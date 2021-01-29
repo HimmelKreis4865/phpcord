@@ -53,7 +53,10 @@ The libary comes up with a built-in command handler, you don't have to use it, b
 ```php
 <?php
 
-use DiscordPHP\channel\BaseTextChannel;use DiscordPHP\command\Command;use DiscordPHP\Discord;use DiscordPHP\guild\GuildMessage;
+use DiscordPHP\channel\BaseTextChannel;
+use DiscordPHP\command\Command;
+use DiscordPHP\Discord;
+use DiscordPHP\guild\GuildMessage;
 
 require_once "src\DiscordPHP\Discord.php";
 
