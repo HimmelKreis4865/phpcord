@@ -72,7 +72,8 @@ $discord->getCommandMap()->register(new class extends Command {
 	}
 	
 	public function execute(BaseTextChannel $channel, GuildMessage $message, array $args): void {
-		
+		// do anything you want inside of your command
+		$channel->send("Wow! Thanks for executing my command!");
 	}
 });
 
