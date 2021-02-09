@@ -211,6 +211,17 @@ final class RestAPIHandler {
 		if ($reason !== null) $request->addRawGet("reason", $reason);
 		return $this->createRestResponse($request->submit());
 	}
+	
+	public function addRoleToUser(string $guildId, string $user, string $role): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/members/" . $user . "/roles/" . $role, HTTPRequest::REQUEST_PUT);
+		$request->addHTTPData("content", json_encode([]));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function removeRoleFromUser(string $guildId, string $user, string $role): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/members/" . $user . "/roles/" . $role, HTTPRequest::REQUEST_DELETE, false);
+		return $this->createRestResponse($request->submit());
+	}
 }
 
 

@@ -3,6 +3,7 @@
 namespace phpcord\guild;
 
 use phpcord\Discord;
+use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use function array_map;
 use function is_numeric;
@@ -66,6 +67,23 @@ class GuildMember extends User {
 	public function getGuild(): ?Guild {
 		return Discord::getInstance()->getClient()->getGuild($this->getGuildId());
 	}
+	
+	public function hasRole($role): bool {
+		if ($role instanceof GuildRole) $role = $role->getId();
+		return isset($this->roles[$role]);
+	}
+	
+	public function addRole($role): bool {
+		if ($role instanceof GuildRole) $role = $role->getId();
+		if ($this->hasRole($role)) return false;
+		$this->roles[] = $role;
+		return !RestAPIHandler::getInstance()->addRoleToUser($this->getGuildId(), $this->getId(), $role)->isFailed();
+	}
+	
+	public function removeRole($role): bool {
+		if ($role instanceof GuildRole) $role = $role->getId();
+		if (!$this->hasRole($role)) return false;
+		if (isset($this->roles[$role])) unset($this->roles[$role]);
+		return !RestAPIHandler::getInstance()->removeRoleFromUser($this->getGuildId(), $this->getId(), $role)->isFailed();
+	}
 }
-
-

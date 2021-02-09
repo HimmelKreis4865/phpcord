@@ -20,6 +20,10 @@ class RGB implements ColorComponent {
     public const BLACK = [0, 0, 0];
 
     /**
+	 * Returns a random RGB color as RGB / array instance
+	 *
+	 * @api
+	 *
      * @param bool $asRGB
      *
      * @return array|RGB|null
@@ -34,8 +38,10 @@ class RGB implements ColorComponent {
 
     /** @var int $red */
     private $red;
+    
     /** @var int $green */
     private $green;
+    
     /** @var int $blue */
     private $blue;
 
@@ -60,6 +66,10 @@ class RGB implements ColorComponent {
 
 
     /**
+	 * Returns the red component
+	 *
+	 * @api
+	 *
      * @return int
      */
     public function getRed(): int {
@@ -67,6 +77,10 @@ class RGB implements ColorComponent {
     }
 
     /**
+	 * Returns the green component
+	 *
+	 * @api
+	 *
      * @return int
      */
     public function getGreen(): int {
@@ -74,22 +88,49 @@ class RGB implements ColorComponent {
     }
 
     /**
+	 * Returns the blue component
+	 *
+	 * @api
+	 *
      * @return int
      */
     public function getBlue(): int {
         return $this->blue;
     }
-
+	
+	/**
+	 * Returns the instance as array [red, green, blue]
+	 *
+	 * @api
+	 *
+	 * @return int[]
+	 */
     public function toArray(): array {
         return [$this->getRed(), $this->getGreen(), $this->getBlue()];
     }
-
+	
+	/**
+	 * Parses another RGB instance to this class
+	 *
+	 * @api
+	 *
+	 * @param RGB $rgb
+	 */
     public function parseRGB(RGB $rgb) {
         $this->red = $rgb->red;
         $this->blue = $rgb->blue;
         $this->green = $rgb->green;
     }
-
+	
+	/**
+	 * Returns an RGB instance from an array, null on failure
+	 *
+	 * @api
+	 *
+	 * @param array $array
+	 *
+	 * @return RGB|null
+	 */
     public static function fromArray(array $array): ?RGB {
         $array = array_filter($array, function ($key) {
             return (is_numeric($key) and (intval($key) >= self::MIN_VAL) and (intval($key) <= self::MAX_VAL));
@@ -97,11 +138,27 @@ class RGB implements ColorComponent {
         if (count($array) < 3) return null;
         return new RGB(array_shift($array), array_shift($array), array_shift($array));
     }
-
+	
+	/**
+	 * Converts rgb to a string hex value with # at the beginning
+	 *
+	 * @api
+	 *
+	 * @return string
+	 */
     public function toHex(): string {
         return sprintf("#%02x%02x%02x", $this->red, $this->green, $this->blue);
     }
-
+	
+	/**
+	 * Returns whether some data can be converted to a valid RGB instance
+	 *
+	 * @api
+	 *
+	 * @param mixed $data
+	 *
+	 * @return bool
+	 */
     public static function isValid($data): bool {
         return (is_array($data) and self::fromArray($data) instanceof static);
     }
