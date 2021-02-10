@@ -2,6 +2,7 @@
 
 namespace phpcord\utils;
 
+use phpcord\guild\FollowWebhook;
 use phpcord\guild\GuildBanEntry;
 use phpcord\guild\GuildBanList;
 use phpcord\guild\GuildInvite;
@@ -9,6 +10,7 @@ use phpcord\guild\GuildRole;
 use phpcord\guild\Webhook;
 use function intval;
 use function is_array;
+use function var_dump;
 
 class GuildSettingsInitializer {
 	/**
@@ -42,6 +44,8 @@ class GuildSettingsInitializer {
 	public static function initWebhook(array $data): ?Webhook {
 		$user = null;
 		if (isset($data["user"]) and is_array($data["user"])) $user = MemberInitializer::createUser($data["user"], $data["guild_id"]);
+		if (@$data["type"] === 2) return new FollowWebhook($data["guild_id"], $data["id"], $data["channel_id"], $data["source_guild"]["id"] ?? "", $data["source_guild"]["name"] ?? "", $data["source_guild"]["icon"] ?? "", $data["source_channel"]["id"] ?? "", $data["source_channel"]["name"] ?? "", @$data["name"], @$data["avatar"], @$data["token"], @$data["application_id"], $user);
+		
 		return new Webhook($data["guild_id"], $data["id"], $data["channel_id"], @$data["name"], @$data["avatar"], @$data["token"], @$data["application_id"], $user);
 	}
 	/**
@@ -66,7 +70,18 @@ class GuildSettingsInitializer {
 		$channel = null;
 		if (isset($data["channel"])) $channel = ChannelInitializer::createIncomplete($data["channel"], ($guild === null ? "0" : $guild->getId()));
 		
-		return new GuildInvite($data["code"], $guild, $channel, $inviter, $target, $data["target_user_type"] ?? 0, @$data["approximate_presence_count"], @$data["approximate_member_count"]);
+		$metadata = [];
+		if (isset($data["uses"]) and isset($data["max_uses"]) and isset($data["temporary"]) and isset($data["created_at"]) and isset($data["max_age"])) {
+			$metadata = [
+				"uses" => $data["uses"],
+				"max_uses" => $data["max_uses"],
+				"temporary" => $data["temporary"],
+				"created_uses" => $data["created_at"],
+				"duration" => $data["max_age"]
+			];
+		}
+		
+		return new GuildInvite($data["code"], $guild, $channel, $inviter, $target, $data["target_user_type"] ?? 0, @$data["approximate_presence_count"], @$data["approximate_member_count"], $metadata);
 	}
 	
 	/**

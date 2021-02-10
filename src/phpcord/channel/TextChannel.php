@@ -2,13 +2,19 @@
 
 namespace phpcord\channel;
 
+use phpcord\guild\FollowWebhook;
 use phpcord\guild\GuildChannel;
+use phpcord\guild\GuildInvite;
 use phpcord\guild\Webhook;
 use phpcord\http\RestAPIHandler;
+use phpcord\utils\DateUtils;
 use phpcord\utils\GuildSettingsInitializer;
+use phpcord\utils\IntUtils;
+use function array_filter;
 use function array_map;
 use function array_merge;
 use function is_bool;
+use function is_string;
 use function json_decode;
 use function strlen;
 
@@ -97,6 +103,86 @@ class TextChannel extends BaseTextChannel {
 	}
 	
 	/**
+	 * Follows another news channel
+	 *
+	 * @param string $targetId
+	 *
+	 * @return bool
+	 */
+	public function follow(string $targetId): bool {
+		return !RestAPIHandler::getInstance()->followChannel($targetId, $this->getId())->isFailed();
+	}
+	
+	/**
+	 * Unfollows another channel if followed
+	 *
+	 * @param string $targetId
+	 * @param bool $isGuildID
+	 *
+	 * @return void
+	 */
+	public function unfollow(string $targetId, bool $isGuildID = false): void {
+		foreach ($this->getFollows() as $follow) {
+			if ($follow->getSourceChannelId() === $targetId or ($isGuildID and $follow->getSourceGuildId() === $targetId)) $follow->delete();
+		}
+	}
+	
+	/**
+	 * Returns an array with all follows
+	 *
+	 * @api
+	 *
+	 * @return FollowWebhook[]
+	 */
+	public function getFollows(): array {
+		return array_filter($this->getWebhooks(), function(Webhook $webhook) {
+			return ($webhook instanceof FollowWebhook);
+		});
+	}
+	
+	/**
+	 * Tries to create an Invitation for the channel
+	 *
+	 * @api
+	 *
+	 * @param string|int $duration the duration must be formed like days:hours:minutes:seconds, for only setting 3 days use 3:0:0:0, check out readme for a more detailed description
+	 *  0 for infinitive duration
+	 * @param int $max_uses 0 = infinitive
+	 * @param bool $temporary_membership
+	 * @param bool $unique
+	 * @param string|null $target_user the id of the target user
+	 *
+	 * @return GuildInvite|null
+	 */
+	public function createInvite($duration = 0, int $max_uses = 0, bool $temporary_membership = false, bool $unique = false, ?string $target_user = null): ?GuildInvite {
+		if (is_string($duration)) $duration = DateUtils::convertTimeToSeconds($duration);
+		if (!IntUtils::isInRange($max_uses, 0, 100)) throw new \OutOfRangeException("Max uses must be in range between 0 and 100!");
+		$result = RestAPIHandler::getInstance()->createInvite($this->getId(), $duration, $max_uses, $temporary_membership, $unique, $target_user);
+		if ($result->isFailed() or strlen($result->getRawData()) === 0) return null;
+		return GuildSettingsInitializer::createInvitation(json_decode($result->getRawData(), true));
+	}
+	
+	/**
+	 * Fetches all invites for a channel
+	 *
+	 * @warning invites are fetched from RESTAPI and not stored in cache!
+	 *
+	 * @api
+	 *
+	 * @return array
+	 */
+	public function getInvites(): array {
+		$result = RestAPIHandler::getInstance()->getInvitesByChannel($this->getId());
+		if ($result->isFailed() or strlen($result->getRawData()) === 0) return [];
+		$invites = [];
+		foreach (json_decode($result->getRawData(), true) as $invite) {
+			$invite = GuildSettingsInitializer::createInvitation($invite);
+			$invites[$invite->getCode()] = $invite;
+		}
+		return $invites;
+	}
+	
+	/**
 	 * @see GuildChannel::getModifyData()
 	 *
 	 * @internal
@@ -118,5 +204,3 @@ class TextChannel extends BaseTextChannel {
 		return new ChannelType(ChannelType::TYPE_TEXT);
 	}
 }
-
-

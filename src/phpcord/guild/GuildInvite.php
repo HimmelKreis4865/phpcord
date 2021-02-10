@@ -34,6 +34,9 @@ class GuildInvite {
 	/** @var int|null $approximate_member_count */
 	protected $approximate_member_count = null;
 	
+	/** @var array $metadata */
+	protected $metadata = [];
+	
 	/**
 	 * GuildInvite constructor.
 	 *
@@ -45,8 +48,9 @@ class GuildInvite {
 	 * @param int $target_user_type
 	 * @param int|null $approximate_presence_count
 	 * @param int|null $approximate_member_count
+	 * @param array $metadata
 	 */
-	public function __construct(string $code, ?IncompleteGuild $guild = null, ?IncompleteChannel $channel = null, ?User $inviter = null, ?User $target_user = null, int $target_user_type = self::TYPE_STREAM, ?int $approximate_presence_count = null, ?int $approximate_member_count = null) {
+	public function __construct(string $code, ?IncompleteGuild $guild = null, ?IncompleteChannel $channel = null, ?User $inviter = null, ?User $target_user = null, int $target_user_type = self::TYPE_STREAM, ?int $approximate_presence_count = null, ?int $approximate_member_count = null, array $metadata = []) {
 		$this->code = $code;
 		$this->guild = $guild;
 		$this->channel = $channel;
@@ -55,6 +59,7 @@ class GuildInvite {
 		$this->target_user_type = $target_user_type;
 		$this->approximate_presence_count = $approximate_presence_count;
 		$this->approximate_member_count = $approximate_member_count;
+		$this->metadata = $metadata;
 	}
 	
 	/**
@@ -143,6 +148,23 @@ class GuildInvite {
 	 */
 	public function getTargetUserType(): int {
 		return $this->target_user_type;
+	}
+	
+	/**
+	 * Returns the metadata of the an Invite, might just be an empty array
+	 * should contain:
+	 * "uses" (int),
+	 * "duration" (int),
+	 * "max_uses" (int),
+	 * "temporary" (bool),
+	 * "created_at" (ISO8601 timestamp, string)
+	 *
+	 * @api
+	 *
+	 * @return array
+	 */
+	public function getMetadata(): array {
+		return $this->metadata;
 	}
 	
 	/**

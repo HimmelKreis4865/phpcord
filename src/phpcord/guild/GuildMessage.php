@@ -445,4 +445,26 @@ class GuildMessage {
 	public function __toString(): string {
 		return $this->getContent();
 	}
+	
+	/**
+	 * Pins a message in the channel, returns false on failure
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
+	public function pin(): bool {
+		return false;
+	}
+	
+	/**
+	 * Unpins a message in the channel, returns false on failure
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
+	public function unpin(): bool {
+		return false;
+	}
 }

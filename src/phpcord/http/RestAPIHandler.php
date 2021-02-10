@@ -224,8 +224,47 @@ final class RestAPIHandler {
 	}
 	
 	public function setChannelPosition(string $guildId, string $channelId, int $position): RestResponse {
-		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/channels", HTTPRequest::REQUEST_PATCH, false);
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/channels", HTTPRequest::REQUEST_PATCH);
 		$request->addHTTPData("content", json_encode(["id" => $channelId, "position" => $position]));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function triggerTyping(string $channelId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/typing");
+		$request->addHTTPData("content", json_encode([]));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function pinMessage(string $channelId, string $messageId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/pins/" . $messageId, HTTPRequest::REQUEST_PUT);
+		$request->addHTTPData("content", json_encode([]));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function unpinMessage(string $channelId, string $messageId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/pins/" . $messageId, HTTPRequest::REQUEST_DELETE, false);
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function getPins(string $channelId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/pins", HTTPRequest::REQUEST_GET);
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function followChannel(string $channelToFollow, string $targetId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelToFollow . "/followers");
+		$request->addHTTPData("content", json_encode(["webhook_channel_id" => $targetId]));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function createInvite(string $channelId, int $duration, int $max_uses, bool $temporary_membership = false, bool $unique = false, ?string $target_user = null): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/invites");
+		$request->addHTTPData("content", json_encode(["max_age" => $duration, "max_uses" => $max_uses, "temporary" => $temporary_membership, "unique" => $unique, "target_user" => $target_user]));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function getInvitesByChannel(string $channelId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/invites", HTTPRequest::REQUEST_GET);
 		return $this->createRestResponse($request->submit());
 	}
 }

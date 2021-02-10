@@ -6,7 +6,7 @@ use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 
-final class Webhook {
+class Webhook {
 	
 	public const TYPE_INCOMING = 1;
 	

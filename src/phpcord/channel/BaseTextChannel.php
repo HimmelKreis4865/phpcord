@@ -115,4 +115,16 @@ abstract class BaseTextChannel extends GuildChannel {
 	public function getMessageIds(int $limit = 50): array {
 		return array_keys($this->getMessages($limit));
 	}
+	
+	/**
+	 * Will trigger typing in the given channel
+	 * If no message is sent, this trigger will keep up for 10 seconds
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
+	public function triggerTyping(): bool {
+		return !RestAPIHandler::getInstance()->triggerTyping($this->getId())->isFailed();
+	}
 }
