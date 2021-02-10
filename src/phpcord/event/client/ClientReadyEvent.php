@@ -7,5 +7,3 @@ use phpcord\event\Cancellable;
 class ClientReadyEvent extends ClientEvent implements Cancellable {
 
 }
-
-

@@ -58,6 +58,10 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Returns the guild the invite was made for, includes just some important information about it
+	 *
+	 * @api
+	 *
 	 * @return IncompleteGuild|null
 	 */
 	public function getGuild(): ?IncompleteGuild {
@@ -65,6 +69,10 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Approximate count of all members of the guild
+	 *
+	 * @api
+	 *
 	 * @return int|null
 	 */
 	public function getApproximateMemberCount(): ?int {
@@ -72,6 +80,10 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Approximate count of all online members of the guild
+	 *
+	 * @api
+	 *
 	 * @return int|null
 	 */
 	public function getApproximatePresenceCount(): ?int {
@@ -79,6 +91,10 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Returns a channel with only a few features
+	 *
+	 * @api
+	 *
 	 * @return IncompleteChannel|null
 	 */
 	public function getChannel(): ?IncompleteChannel {
@@ -86,6 +102,10 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Returns the invite code
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getCode(): string {
@@ -93,6 +113,10 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Returns the inviter or null if there is none
+	 *
+	 * @api
+	 *
 	 * @return User|null
 	 */
 	public function getInviter(): ?User {
@@ -100,6 +124,10 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Returns the target user this invite was made for, or null if no one specified
+	 *
+	 * @api
+	 *
 	 * @return User|null
 	 */
 	public function getTargetUser(): ?User {
@@ -107,15 +135,24 @@ class GuildInvite {
 	}
 	
 	/**
+	 * Returns the type of the target user (right now only @see GuildInvite::TYPE_STREAM [1] is possible)
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getTargetUserType(): int {
 		return $this->target_user_type;
 	}
 	
+	/**
+	 * Tries to delete the invite, returns false on failure
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
 	public function delete(): bool {
 		return Discord::getInstance()->getClient()->deleteInvite($this->getCode());
 	}
 }
-
-

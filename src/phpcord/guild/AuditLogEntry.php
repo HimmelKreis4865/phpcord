@@ -5,8 +5,10 @@ namespace phpcord\guild;
 class AuditLogEntry implements AuditLogEntryTypes {
 	/** @var int $type */
 	protected $type;
+	
 	/** @var string $id */
 	protected $id;
+	
 	/** @var array $data */
 	protected $data;
 
@@ -25,6 +27,10 @@ class AuditLogEntry implements AuditLogEntryTypes {
 
 
 	/**
+	 * Returns the ID of the Entry
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getId(): string {
@@ -32,15 +38,24 @@ class AuditLogEntry implements AuditLogEntryTypes {
 	}
 
 	/**
+	 * Returns the type of the entry
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getType(): int {
 		return $this->type;
 	}
-
+	
+	/**
+	 * Includes all additional data such as targetID, channelID,..
+	 *
+	 * @api
+	 *
+	 * @return array
+	 */
 	public function getData(): array {
 		return $this->data;
 	}
 }
-
-

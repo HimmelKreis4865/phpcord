@@ -3,7 +3,6 @@
 namespace phpcord\command;
 
 use phpcord\channel\BaseTextChannel;
-use phpcord\guild\GuildMember;
 use phpcord\guild\GuildMessage;
 use phpcord\utils\ArrayUtils;
 use InvalidArgumentException;
@@ -14,11 +13,11 @@ use function count;
 use function explode;
 use function str_replace;
 use function substr;
-use function var_dump;
 
 class SimpleCommandMap extends CommandMap {
 	/** @var Command[] $commands */
 	protected $commands = [];
+	
 	/** @var string[] $prefixes */
 	protected $prefixes = [];
 
@@ -32,7 +31,6 @@ class SimpleCommandMap extends CommandMap {
 	 */
 	public function register(Command $command, bool $override = false) {
 		$names = array_merge([$command->getName()], $command->getAliases());
-		var_dump("names: ", $names);
 		foreach ($names as $name) {
 			if (strlen($name) === 0) continue;
 			if (!$override and isset($this->commands[$name])) throw new InvalidArgumentException("Command or alias " . $name . " already exists and cannot be assigned twice!");

@@ -11,15 +11,31 @@ use phpcord\utils\MessageInitializer;
 use function json_decode;
 
 abstract class BaseTextChannel extends GuildChannel {
-
+	/** @var string|null $last_message_id */
 	public $last_message_id = null;
 
+	/** @var string|null $topic */
 	public $topic = null;
 
+	/** @var string|null $parent_id */
 	public $parent_id = null;
 
+	/** @var bool $nsfw */
 	public $nsfw;
-
+	
+	/**
+	 * BaseTextChannel constructor.
+	 *
+	 * @param string $guild_id
+	 * @param string $id
+	 * @param string $name
+	 * @param int $position
+	 * @param array $permissions
+	 * @param bool $nsfw
+	 * @param string|null $last_message_id
+	 * @param string|null $topic
+	 * @param string|null $parent_id
+	 */
 	public function __construct(string $guild_id, string $id, string $name, int $position = 0, array $permissions = [], bool $nsfw = false, ?string $last_message_id = null, ?string $topic = null, ?string $parent_id = null) {
 		parent::__construct($guild_id, $id, $name, $position, $permissions);
 		$this->nsfw = $nsfw;
@@ -27,7 +43,16 @@ abstract class BaseTextChannel extends GuildChannel {
 		$this->topic = $topic;
 		$this->parent_id = $parent_id;
 	}
-
+	
+	/**
+	 * Sends a message in the given channel, does not work in DMs yet
+	 *
+	 * @api
+	 *
+	 * @param $message
+	 *
+	 * @return MessageSentPromise
+	 */
 	public function send($message): MessageSentPromise {
 		if (is_string($message) or is_numeric($message)) $message = new TextMessage(strval($message));
 		if (!$message instanceof Sendable) return new MessageSentPromise(true);
@@ -38,7 +63,16 @@ abstract class BaseTextChannel extends GuildChannel {
 
 		return new MessageSentPromise(false, $this->getGuildId(), $this->getId());
 	}
-
+	
+	/**
+	 * Returns fetched message from RESTAPI, since fetching is slow, please don't fetch useless messages or you'll have lags
+	 *
+	 * @api
+	 *
+	 * @param int $limit
+	 *
+	 * @return array
+	 */
 	public function getMessages(int $limit = 50): array {
 		if ($limit < 1 or $limit > 100) throw new \OutOfBoundsException("You can only get 1-100 messages per call!");
 
@@ -53,16 +87,32 @@ abstract class BaseTextChannel extends GuildChannel {
 		return $messages;
 	}
 	
+	/**
+	 * Returns a message by ID or null if none existed
+	 *
+	 * @api
+	 *
+	 * @param string $id
+	 *
+	 * @return GuildStoredMessage|null
+	 */
 	public function getMessage(string $id): ?GuildStoredMessage {
 		$result = RestAPIHandler::getInstance()->getMessage($this->getId(), $id);
 		if ($result->isFailed()) return null;
 		if (!is_array(($array = @json_decode($result->getRawData(), true)))) return null;
 		return MessageInitializer::fromStore($this->getGuildId(), $array);
 	}
-
+	
+	/**
+	 * Returns the ids of the messages by limit @see BaseTextChannel::getMessages() for a detailed instruction
+ 	 *
+	 * @api
+	 *
+	 * @param int $limit
+	 *
+	 * @return array
+	 */
 	public function getMessageIds(int $limit = 50): array {
 		return array_keys($this->getMessages($limit));
 	}
 }
-
-

@@ -60,6 +60,10 @@ final class Webhook {
 	}
 	
 	/**
+	 * Returns the name of the webhook application
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getName(): ?string {
@@ -67,6 +71,10 @@ final class Webhook {
 	}
 
 	/**
+	 * Returns the ID of the webhook
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getId(): string {
@@ -74,6 +82,10 @@ final class Webhook {
 	}
 
 	/**
+	 * Returns the avatar contents / url of the webhook
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getAvatar(): ?string {
@@ -81,6 +93,10 @@ final class Webhook {
 	}
 
 	/**
+	 * Returns the GuildID the webhook was made for
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getGuildId(): string {
@@ -88,6 +104,10 @@ final class Webhook {
 	}
 
 	/**
+	 * Returns the ChannelID the webhook was made for
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getChannelId(): string {
@@ -95,6 +115,10 @@ final class Webhook {
 	}
 
 	/**
+	 * Returns the ID of the Application (the bot/OAuth2 that created the webhook)
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getApplicationId(): ?string {
@@ -102,6 +126,10 @@ final class Webhook {
 	}
 
 	/**
+	 * Returns the creator as User Instance
+	 *
+	 * @api
+	 *
 	 * @return User|null
 	 */
 	public function getCreator(): ?User {
@@ -109,35 +137,89 @@ final class Webhook {
 	}
 
 	/**
+	 * Returns the token of the webhook
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getToken(): ?string {
 		return $this->token;
 	}
 	
+	/**
+	 * Tries to get the guild from cache, won't fetch it from RESTAPI
+	 *
+	 * @api
+	 *
+	 * @return Guild|null
+	 */
 	public function getGuild(): ?Guild {
 		return Discord::getInstance()->getClient()->getGuild($this->getGuildId());
 	}
-
+	
+	/**
+	 * Tries to delete the webhook, false on failure
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
 	public function delete(): bool {
 		return !RestAPIHandler::getInstance()->deleteWebhook($this->getId())->isFailed();
 	}
 	
-	public function modify(string $name, ?string $channelId = null, ?string $avatar = null): bool {
+	/**
+	 * Modifies the webhook with specified parameters, null parameters will be left out
+	 *
+	 * @api
+	 *
+	 * @param string|null $name
+	 * @param string|null $channelId
+	 * @param string|null $avatar
+	 *
+	 * @return bool
+	 */
+	public function modify(?string $name, ?string $channelId = null, ?string $avatar = null): bool {
 		return !RestAPIHandler::getInstance()->modifyWebhook($this->getId(), $name, $channelId, $avatar)->isFailed();
 	}
 	
+	/**
+	 * Changes the name of the webhook
+	 *
+	 * @api
+	 *
+	 * @param string $name
+	 *
+	 * @return bool
+	 */
 	public function setName(string $name): bool {
 		return $this->modify($name);
 	}
 	
+	/**
+	 * Changes the avatar of the webhook to some data
+	 *
+	 * @api
+	 *
+	 * @param string $imageData
+	 *
+	 * @return bool
+	 */
 	public function setAvatar(string $imageData): bool {
 		return $this->modify(null, null, $imageData);
 	}
 	
+	/**
+	 * Moves the webhook to another channel
+	 *
+	 * @api
+	 *
+	 * @param string $channelId
+	 *
+	 * @return bool
+	 */
 	public function moveToChannel(string $channelId): bool {
 		return $this->modify(null, $channelId);
 	}
 }
-
-

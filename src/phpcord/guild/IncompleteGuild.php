@@ -2,6 +2,8 @@
 
 namespace phpcord\guild;
 
+use phpcord\utils\VerificationLevels;
+
 class IncompleteGuild {
 	/** @var string $id */
 	protected $id;
@@ -56,6 +58,10 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the name of the guild, "servername"
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getName(): string {
@@ -63,6 +69,10 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the ID of the guild
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getId(): string {
@@ -70,6 +80,10 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the BannerURL or null, if there is none
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getBanner(): ?string {
@@ -77,6 +91,10 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the description of the guild
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getDescription(): ?string {
@@ -84,6 +102,10 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns an array with all available features
+	 *
+	 * @api
+	 *
 	 * @return array
 	 */
 	public function getFeatures(): array {
@@ -91,6 +113,10 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the Icon URL of the Guild
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getIcon(): ?string {
@@ -98,6 +124,12 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the splash hash of a Guild
+	 *
+	 * @todo what is that?
+	 *
+	 * @api
+	 *
 	 * @return mixed
 	 */
 	public function getSplash() {
@@ -105,6 +137,10 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the VanityURL of the Server (e.g. https://discord.gg/phpcord )
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getVanityUrl(): ?string {
@@ -112,11 +148,13 @@ class IncompleteGuild {
 	}
 	
 	/**
+	 * Returns the verification level of the guild @see VerificationLevels
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getVerificationLevel(): int {
 		return $this->verification_level;
 	}
 }
-
-

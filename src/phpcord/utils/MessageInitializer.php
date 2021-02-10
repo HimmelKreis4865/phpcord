@@ -8,11 +8,17 @@ use phpcord\guild\GuildReceivedEmbed;
 use phpcord\guild\GuildUpdatedMessage;
 use phpcord\guild\store\GuildStoredMessage;
 use function array_merge;
+use function is_null;
 use function var_dump;
 
 class MessageInitializer {
 	public static function create(array $data): GuildMessage {
-		return new GuildMessage($data["guild_id"], $data["id"], $data["channel_id"], $data["content"], MemberInitializer::createMember(array_merge(["user" => $data["author"]], $data["member"]), $data["guild_id"]), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, @$data["referenced_message"], $data["attachments"] ?? [], @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? [], $data["reactions"] ?? []);
+		$reference = null;
+		if (!is_null(@$data["referenced_message"])) {
+			var_dump($data["referenced_message"]);
+			$reference = self::fromStore($data["guild_id"], $data["referenced_message"]);
+		}
+		return new GuildMessage($data["guild_id"], $data["id"], $data["channel_id"], $data["content"], MemberInitializer::createMember(array_merge(["user" => $data["author"]], $data["member"]), $data["guild_id"]), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, $reference, $data["attachments"] ?? [], @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? [], $data["reactions"] ?? []);
 	}
 
 	public static function createDeleted(array $data): GuildDeletedMessage {
@@ -31,5 +37,3 @@ class MessageInitializer {
 		return new GuildStoredMessage($guildId, $data["id"], $data["channel_id"], $data["content"], MemberInitializer::createUser($data["author"], $guildId), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, @$data["referenced_message"], $data["attachments"] ?? [], @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? []);
 	}
 }
-
-

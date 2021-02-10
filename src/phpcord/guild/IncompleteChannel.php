@@ -34,6 +34,10 @@ class IncompleteChannel {
 	}
 	
 	/**
+	 * Returns the name of the channel
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getName(): string {
@@ -41,6 +45,10 @@ class IncompleteChannel {
 	}
 	
 	/**
+	 * Returns the ID of the channel
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getId(): string {
@@ -48,11 +56,13 @@ class IncompleteChannel {
 	}
 	
 	/**
+	 * Returns the type of the channel @see ChannelType
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getType(): int {
 		return $this->type;
 	}
 }
-
-

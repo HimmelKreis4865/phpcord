@@ -12,5 +12,3 @@ interface Authorizable {
 	 */
 	public function getToken(): string;
 }
-
-

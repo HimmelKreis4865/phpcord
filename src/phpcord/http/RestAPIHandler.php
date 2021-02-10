@@ -222,6 +222,10 @@ final class RestAPIHandler {
 		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/members/" . $user . "/roles/" . $role, HTTPRequest::REQUEST_DELETE, false);
 		return $this->createRestResponse($request->submit());
 	}
+	
+	public function setChannelPosition(string $guildId, string $channelId, int $position): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/channels", HTTPRequest::REQUEST_PATCH, false);
+		$request->addHTTPData("content", json_encode(["id" => $channelId, "position" => $position]));
+		return $this->createRestResponse($request->submit());
+	}
 }
-
-

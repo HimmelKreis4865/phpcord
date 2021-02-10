@@ -3,7 +3,9 @@
 namespace phpcord\guild;
 
 interface AuditLogEntryTypes {
-
+	/**
+	 * Includes a list with all possible auditlog entry - types
+	 */
 	public const TYPE_LIST = [
 	"GUILD_UPDATE" => 1,
 	"CHANNEL_CREATE" => 10,
@@ -42,5 +44,3 @@ interface AuditLogEntryTypes {
 	"INTEGRATION_DELETE" => 82,
 	];
 }
-
-

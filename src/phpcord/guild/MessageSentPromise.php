@@ -34,6 +34,10 @@ class MessageSentPromise {
 	}
 
 	/**
+	 * Sets an answer handler to fetch the next message the member $member is typing
+	 *
+	 * @api
+	 *
 	 * @param GuildMember|string $member
 	 * @param callable $answerCallable
 	 */
@@ -44,12 +48,17 @@ class MessageSentPromise {
 		$this->answerCallable = $answerCallable;
 		$this->storePromise();
 	}
-
+	
+	/**
+	 * @internal
+	 */
 	protected function storePromise() {
 		Discord::$lastInstance->answerHandlers[$this->channelId . ":" . $this->id] = $this;
 	}
 
 	/**
+	 * Return whether message sending / answering failed
+	 *
 	 * @return bool
 	 */
 	public function isFailed(): bool {

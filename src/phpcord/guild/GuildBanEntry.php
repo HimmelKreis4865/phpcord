@@ -7,6 +7,7 @@ use phpcord\user\User;
 class GuildBanEntry {
 	/** @var User $user */
 	protected $user;
+	
 	/** @var string | null $reason */
 	protected $reason;
 
@@ -22,6 +23,10 @@ class GuildBanEntry {
 	}
 
 	/**
+	 * Returns the user that is banned
+	 *
+	 * @api
+	 *
 	 * @return User
 	 */
 	public function getUser(): User {
@@ -29,11 +34,13 @@ class GuildBanEntry {
 	}
 
 	/**
+	 * Returns the reason or null for unspecified
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getReason(): ?string {
 		return $this->reason;
 	}
 }
-
-

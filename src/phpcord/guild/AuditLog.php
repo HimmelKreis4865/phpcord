@@ -5,6 +5,7 @@ namespace phpcord\guild;
 class AuditLog {
 	/** @var array $entries */
 	protected $entries = [];
+	
 	/** @var string $guildId */
 	protected $guildId;
 
@@ -52,5 +53,3 @@ class AuditLog {
 		return $this->entries;
 	}
 }
-
-

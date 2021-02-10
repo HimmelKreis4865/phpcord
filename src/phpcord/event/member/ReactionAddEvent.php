@@ -2,17 +2,18 @@
 
 namespace phpcord\event\member;
 
-use phpcord\channel\BaseTextChannel;
 use phpcord\Discord;
-use phpcord\event\message\Emoji;
+use phpcord\guild\Emoji;
 use phpcord\guild\GuildMember;
 use phpcord\guild\GuildMessage;
 
 class ReactionAddEvent extends MemberEvent {
 	/** @var string $channel_id */
 	public $channel_id;
+	
 	/** @var string $message_id */
 	public $message_id;
+	
 	/** @var Emoji $emoji */
 	public $emoji;
 
@@ -31,9 +32,14 @@ class ReactionAddEvent extends MemberEvent {
 		$this->emoji = $emoji;
 	}
 	
+	/**
+	 * Tries to fetch the message of the event
+	 *
+	 * @api
+	 *
+	 * @return GuildMessage|null
+	 */
 	public function getMessage(): ?GuildMessage {
 		return Discord::getInstance()->getClient()->getGuild($this->getMember()->getGuildId())->getChannel($this->channel_id)->getMessage($this->message_id);
 	}
 }
-
-

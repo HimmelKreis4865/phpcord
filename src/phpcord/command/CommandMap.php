@@ -6,8 +6,7 @@ use phpcord\channel\BaseTextChannel;
 use phpcord\guild\GuildMember;
 use phpcord\guild\GuildMessage;
 
-abstract class CommandMap
-{
+abstract class CommandMap {
 	/**
 	 * Registers a command to the map if it doesn't already exist
 	 *
@@ -89,5 +88,3 @@ abstract class CommandMap
 	 */
 	abstract public function executeCommand(BaseTextChannel $channel, GuildMessage $message): bool;
 }
-
-

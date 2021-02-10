@@ -4,7 +4,7 @@ namespace phpcord\intents\handlers;
 
 use phpcord\Discord;
 use phpcord\event\member\ReactionAddEvent;
-use phpcord\event\message\Emoji;
+use phpcord\guild\Emoji;
 use phpcord\event\ReactionRemoveEvent;
 use phpcord\utils\MemberInitializer;
 

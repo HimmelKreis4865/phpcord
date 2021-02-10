@@ -12,6 +12,7 @@ class RestResponse {
 	/** @var mixed $raw_data */
 	protected $raw_data;
 
+	/** @var bool $failed */
 	protected $failed = false;
 
 	/**
@@ -39,15 +40,7 @@ class RestResponse {
 	 * @return mixed
 	 */
 	public function getRawData() {
-		var_dump($this->raw_data);
 		return $this->raw_data;
-	}
-	
-	public static function findError(string $message): ?string {
-		$message = str_replace(["HTTP/1.0", "HTTP/1.2", "HTTP/1.3", "HTTP/1.4", "HTTP/2.0"], "HTTP/1.1", $message);
-		$error = @explode("HTTP/1.1", $message)[1];
-		if (is_null($error)) return null;
-		return $error;
 	}
 }
 

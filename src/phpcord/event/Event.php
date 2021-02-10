@@ -34,9 +34,9 @@ class Event {
 	}
 
 	/**
-	 * @api
-	 *
 	 * Calls an event and executes code for listeners
+	 *
+	 * @api
 	 */
 	public function call() {
 		if (!isset(Discord::$listeners[static::class])) return;
@@ -47,5 +47,3 @@ class Event {
 		}
 	}
 }
-
-

@@ -5,6 +5,7 @@ namespace phpcord\connection;
 final class ConnectOptions implements Authorizable {
 	/** @var string $token */
 	private $token;
+	
 	/** @var int $intents */
 	private $intents;
 
@@ -20,6 +21,10 @@ final class ConnectOptions implements Authorizable {
 	}
 
 	/**
+	 * Returns the token for identifying
+	 *
+	 * @internal
+	 *
 	 * @return string
 	 */
 	public function getToken(): string {
@@ -27,11 +32,13 @@ final class ConnectOptions implements Authorizable {
 	}
 
 	/**
+	 * Returns the bitwise number of intents
+	 *
+	 * @internal
+	 *
 	 * @return int
 	 */
 	public function getIntents(): int {
 		return $this->intents;
 	}
 }
-
-

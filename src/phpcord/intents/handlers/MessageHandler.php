@@ -23,7 +23,6 @@ class MessageHandler extends BaseIntentHandler {
 				/** @var BaseTextChannel $channel thanks phpstorm :/ */
   				$channel = $discord->client->getGuild($message->guildId)->getChannel($message->channelId);
 				
-				
 				if (isset($discord->answerHandlers[$message->channelId . ":" . $message->getMember()->getId()])) {
 					$val = $discord->answerHandlers[$message->channelId . ":" . $message->getMember()->getId()];
 					$callable = $val->answerCallable;

@@ -5,10 +5,13 @@ namespace phpcord\guild;
 class GuildUpdatedMessage{
 	/** @var GuildReceivedEmbed|null $embed */
 	public $embed = null;
+	
 	/** @var string $id */
 	public $id;
+	
 	/** @var string $channel_id */
 	public $channel_id;
+	
 	/** @var string $guild_id */
 	public $guild_id;
 

@@ -9,32 +9,46 @@ namespace phpcord\guild;
  * @package DiscordPHP\guild
  */
 class GuildReceivedEmbed {
+	/** @var string $guild_id */
 	public $guild_id;
 
+	/** @var string $id */
 	public $id;
 
+	/** @var string|null $title */
 	public $title = null;
 
+	/** @var array $fields */
 	public $fields = [];
 
+	/** @var string|null $description */
 	public $description = null;
 
+	/** @var string|null $url */
 	public $url = null;
 
+	/** @var array|null $thumbnail */
 	public $thumbnail = null;
 
+	/** @var int $color */
 	public $color = 0;
 
+	/** @var string|null $timestamp */
 	public $timestamp = null;
 
+	/** @var array|null $footer */
 	public $footer = null;
 
+	/** @var array|null $image */
 	public $image = null;
 
+	/** @var array|null $video */
 	public $video = null;
 
+	/** @var array|null $provider */
 	public $provider = null;
 
+	/** @var array|null $author */
 	public $author = null;
 
 	/**
@@ -73,6 +87,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the author of the embed, must not be the author of the message
+	 *
+	 * @api
+	 *
 	 * @return array|null
 	 */
 	public function getAuthor(): ?array {
@@ -80,6 +98,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the decimal color code
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getColor(): int {
@@ -87,6 +109,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns an array with all fields
+	 *
+	 * @api
+	 *
 	 * @return array
 	 */
 	public function getFields(): array {
@@ -94,6 +120,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns a Footer "object", array structure
+	 *
+	 * @api
+	 *
 	 * @return array|null
 	 */
 	public function getFooter(): ?array {
@@ -101,6 +131,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the GuildID of the embed
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getGuildId(): string {
@@ -108,6 +142,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the MessageID of the embed
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getId(): string {
@@ -115,6 +153,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns an image "object", array structure
+	 *
+	 * @api
+	 *
 	 * @return array|null
 	 */
 	public function getImage(): ?array {
@@ -122,13 +164,21 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns an provider "object", array structure
+	 *
+	 * @api
+	 *
 	 * @return array|null
 	 */
 	public function getProvider(): ?array {
 		return $this->provider;
 	}
-
+	
 	/**
+	 * Returns a Thumbnail "object", array structure
+	 *
+	 * @api
+	 *
 	 * @return array|null
 	 */
 	public function getThumbnail(): ?array {
@@ -136,6 +186,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the timestamp of the embed content
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getTimestamp(): ?string {
@@ -143,6 +197,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the title of the embed
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getTitle(): ?string {
@@ -150,6 +208,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the url of the embed
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getUrl(): ?string {
@@ -157,6 +219,10 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns a video "object", array structure
+	 *
+	 * @api
+	 *
 	 * @return array|null
 	 */
 	public function getVideo(): ?array {
@@ -164,11 +230,13 @@ class GuildReceivedEmbed {
 	}
 
 	/**
+	 * Returns the description of the embed
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getDescription(): ?string {
 		return $this->description;
 	}
 }
-
-

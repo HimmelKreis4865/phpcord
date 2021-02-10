@@ -7,8 +7,10 @@ use phpcord\event\Event;
 class ChannelPinsUpdateEvent extends Event {
 	/** @var string $last_pin_timestamp */
 	protected $last_pin_timestamp;
+	
 	/** @var string $channel_id */
 	protected $channel_id;
+	
 	/** @var string $guild_id */
 	protected $guild_id;
 
@@ -26,6 +28,10 @@ class ChannelPinsUpdateEvent extends Event {
 	}
 
 	/**
+	 * Returns the ChannelID passed, we're not trying  to get the channel for you
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getChannelId(): string {
@@ -33,6 +39,10 @@ class ChannelPinsUpdateEvent extends Event {
 	}
 
 	/**
+	 * Returns the GuildID of the channel
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getGuildId(): string {
@@ -40,11 +50,15 @@ class ChannelPinsUpdateEvent extends Event {
 	}
 
 	/**
+	 * Returns the last pin timestamp
+	 *
+	 * @todo What is that used for?
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getLastPinTimestamp(): string {
 		return $this->last_pin_timestamp;
 	}
 }
-
-

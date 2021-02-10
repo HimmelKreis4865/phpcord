@@ -1,12 +1,13 @@
 <?php
 
-namespace phpcord\event\message;
+namespace phpcord\guild;
 
 use function is_null;
 
 final class Emoji {
 	/** @var string $name */
 	protected $name;
+	
 	/** @var string|null $id */
 	protected $id;
 
@@ -24,6 +25,8 @@ final class Emoji {
 	/**
 	 * ID might be null if Emoji is a default emoji
 	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getId(): ?string {
@@ -31,15 +34,24 @@ final class Emoji {
 	}
 
 	/**
+	 * Returns the name of the emoji, should never be null
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getName(): string {
 		return $this->name;
 	}
 	
+	/**
+	 * Converts this emoji to a better formatted string that can be used to communicate with RESTAPI
+	 *
+	 * @internal
+	 *
+	 * @return string
+	 */
 	public function __toString(): string {
 		return $this->name . (!is_null($this->id) ? ":" . $this->id : "");
 	}
 }
-
-

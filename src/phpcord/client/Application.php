@@ -5,6 +5,7 @@ namespace phpcord\client;
 final class Application {
 	/** @var string $id */
 	protected $id;
+	
 	/** @var int $flags */
 	protected $flags = 0;
 
@@ -20,6 +21,10 @@ final class Application {
 	}
 
 	/**
+	 * Returns the API of the application
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getId(): string {
@@ -27,6 +32,10 @@ final class Application {
 	}
 
 	/**
+	 * Returns the bitwise flags of the application
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getFlags(): int {

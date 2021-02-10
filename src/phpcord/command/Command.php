@@ -54,6 +54,10 @@ abstract class Command {
 
 
 	/**
+	 * Returns the name of the command
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getName(): string {
@@ -61,11 +65,13 @@ abstract class Command {
 	}
 
 	/**
+	 * Returns an array with all aliases of the command
+	 *
+	 * @api
+	 *
 	 * @return array
 	 */
 	public function getAliases(): array {
 		return $this->aliases;
 	}
 }
-
-

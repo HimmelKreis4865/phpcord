@@ -544,7 +544,7 @@ class Guild {
 	 */
 	public function getRole(string $id): ?GuildRole {
 		if ($id instanceof GuildRole) return $id;
-		return $this->roles[$id];
+		return @$this->roles[$id];
 	}
 	
 	/**

@@ -5,5 +5,3 @@ namespace phpcord\event;
 interface Cancellable {
 
 }
-
-

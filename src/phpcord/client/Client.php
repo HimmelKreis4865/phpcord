@@ -10,18 +10,20 @@ use phpcord\utils\GuildSettingsInitializer;
 use function array_rand;
 use function is_array;
 use function json_decode;
-use function var_dump;
 
-class Client extends Connector {
-	/** @var Guild[]|null $guild */
+class Client {
+	/** @var Guild[]|null $guild todo: maybe make this to a SplFixedArray */
 	public $guilds;
+	
 	/** @var int $ping */
 	public $ping;
+	
 	/** @var BotUser|null $user */
 	public $user;
 
 	/**
 	 * Client constructor.
+	 *
 	 * @param Guild[] $guilds
 	 */
 	public function __construct(array $guilds = []) {
@@ -51,6 +53,11 @@ class Client extends Connector {
 	}
 
 	/**
+	 * Returns the last recognized ping (in MS)
+	 * => ping is built by time between heartbeating and heartbeat ack
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getPing(): int {
@@ -58,6 +65,10 @@ class Client extends Connector {
 	}
 
 	/**
+	 * Returns the BotUser instance of the Client
+	 *
+	 * @api
+	 *
 	 * @return BotUser|null
 	 */
 	public function getUser(): ?BotUser {
@@ -79,18 +90,32 @@ class Client extends Connector {
 		return GuildSettingsInitializer::createInvitation($value);
 	}
 	
+	/**
+	 * Deletes an Invitation by a specific code
+	 *
+	 * @api
+	 *
+	 * @param string $code
+	 *
+	 * @return bool
+	 */
 	public function deleteInvite(string $code): bool {
 		$data = RestAPIHandler::getInstance()->deleteInvite($code);
 		if ($data->isFailed() or !is_array(($value = @json_decode($data->getRawData(), true))) or !isset($value["code"]) or ($value["code"] !== $code)) return false;
 		return true;
 	}
 	
+	/**
+	 * Changes the activity of the bot
+	 * Public on all guilds and DMs
+	 *
+	 * @api
+	 *
+	 * @param Activity $activity
+	 */
 	public function setActivity(Activity $activity) {
 		$activity = $activity->encode();
-		var_dump($activity);
 		
 		Discord::getInstance()->toSend[] = $activity;
 	}
 }
-
-

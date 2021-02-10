@@ -82,5 +82,3 @@ class BotUser extends User {
 		$this->bot = true;
 	}
 }
-
-

@@ -8,12 +8,21 @@ use phpcord\guild\GuildMember;
 class MemberEvent extends Event {
 	/** @var GuildMember $member */
 	protected $member;
-
+	
+	/**
+	 * MemberEvent constructor.
+	 *
+	 * @param GuildMember $member
+	 */
 	public function __construct(GuildMember $member) {
 		$this->member = $member;
 	}
 
 	/**
+	 * Returns the member instance of the GuildMember used
+	 *
+	 * @api
+	 *
 	 * @return GuildMember
 	 */
 	public function getMember(): GuildMember {

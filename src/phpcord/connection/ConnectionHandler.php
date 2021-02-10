@@ -13,13 +13,16 @@ final class ConnectionHandler {
 
 	/** @var ConnectOptions $options */
 	protected $options;
+	
 	/** @var ConvertManager $connection */
 	public $connectionManager;
+	
 	/** @var Discord $discord */
 	private $discord;
-	/** @var null | StreamHandler $handler */
-	public $handler = null;
-
+	
+	/**
+	 * ConnectionHandler constructor.
+	 */
 	public function __construct() {
 	    self::$instance = $this;
     }
@@ -32,7 +35,14 @@ final class ConnectionHandler {
     	$this->options = $connectOptions;
         $this->startListener($discord);
     }
-
+	
+	/**
+	 * Starts the listener for a Discord instance
+	 *
+	 * @internal
+	 *
+	 * @param Discord $discord
+	 */
 	public function startListener(Discord $discord) {
     	$this->connectionManager = new ConvertManager();
     	$this->connectionManager->discord = $discord;
@@ -42,10 +52,4 @@ final class ConnectionHandler {
 		});
 		$connection->start();
 	}
-
-	public function close() {
-
-	}
 }
-
-
