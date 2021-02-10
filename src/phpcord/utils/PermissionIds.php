@@ -72,7 +72,7 @@ abstract class PermissionIds {
 	];
 
 	public static function initDefinitions() {
-		// doing the stuff hardcoded here to simplify calculations for IDE :D
+		// doing the stuff hardcoded here to simplify calculations for IDEs :D
 		define("CREATE_INSTANT_INVITE", self::CREATE_INSTANT_INVITE);
 		define("KICK_MEMBERS", self::KICK_MEMBERS);
 		define("BAN_MEMBERS", self::BAN_MEMBERS);
@@ -106,5 +106,3 @@ abstract class PermissionIds {
 		define("MANAGE_EMOJIS", self::MANAGE_EMOJIS);
 	}
 }
-
-

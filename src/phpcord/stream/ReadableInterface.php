@@ -12,5 +12,3 @@ interface ReadableInterface extends Expirable {
 	 */
 	public function read();
 }
-
-

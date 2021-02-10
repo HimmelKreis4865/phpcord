@@ -26,7 +26,17 @@ final class CacheLevels {
 	
 	public const TYPE_BAN_LIST = 5;
 	
+	/**
+	 * Disabled for now due to incompatible api behaviour
+	 * Will follow asap
+	 *
+	 * @api
+	 *
+	 * @param int $action
+	 *
+	 * @return bool
+	 */
 	public static function canCache(int $action): bool {
-		return (Discord::$cacheLevel < $action);
+		return true;
 	}
 }

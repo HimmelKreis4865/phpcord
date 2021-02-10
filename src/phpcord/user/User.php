@@ -8,22 +8,40 @@ use phpcord\http\RestAPIHandler;
 use phpcord\utils\UserUtils;
 
 class User {
+	/** @var string $username */
 	public $username;
 
+	/** @var string $tag */
 	public $tag;
 
+	/** @var string $id */
 	public $id;
 
+	/** @var int $public_flags */
 	public $public_flags;
 
+	/** @var string $discriminator */
 	public $discriminator = "0000";
 
+	/** @var bool $bot */
 	public $bot = false;
 
+	/** @var string|null $avatar */
 	public $avatar;
 
+	/** @var string $guild_id */
 	public $guild_id;
-
+	
+	/**
+	 * User constructor.
+	 *
+	 * @param string $guild_id
+	 * @param string $id
+	 * @param string $username
+	 * @param string $discriminator
+	 * @param int $public_flags
+	 * @param string|null $avatar
+	 */
 	public function __construct(string $guild_id, string $id, string $username, string $discriminator, int $public_flags = 0, ?string $avatar = null) {
 		$this->id = $id;
 		$this->username = $username;
@@ -33,23 +51,39 @@ class User {
 		$this->public_flags = $public_flags;
 		$this->guild_id = $guild_id;
 	}
-
+	
+	/**
+	 * Creates a (hopefully) valid mention
+	 *
+	 * @api
+	 *
+	 * @return string
+	 */
 	public function createMention(): string {
 		return "<@" . $this->id . ">";
 	}
 
 	/**
+	 * Returns the avatar url built by id + / + avatar url hash
+	 *
+	 * @api
+	 *
 	 * @param string $extension
 	 * @param int $size
 	 *
 	 * @return string|null
 	 */
-	public function getAvatarURL(string $extension = "png", int $size = 1024): string {
+	public function getAvatarURL(string $extension = "png", int $size = 1024): ?string {
+		if ($this->avatar === null) return null;
 		if (!in_array($extension, UserUtils::AVATAR_SUPPORTED_EXTENSIONS)) $extension = "png";
 		return UserUtils::AVATAR_URL_PATH . $this->id . "/" . $this->avatar . "." . $extension . "?size=" . $size;
 	}
 
 	/**
+	 * Returns the GuildID of the User
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getGuildId(): string {
@@ -57,6 +91,10 @@ class User {
 	}
 
 	/**
+	 * Returns the ID of the User
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getId(): string {
@@ -64,6 +102,10 @@ class User {
 	}
 
 	/**
+	 * Returns the avatar hash or null if the user's having the default avatar
+	 *
+	 * @api
+	 *
 	 * @return string|null
 	 */
 	public function getAvatar(): ?string {
@@ -71,6 +113,10 @@ class User {
 	}
 
 	/**
+	 * Returns the discriminator (#0000) of the user, must be returned as string since int of 0001 would be 1 which is an invalid discriminator
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getDiscriminator(): string {
@@ -78,6 +124,10 @@ class User {
 	}
 
 	/**
+	 * Returns the bitwise public flags of the user
+	 *
+	 * @api
+	 *
 	 * @return int
 	 */
 	public function getPublicFlags(): int {
@@ -85,6 +135,10 @@ class User {
 	}
 
 	/**
+	 * Returns the tag of the user which is username + # + discriminator
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getTag(): string {
@@ -92,21 +146,39 @@ class User {
 	}
 
 	/**
+	 * Returns the username of a user
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getUsername(): string {
 		return $this->username;
 	}
 	
+	/**
+	 * Bans the user from the guild he is on
+	 *
+	 * @api
+	 *
+	 * @param string|null $reason
+	 * @param int $messageDeleteDays
+	 */
 	public function ban(?string $reason = null, int $messageDeleteDays = 0) {
 		if (($instance = Discord::getInstance()) === null) throw new GuildException("Cannot ban a Member with a not initialized Client!");
 		if (($guild = $instance->getClient()->getGuild($this->getGuildId())) === null) throw new GuildException("Couldn't find a registered Guild " . $this->getGuildId());
 		$guild->addBan($this, $reason, $messageDeleteDays);
 	}
 	
+	/**
+	 * Kicks the user from the guild he is on
+	 *
+	 * @api
+	 *
+	 * @param string|null $reason
+	 * @return bool
+	 */
 	public function kick(?string $reason = null): bool {
 		return !RestAPIHandler::getInstance()->removeMember($this->getGuildId(), $this->getId(), $reason)->isFailed();
 	}
 }
-
-

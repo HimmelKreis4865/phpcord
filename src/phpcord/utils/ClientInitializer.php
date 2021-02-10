@@ -12,6 +12,16 @@ use phpcord\guild\GuildRole;
 use phpcord\guild\IncompleteGuild;
 
 class ClientInitializer {
+	/**
+	 * ClientInitializer constructor.
+	 *
+	 * Initialises a new guild to the client
+	 *
+	 * @internal
+	 *
+	 * @param Client $client
+	 * @param array $data
+	 */
 	public function __construct(Client &$client, array $data) {
 		$roles = [];
 		$members = [];
@@ -46,10 +56,28 @@ class ClientInitializer {
 		);
 	}
 	
+	/**
+	 * Creates an incomplete Guild used for invitations
+	 *
+	 * @internal
+	 *
+	 * @param array $data
+	 *
+	 * @return IncompleteGuild
+	 */
 	public static function createIncompleteGuild(array $data): IncompleteGuild {
 		return new IncompleteGuild($data["id"], $data["name"], @$data["splash"], @$data["banner"], @$data["description"], @$data["icon"], $data["features"] ?? [], $data["verification_level"] ?? 0, @$data["vanity_url"]);
 	}
-
+	
+	/**
+	 * Creates the BotUser (your bot)
+	 *
+	 * @internal
+	 *
+	 * @param array $data
+	 *
+	 * @return BotUser|null
+	 */
 	public static function createBotUser(array $data): ?BotUser {
 		if (!isset($data["application"]) or !isset($data["user"])) return null;
 		return new BotUser(-1, $data["user"]["id"], $data["user"]["username"], $data["user"]["discriminator"], $data["user"]["flags"] ?? 0, @$data["avatar"], $data["version"] ?? Discord::VERSION, $data["user_settings"] ?? [], $data["user"]["verified"] ?? false, $data["user"]["mfa_enabled"] ?? false, @$data["user"]["email"], @$data["session_id"], $data["relationships"] ?? [], $data["private_channels"] ?? [], array_filter(array_map(function($key) {
@@ -59,5 +87,3 @@ class ClientInitializer {
 		}), $data["guild_join_requests"] ?? [], $data["geo_ordered_rtc_regions"] ?? [], new Application($data["application"]["id"], $data["application"]["flags"] ?? 0));
 	}
 }
-
-

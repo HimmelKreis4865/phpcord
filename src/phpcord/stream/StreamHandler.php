@@ -3,6 +3,7 @@
 namespace phpcord\stream;
 
 use phpcord\utils\MainLogger;
+use function fwrite;
 
 class StreamHandler implements WriteableInterface, ReadableInterface {
 	
@@ -30,10 +31,8 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 			. "Sec-WebSocket-Version: 13\r\n";
 
 		if (!empty($headers)) foreach ($headers as $h) $header .= $h . "\r\n";
-		// Add end of header marker
 		$header .= "\r\n";
 
-		// Connect to server
 		$host = $host ? $host : "127.0.0.1";
 		$port = $port < 1 ? ($ssl ? 443 : 80) : $port;
 		$address = ($ssl ? 'ssl://' : '') . $host . ':' . $port;
@@ -41,18 +40,12 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 
 		$sp = stream_socket_client($address, $errno, $str, $timeout, STREAM_CLIENT_CONNECT, $ctx);
 
-		if (!$sp) {
-			return false;
-		}
+		if (!$sp) return false;
+		
 		stream_set_timeout($sp, $timeout);
 
-		//stream_set_blocking($sp, false);
-
-		$rc = fwrite($sp, $header);
-		if (!$rc) {
-			return false;
-		}
-
+		if (!fwrite($sp, $header)) return false;
+		
 		$response_header = fread($sp, 1024);
 
 		if (stripos($response_header, ' 101 ') === false || stripos($response_header, 'Sec-WebSocket-Accept: ') === false) {
@@ -79,7 +72,6 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 		$mask = pack("N", rand(1, 0x7FFFFFFF));
 		$header .= $mask;
 
-		// Mask application data.
 		for ($i = 0; $i < strlen($data); $i++)
 			$data[$i] = chr(ord($data[$i]) ^ ord($mask[$i % 4]));
 
@@ -134,14 +126,12 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 				$payload_len -= strlen($frame);
 				$frame_data .= $frame;
 			} while ($payload_len > 0);
-
+			
+			// todo: is this needed?
 			if ($opcode == 9) {
 				fwrite($this->stream, chr(0x8A) . chr(0x80) . pack("N", rand(1, 0x7FFFFFFF)));
 				continue;
-			} /*elseif ($opcode === 8) {
-				fclose($this->stream);
-
-			}*/ elseif ($opcode < 3) {
+			} elseif ($opcode < 3) {
 				$data_len = strlen($frame_data);
 				if ($masked)
 					for ($i = 0; $i < $data_len; $i++)
@@ -166,5 +156,3 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 		$this->stream = null; // preventing any issues with invalid streams and stuff
 	}
 }
-
-

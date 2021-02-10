@@ -7,11 +7,22 @@ use function is_numeric;
 use function strval;
 
 class Permission {
-	
+	/** @var array|int|mixed $allow */
 	protected $allow = 0;
 	
+	/** @var array|int|mixed $deny */
 	protected $deny = 0;
 	
+	/**
+	 * Creates a bitwise permission from raw allow and deny
+	 *
+	 * @api
+	 *
+	 * @param int $allow
+	 * @param int $deny
+	 *
+	 * @return string
+	 */
 	public static function fromValues(int $allow, int $deny): string {
 		$permission = 0;
 		$permission |= $allow;
@@ -21,6 +32,7 @@ class Permission {
 	
 	/**
 	 * Permission constructor.
+	 *
 	 * @param int|array $allow
 	 * @param int|array $deny
 	 */
@@ -113,6 +125,10 @@ class Permission {
 	}
 	
 	/**
+	 * Returns the raw (current) allow permissions
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getAllow(): string {
@@ -120,6 +136,10 @@ class Permission {
 	}
 	
 	/**
+	 * Returns the raw (current) deny permissions
+	 *
+	 * @api
+	 *
 	 * @return string
 	 */
 	public function getDeny(): string {

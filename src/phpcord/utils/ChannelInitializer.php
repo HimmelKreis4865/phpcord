@@ -8,6 +8,7 @@ use phpcord\channel\DMChannel;
 use phpcord\channel\NewsChannel;
 use phpcord\channel\TextChannel;
 use phpcord\channel\VoiceChannel;
+use phpcord\guild\AuditLog;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildPermissionMemberOverwrite;
 use phpcord\guild\GuildPermissionOverwrite;
@@ -17,7 +18,17 @@ use function array_map;
 use function is_null;
 
 class ChannelInitializer {
-
+	
+	/**
+	 * Tries to create a GuildChannel instance
+	 *
+	 * @internal
+	 *
+	 * @param array $data
+	 * @param string $guild_id
+	 *
+	 * @return GuildChannel|null
+	 */
 	public static function createChannel(array $data, string $guild_id): ?GuildChannel {
 		$permissions = array_filter(array_map(function(array $keys) {
 			$type = ($keys["type"] === "role" ? GuildPermissionOverwrite::TYPE_ROLE : ($keys["type"] === "member" ? GuildPermissionOverwrite::TYPE_MEMBER : $keys["type"]));
@@ -50,10 +61,17 @@ class ChannelInitializer {
 		}
 		return $channel;
 	}
-	
+	/**
+	 * Tries to create a IncompleteChannel instance
+	 *
+	 * @internal
+	 *
+	 * @param array $data
+	 * @param string $guildId
+	 *
+	 * @return IncompleteChannel|null
+	 */
 	public static function createIncomplete(array $data, string $guildId): ?IncompleteChannel {
 		return new IncompleteChannel($guildId, $data["id"], $data["name"], $data["type"] ?? ChannelType::TYPE_TEXT);
 	}
 }
-
-

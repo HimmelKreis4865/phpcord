@@ -14,5 +14,3 @@ interface WriteableInterface extends Expirable {
 	 */
 	public function write(string $data, bool $final = true);
 }
-
-

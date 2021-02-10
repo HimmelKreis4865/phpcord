@@ -12,15 +12,18 @@ class StreamLoop {
 	/** @var callable $onSend */
 	protected $onSend;
 
+	/** @var bool $closed */
 	private $closed = false;
 
+	/** @var StreamHandler $handler */
 	public $handler;
+	
 	/** @var ConvertManager $manager */
 	public $manager;
 
-	public $last_heartbeat;
 	/** @var ConnectOptions $data */
 	private $options;
+	
 	/** @var null $lastS */
 	private $lastS = null;
 
@@ -84,7 +87,10 @@ class StreamLoop {
 			}
 		}
 	}
-
+	public function close() {
+		$this->closed = true;
+	}
+	
 	public function start() {
 		$this->run();
 	}

@@ -14,5 +14,3 @@ trait InstantiableTrait {
 		return self::$instance;
 	}
 }
-
-

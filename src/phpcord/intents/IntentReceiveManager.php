@@ -16,9 +16,21 @@ class IntentReceiveManager {
 
 	/** @var string[][] $intentHandlers */
 	protected $intentHandlers = [];
+	
 	/** @var string[] */
 	protected $registeredClasses = [];
-
+	
+	/**
+	 * Registers a new intent handler to the system
+	 *
+	 * @warning Please don't register an anonymous class, it will throw an Exception!
+	 *
+	 * @api
+	 *
+	 * @param BaseIntentHandler $intentHandler
+	 *
+	 * @return bool
+	 */
 	public function registerHandler(BaseIntentHandler $intentHandler): bool {
 		if (in_array(get_class($intentHandler), $this->registeredClasses)) return false;
 		foreach (array_filter($intentHandler->getIntents(), function($key) {
@@ -29,7 +41,16 @@ class IntentReceiveManager {
 		$this->registeredClasses[] = get_class($intentHandler);
 		return true;
 	}
-
+	
+	/**
+	 * Executes an intent, loops through all intent handlers of a type here
+	 *
+	 * @internal
+	 *
+	 * @param Discord $discord
+	 * @param string $intent
+	 * @param array $data
+	 */
 	final public function executeIntent(Discord $discord, string $intent, array $data) {
 		if (!isset($this->intentHandlers[$intent])) return;
 
@@ -39,12 +60,22 @@ class IntentReceiveManager {
 			$class->handle($discord, $intent, $data);
 		}
 	}
-
+	
+	/**
+	 * Initialises all important default handlers
+	 *
+	 * @internal
+	 */
 	final public function init() {
 		$this->initialized = true;
 		$this->initDefaultHandlers();
 	}
-
+	
+	/**
+	 * @see init()
+	 *
+	 * @internal
+	 */
 	public function initDefaultHandlers() {
 		$this->registerHandler(new MessageHandler());
 		$this->registerHandler(new MemberHandler());
@@ -53,6 +84,3 @@ class IntentReceiveManager {
 		$this->registerHandler(new ChannelHandler());
 	}
 }
-
-
-

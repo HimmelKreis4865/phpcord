@@ -28,10 +28,17 @@ class IntentsManager implements IntentList {
 		}
 		return $sum;
 	}
-
+	
+	/**
+	 * Returns whether an intent is a valid one
+	 *
+	 * @api
+	 *
+	 * @param string $intent
+	 *
+	 * @return bool
+	 */
 	public static function isValidIntent(string $intent): bool {
 		return in_array($intent, self::INTENTS);
 	}
 }
-
-

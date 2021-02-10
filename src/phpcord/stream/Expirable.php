@@ -19,5 +19,3 @@ interface Expirable {
 	 */
 	public function close(): void;
 }
-
-

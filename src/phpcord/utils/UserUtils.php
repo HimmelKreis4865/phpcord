@@ -7,5 +7,3 @@ class UserUtils {
 
 	public const AVATAR_SUPPORTED_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 }
-
-

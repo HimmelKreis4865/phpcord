@@ -5,6 +5,7 @@ namespace phpcord\utils;
 class IdentifyData {
 	/** @var string $token */
 	public $token;
+	
 	/** @var int $intents */
 	public $intents = 513;
 
@@ -19,5 +20,3 @@ class IdentifyData {
 		$this->intents = $intents;
 	}
 }
-
-

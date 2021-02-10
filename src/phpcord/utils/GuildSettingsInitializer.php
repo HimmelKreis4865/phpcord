@@ -11,6 +11,16 @@ use function intval;
 use function is_array;
 
 class GuildSettingsInitializer {
+	/**
+	 * Creates a GuildBanList from data
+	 *
+	 * @internal
+	 *
+	 * @param string $guildId
+	 * @param array $data
+	 *
+	 * @return GuildBanList
+	 */
 	public static function createBanList(string $guildId, array $data): GuildBanList {
 		$entries = [];
 		foreach ($data as $ban) {
@@ -20,12 +30,29 @@ class GuildSettingsInitializer {
 		return new GuildBanList($entries);
 	}
 	
+	/**
+	 * Creates a webhook from data
+	 *
+	 * @internal
+	 *
+	 * @param array $data
+	 *
+	 * @return Webhook|null
+	 */
 	public static function initWebhook(array $data): ?Webhook {
 		$user = null;
 		if (isset($data["user"]) and is_array($data["user"])) $user = MemberInitializer::createUser($data["user"], $data["guild_id"]);
 		return new Webhook($data["guild_id"], $data["id"], $data["channel_id"], @$data["name"], @$data["avatar"], @$data["token"], @$data["application_id"], $user);
 	}
-	
+	/**
+	 * Creates a GuildInvite from data
+	 *
+	 * @internal
+	 *
+	 * @param array $data
+	 *
+	 * @return GuildInvite
+	 */
 	public static function createInvitation(array $data): GuildInvite {
 		$guild = null;
 		if (isset($data["guild"])) $guild = ClientInitializer::createIncompleteGuild($data["guild"]);
@@ -42,9 +69,17 @@ class GuildSettingsInitializer {
 		return new GuildInvite($data["code"], $guild, $channel, $inviter, $target, $data["target_user_type"] ?? 0, @$data["approximate_presence_count"], @$data["approximate_member_count"]);
 	}
 	
+	/**
+	 * Initialises a GuildRole from data
+	 *
+	 * @internal
+	 *
+	 * @param string $guildId
+	 * @param array $data
+	 *
+	 * @return GuildRole
+	 */
 	public static function initRole(string $guildId, array $data): GuildRole {
 		return new GuildRole($guildId, $data["name"], $data["id"], intval($data["position"] ?? 0), $data["permissions"] ?? [], $data["color"] ?? 0, $data["mentionable"] ?? false, $data["managed"] ?? false);
 	}
 }
-
-
