@@ -64,7 +64,7 @@ class StreamLoop {
 
 				if ($encoded["op"] === 10) {
 					$this->manager->heartbeat_interval = $encoded["d"]["heartbeat_interval"];
-					$handler->write('{ "op": 2, "d": { "token": "ODAwMjkzMzM2ODU3ODM3NTY5.YAQBQA.IGviSCwsuqiUQQ7hAEqGDW0E_ag", "intents": 32767, "properties": { "$os": "%2%", "$browser": "DiscordPHP", "$device": "DiscordPHP" } } }');
+					$handler->write('{ "op": 2, "d": { "token": "' . $this->options->getToken() . '", "intents": ' . $this->options->getIntents() . ', "properties": { "$os": "%2%", "$browser": "DiscordPHP", "$device": "DiscordPHP" } } }');
 					$this->manager->last_heartbeat = microtime(true);
 				}
 

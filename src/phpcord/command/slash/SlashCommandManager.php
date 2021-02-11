@@ -2,9 +2,6 @@
 
 namespace phpcord\command\slash;
 
-use phpcord\http\RestAPIHandler;
-use function var_dump;
-
 final class SlashCommandManager {
 	
 	protected $application_id;
