@@ -45,11 +45,11 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 		
 		if (file_exists('/etc/ssl/cacert.pem')) stream_context_set_option($ctx, 'ssl', 'cafile', '/etc/ssl/cacert.pem');
 
-		stream_socket_enable_crypto($ctx, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-		
 		$sp = stream_socket_client($address, $errno, $str, $timeout, STREAM_CLIENT_CONNECT, $ctx);
 
 		if (!$sp) return false;
+
+		stream_socket_enable_crypto($ctx, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
 		
 		stream_set_timeout($sp, $timeout);
 		
