@@ -19,7 +19,5 @@ final class SlashCommandManager {
 	
 	public function registerCommand(SlashCommand $command) {
 		$command = $command->encode();
-		
-		var_dump(RestAPIHandler::getInstance()->registerSlashCommand("709680348941910148", $this->application_id, $command));
 	}
 }

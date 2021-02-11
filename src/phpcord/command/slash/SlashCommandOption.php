@@ -4,7 +4,7 @@ namespace phpcord\command\slash;
 
 use function array_map;
 
-final class SlashCommandOption {
+class SlashCommandOption {
 	
 	public const SUB_COMMAND = 1;
 	public const SUB_COMMAND_GROUP = 2;

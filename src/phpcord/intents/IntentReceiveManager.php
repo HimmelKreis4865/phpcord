@@ -5,10 +5,12 @@ namespace phpcord\intents;
 use phpcord\intents\handlers\BaseIntentHandler;
 use phpcord\intents\handlers\ChannelHandler;
 use phpcord\intents\handlers\GuildHandler;
+use phpcord\intents\handlers\InteractionHandler;
 use phpcord\intents\handlers\MemberHandler;
 use phpcord\intents\handlers\MessageHandler;
 use phpcord\intents\handlers\ReactionHandler;
 use phpcord\Discord;
+use function var_dump;
 
 class IntentReceiveManager {
 	/** @var bool $initialized */
@@ -53,7 +55,6 @@ class IntentReceiveManager {
 	 */
 	final public function executeIntent(Discord $discord, string $intent, array $data) {
 		if (!isset($this->intentHandlers[$intent])) return;
-
 		foreach ($this->intentHandlers[$intent] as $class) {
 			/** @var BaseIntentHandler $class */
 			$class = new $class();
@@ -82,5 +83,6 @@ class IntentReceiveManager {
 		$this->registerHandler(new GuildHandler());
 		$this->registerHandler(new ReactionHandler());
 		$this->registerHandler(new ChannelHandler());
+		$this->registerHandler(new InteractionHandler());
 	}
 }

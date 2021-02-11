@@ -108,4 +108,8 @@ class GuildSettingsInitializer {
 		}
 		return new GuildWelcomeScreen($data["description"], $fields);
 	}
+	
+	public static function createGuildInteraction(array $data) {
+	
+	}
 }
