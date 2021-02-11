@@ -8,8 +8,6 @@ use phpcord\event\message\MessageDeleteEvent;
 use phpcord\event\message\MessageSendEvent;
 use phpcord\event\message\MessageUpdateEvent;
 use phpcord\utils\MessageInitializer;
-use function var_dump;
-
 class MessageHandler extends BaseIntentHandler {
 
 	public function getIntents(): array {

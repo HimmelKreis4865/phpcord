@@ -2,11 +2,14 @@
 
 namespace phpcord\utils;
 
+use phpcord\guild\Emoji;
 use phpcord\guild\FollowWebhook;
 use phpcord\guild\GuildBanEntry;
 use phpcord\guild\GuildBanList;
 use phpcord\guild\GuildInvite;
 use phpcord\guild\GuildRole;
+use phpcord\guild\GuildWelcomeScreen;
+use phpcord\guild\GuildWelcomeScreenField;
 use phpcord\guild\Webhook;
 use function intval;
 use function is_array;
@@ -96,5 +99,13 @@ class GuildSettingsInitializer {
 	 */
 	public static function initRole(string $guildId, array $data): GuildRole {
 		return new GuildRole($guildId, $data["name"], $data["id"], intval($data["position"] ?? 0), $data["permissions"] ?? [], $data["color"] ?? 0, $data["mentionable"] ?? false, $data["managed"] ?? false);
+	}
+	
+	public static function initWelcomeScreen(array $data): GuildWelcomeScreen {
+		$fields = [];
+		foreach ($data["welcome_channels"] ?? [] as $channel) {
+			$fields[] = new GuildWelcomeScreenField($channel["channel_id"], $channel["description"], (isset($channel["emoji_name"]) ? new Emoji($channel["emoji_name"], @$channel["emoji_id"]) : null));
+		}
+		return new GuildWelcomeScreen($data["description"], $fields);
 	}
 }

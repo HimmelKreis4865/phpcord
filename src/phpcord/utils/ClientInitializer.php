@@ -10,6 +10,8 @@ use phpcord\guild\Guild;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildRole;
 use phpcord\guild\IncompleteGuild;
+use function is_null;
+use function var_dump;
 
 class ClientInitializer {
 	/**
@@ -47,12 +49,15 @@ class ClientInitializer {
 			}
 		}
 
+		$screen = null;
+		if (isset($data["welcome_screen"]) and !is_null($data["welcome_screen"])) $screen = GuildSettingsInitializer::initWelcomeScreen($data["welcome_screen"]);
+		
 		$client->guilds[$guild_id] = new Guild(
 			$data["name"], $data["id"], $data["owner_id"], $data["icon"], $data["banner"], $data["afk_channel_id"],
 			$data["rules_channel_id"], $channels, $members, $roles, $data["description"], intval($data["member_count"]),
 			$data["preferred_locale"], $data["region"], intval($data["default_message_notifications"]), intval($data["verification_level"]),
 			intval($data["max_members"]), $data["vanity_url_code"], $data["system_channel_id"],
-			$data["public_updates_channel_id"], intval($data["premium_subscription_count"])
+			$data["public_updates_channel_id"], intval($data["premium_subscription_count"], $screen)
 		);
 	}
 	

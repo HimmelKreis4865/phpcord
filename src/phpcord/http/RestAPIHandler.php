@@ -8,6 +8,7 @@ use phpcord\guild\GuildInvite;
 use phpcord\utils\InstantiableTrait;
 use function array_merge;
 use function is_null;
+use function json_decode;
 use function json_encode;
 use function urlencode;
 use function var_dump;
@@ -42,9 +43,12 @@ final class RestAPIHandler {
 		return $this->createRestResponse($request->submit());
 	}
 
-	public function sendMessage(string $channelId, string $data): RestResponse {
-		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages");
+	public function sendMessage(string $channelId, string $data, string $contentType): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages", HTTPRequest::REQUEST_POST, false);
+		$request->setContentType($contentType);
 		$request->addHTTPData("content", $data);
+		//$request->addHTTPData("file", json_encode(json_decode($data, true)["file"]));
+		var_dump($request);
 		return $this->createRestResponse($request->submit());
 	}
 
@@ -212,6 +216,18 @@ final class RestAPIHandler {
 		return $this->createRestResponse($request->submit());
 	}
 	
+	public function updateMember(string $guildId, string $id, array $data): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/members/" . $id, HTTPRequest::REQUEST_PATCH);
+		$request->addHTTPData("content", json_encode($data));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function setBotNick(string $guildId, string $nick): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/members/@me/nick", HTTPRequest::REQUEST_PATCH);
+		$request->addHTTPData("content", json_encode(["nick" => $nick]));
+		return $this->createRestResponse($request->submit());
+	}
+	
 	public function addRoleToUser(string $guildId, string $user, string $role): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/members/" . $user . "/roles/" . $role, HTTPRequest::REQUEST_PUT);
 		$request->addHTTPData("content", json_encode([]));
@@ -265,6 +281,17 @@ final class RestAPIHandler {
 	
 	public function getInvitesByChannel(string $channelId): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/invites", HTTPRequest::REQUEST_GET);
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function registerSlashCommand(string $guildId, string $applicationId, array $data): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/guilds/" . $guildId . "/commands");
+		$request->addHTTPData("content", json_encode($data));
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function getSlashCommands(string $applicationId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/commands", HTTPRequest::REQUEST_GET);
 		return $this->createRestResponse($request->submit());
 	}
 }

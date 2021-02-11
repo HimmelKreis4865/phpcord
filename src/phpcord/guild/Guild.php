@@ -6,6 +6,7 @@ use phpcord\channel\BaseTextChannel;
 use phpcord\channel\ChannelType;
 use phpcord\channel\embed\ColorUtils;
 use phpcord\channel\TextChannel;
+use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\AuditLogInitializer;
@@ -25,6 +26,7 @@ use function json_decode;
 use function strlen;
 use function strval;
 use function substr;
+use function var_dump;
 
 class Guild {
 	/** @var string $name */
@@ -98,6 +100,9 @@ class Guild {
 	
 	/** @var array|null $features */
 	public $features = [];
+	
+	/** @var GuildWelcomeScreen|null $welcomeScreen */
+	public $welcomeScreen = null;
 
 	/**
 	 * Guild constructor.
@@ -125,8 +130,9 @@ class Guild {
  	 * @param string|null $public_updates_channel_id
 	 * @param int|null $premium_subscription_count
 	 * @param array|null $features
+	 * @param GuildWelcomeScreen|null $welcomeScreen
 	 */
-	public function __construct(string $name, string $id, ?string $owner_id, ?string $icon = null, ?string $banner = null, ?string $afk_channel = null, ?string $rules_channel_id = null, array $channels = [], array $members = [], array $roles = [], string $description = null, int $member_count = 10000, string $preferred_locale = "en-US", string $region = "europe", int $default_message_notifications = 0, int $verification_level = 0, int $max_members = 10000, ?string $vanity_url = null, ?string $system_channel_id = null, ?string $public_updates_channel_id = null, ?int $premium_subscription_count = 0, ?array $features = null) {
+	public function __construct(string $name, string $id, ?string $owner_id, ?string $icon = null, ?string $banner = null, ?string $afk_channel = null, ?string $rules_channel_id = null, array $channels = [], array $members = [], array $roles = [], string $description = null, int $member_count = 10000, string $preferred_locale = "en-US", string $region = "europe", int $default_message_notifications = 0, int $verification_level = 0, int $max_members = 10000, ?string $vanity_url = null, ?string $system_channel_id = null, ?string $public_updates_channel_id = null, ?int $premium_subscription_count = 0, ?array $features = null, ?GuildWelcomeScreen $welcomeScreen = null) {
 		$this->name = $name;
 		$this->id = $id;
 		$this->owner_id = $owner_id;
@@ -149,6 +155,8 @@ class Guild {
 		$this->public_updates_channel_id = $public_updates_channel_id;
 		$this->premium_subscription_count = $premium_subscription_count;
 		$this->features = $features;
+		$this->welcomeScreen = $welcomeScreen;
+		var_dump($welcomeScreen);
 		$this->getBanList(); // initializing the ban-list
 	}
 
@@ -558,6 +566,21 @@ class Guild {
 	 */
 	public function hasRole(string $id): bool {
 		return ($this->getRole($id) instanceof GuildRole);
+	}
+	
+	/**
+	 * Changes the nick of your bot application, you CANNOT use @link GuildMember::setNick()
+	 *
+	 * @warning does not work like how it should yet
+	 *
+	 * @api
+	 *
+	 * @param string|null $nick
+	 *
+	 * @return bool
+	 */
+	public function setBotNick(?string $nick): bool {
+		return !RestAPIHandler::getInstance()->setBotNick(Discord::getInstance()->getClient()->getUser()->getId(), $nick)->isFailed();
 	}
 	
 	/**

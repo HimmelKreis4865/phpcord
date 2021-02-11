@@ -4,6 +4,7 @@ namespace phpcord\utils;
 
 use phpcord\guild\GuildMember;
 use phpcord\user\User;
+use function strval;
 
 class MemberInitializer {
 	/**
@@ -31,6 +32,11 @@ class MemberInitializer {
 	 * @return GuildMember
 	 */
 	public static function createMember(array $member, string $guild_id): GuildMember {
-		return new GuildMember($guild_id, $member["user"]["id"], $member["user"]["username"], strval($member["user"]["discriminator"]), $member["roles"] ?? [], $member["user"]["bot"] ?? false,  ($member["nick"] ?? $member["user"]["username"]), ["user"]["public_flags"] ?? 0, $member["user"]["avatar"] ?? "", $member["joined_at"], @$member["premium_since"]);
+		return new GuildMember($guild_id, $member["user"]["id"], $member["user"]["username"], strval($member["user"]["discriminator"]), $member["roles"] ?? [], $member["user"]["bot"] ?? false,  ($member["nick"] ?? $member["user"]["username"]), ["user"]["public_flags"] ?? 0, @$member["user"]["avatar"], $member["joined_at"], @$member["premium_since"]);
+	}
+	
+	public static function createMentioned(array $member, string $guild_id): GuildMember {
+		return new GuildMember($guild_id, $member["id"], $member["username"], strval($member["discriminator"]), $member["member"]["roles"] ?? [], $member["bot"] ?? false,  ($member["member"]["nick"] ?? $member["username"]), $member["public_flags"] ?? 0, @$member["avatar"], $member["member"]["joined_at"], @$member["member"]["premium_since"]);
+		
 	}
 }

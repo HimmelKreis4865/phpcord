@@ -41,7 +41,8 @@ class TextMessage implements Sendable {
 	public function addEmbed(MessageEmbed $embed): self {
 		// removing the embed data for making an old embed (if existed) invisible
 		if (isset($this->data["embed"])) unset($this->data["embed"]);
-		$this->data["embed"] = $embed->getJsonData()["embed"];
+		// some workaround hacks to keep this working
+		$this->data["embed"] = json_encode(json_decode($embed->getFormattedData(), true)["embed"]);
 		return $this;
 	}
 
@@ -62,9 +63,13 @@ class TextMessage implements Sendable {
 	 *
 	 * @internal
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public function getJsonData(): array {
-		return $this->data;
+	public function getFormattedData(): string {
+		return json_encode($this->data);
+	}
+	
+	public function getContentType(): string {
+		return "application/json";
 	}
 }

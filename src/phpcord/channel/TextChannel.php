@@ -5,11 +5,13 @@ namespace phpcord\channel;
 use phpcord\guild\FollowWebhook;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildInvite;
+use phpcord\guild\store\GuildStoredMessage;
 use phpcord\guild\Webhook;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\DateUtils;
 use phpcord\utils\GuildSettingsInitializer;
 use phpcord\utils\IntUtils;
+use phpcord\utils\MessageInitializer;
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -202,5 +204,23 @@ class TextChannel extends BaseTextChannel {
 	 */
 	public function getType(): ChannelType {
 		return new ChannelType(ChannelType::TYPE_TEXT);
+	}
+	
+	/**
+	 * Returns an array with GuildStoredMessage objects
+	 *
+	 * @api
+	 *
+	 * @return GuildStoredMessage[]
+	 */
+	public function getPins(): array {
+		$result = RestAPIHandler::getInstance()->getPins($this->getId());
+		if ($result->isFailed() or strlen($result->getRawData()) === 0) return [];
+		$messages = [];
+		foreach (json_decode($result->getRawData(), true) as $message) {
+			$message = MessageInitializer::fromStore($this->getGuildId(), $message);
+			$messages[$message->getId()] = $message;
+		}
+		return $messages;
 	}
 }

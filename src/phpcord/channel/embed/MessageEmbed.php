@@ -214,9 +214,13 @@ class MessageEmbed implements Sendable {
 	 *
 	 * @internal
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public function getJsonData(): array {
-		return ["embed" => ArrayUtils::filterNullRecursive($this->data)];
+	public function getFormattedData(): string {
+		return json_encode(["embed" => ArrayUtils::filterNullRecursive($this->data)]);
+	}
+	
+	public function getContentType(): string {
+		return "application/json";
 	}
 }

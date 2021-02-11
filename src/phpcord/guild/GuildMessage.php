@@ -454,7 +454,9 @@ class GuildMessage {
 	 * @return bool
 	 */
 	public function pin(): bool {
-		return false;
+		if (in_array($this->getType(), [self::TYPE_CALL, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION, self::TYPE_GUILD_MEMBER_JOIN, self::TYPE_CHANNEL_PINNED_MESSAGE, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3, self::TYPE_CHANNEL_FOLLOW_ADD]))
+			throw new \InvalidArgumentException("Could not pin a message of type " . $this->getType());
+		return !RestAPIHandler::getInstance()->pinMessage($this->getChannelId(), $this->getId())->isFailed();
 	}
 	
 	/**
@@ -465,6 +467,6 @@ class GuildMessage {
 	 * @return bool
 	 */
 	public function unpin(): bool {
-		return false;
+		return !RestAPIHandler::getInstance()->unpinMessage($this->getChannelId(), $this->getId())->isFailed();
 	}
 }

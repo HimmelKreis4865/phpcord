@@ -22,14 +22,9 @@ use phpcord\utils\PermissionIds;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
-use function count;
 use function floor;
-use function json_encode;
-use function memory_get_peak_usage;
-use function memory_get_usage;
 use function microtime;
 use function set_time_limit;
-use function var_dump;
 
 final class Discord {
 	/** @var int the version that is used for the gateway and restapi */

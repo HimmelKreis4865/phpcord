@@ -8,9 +8,16 @@ interface Sendable {
 	 *
 	 * @internal
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public function getJsonData(): array;
+	public function getFormattedData(): string;
+	
+	/**
+	 * Returns the content type for the message
+	 *
+	 * @internal
+	 *
+	 * @return string
+	 */
+	public function getContentType(): string;
 }
-
-
