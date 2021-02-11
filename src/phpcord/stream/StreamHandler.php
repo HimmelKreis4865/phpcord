@@ -49,7 +49,7 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 
 		if (!$sp) return false;
 
-		stream_socket_enable_crypto($ctx, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+		stream_socket_enable_crypto($sp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
 		
 		stream_set_timeout($sp, $timeout);
 		
