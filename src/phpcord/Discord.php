@@ -192,7 +192,7 @@ final class Discord {
 	 */
 	public function registerAutoload() {
 		spl_autoload_register(function($class) {
-			if (!class_exists($class)) require_once $this->basedir . str_replace("phpcord", "\src\phpcord", (strpos($class, DIRECTORY_SEPARATOR) === false ? "\u{005C}" . $class : $class)) . ".php";
+			if (!class_exists($class)) require_once str_replace("phpcord", "\src\phpcord",  $this->basedir .  (strpos($class, DIRECTORY_SEPARATOR) === false ? "\u{005C}" . $class : $class)) . ".php";
 		});
 	}
 	

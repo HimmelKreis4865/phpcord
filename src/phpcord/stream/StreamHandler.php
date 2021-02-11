@@ -37,12 +37,18 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 		$port = $port < 1 ? ($ssl ? 443 : 80) : $port;
 		$address = ($ssl ? 'ssl://' : '') . $host . ':' . $port;
 		$ctx = $context ?? stream_context_create();
-
+		
+		stream_context_set_option($ctx, 'ssl', 'verify_host', false);
+		stream_context_set_option($ctx, 'ssl', 'verify_peer', false);
+		stream_context_set_option($ctx, 'ssl', 'allow_self_signed', false);
+		
 		$sp = stream_socket_client($address, $errno, $str, $timeout, STREAM_CLIENT_CONNECT, $ctx);
 
 		if (!$sp) return false;
 		
 		stream_set_timeout($sp, $timeout);
+		
+		
 
 		if (!fwrite($sp, $header)) return false;
 		
