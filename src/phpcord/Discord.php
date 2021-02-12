@@ -25,6 +25,9 @@ use ReflectionMethod;
 use function floor;
 use function microtime;
 use function set_time_limit;
+use function str_replace;
+use function var_dump;
+use const DIRECTORY_SEPARATOR;
 
 final class Discord {
 	/** @var int the version that is used for the gateway and restapi */
@@ -71,9 +74,8 @@ final class Discord {
 	/** @var int|mixed $cacheLevel */
 	public static $cacheLevel = 0;
 
-	public function __construct(string $basedir, array $options = []) {
+	public function __construct(array $options = []) {
 		self::$lastInstance = $this;
-		$this->basedir = $basedir;
 		//$this->setErrorHandler();
 		$this->registerAutoload();
 		$this->client = new Client();
@@ -192,7 +194,7 @@ final class Discord {
 	 */
 	public function registerAutoload() {
 		spl_autoload_register(function($class) {
-			if (!class_exists($class)) require_once str_replace("phpcord", "\src\phpcord",  $this->basedir .  (strpos($class, DIRECTORY_SEPARATOR) === false ? "\u{005C}" . $class : $class)) . ".php";
+			if (!class_exists($class)) require_once str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
 		});
 	}
 	

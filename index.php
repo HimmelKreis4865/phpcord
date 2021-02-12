@@ -10,7 +10,7 @@ use phpcord\intents\IntentsManager;
 
 require_once __DIR__ . "/src/phpcord/Discord.php";
 
-$discord = new Discord(__DIR__, [
+$discord = new Discord([
 	"debugMode" => true
 ]);
 

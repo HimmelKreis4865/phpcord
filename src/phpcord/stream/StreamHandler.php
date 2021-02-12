@@ -5,6 +5,7 @@ namespace phpcord\stream;
 use phpcord\utils\MainLogger;
 use function file_exists;
 use function fwrite;
+use const STREAM_CRYPTO_METHOD_ANY_CLIENT;
 
 class StreamHandler implements WriteableInterface, ReadableInterface {
 	
@@ -49,7 +50,7 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 
 		if (!$sp) return false;
 
-		stream_socket_enable_crypto($sp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+		//stream_socket_enable_crypto($sp, true, STREAM_CRYPTO_METHOD_ANY_CLIENT);
 		
 		stream_set_timeout($sp, $timeout);
 		
