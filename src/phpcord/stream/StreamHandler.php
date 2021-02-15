@@ -40,9 +40,8 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 		$address = ($ssl ? 'ssl://' : '') . $host . ':' . $port;
 		$ctx = $context ?? stream_context_create();
 		
-		stream_context_set_option($ctx, 'ssl', 'verify_host', false);
+		stream_context_set_option($ctx, 'ssl', 'verify_peer_name', false);
 		stream_context_set_option($ctx, 'ssl', 'verify_peer', false);
-		stream_context_set_option($ctx, 'ssl', 'allow_self_signed', false);
 		
 		if (file_exists('/etc/ssl/cacert.pem')) stream_context_set_option($ctx, 'ssl', 'cafile', '/etc/ssl/cacert.pem');
 
@@ -50,7 +49,7 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 
 		if (!$sp) return false;
 
-		stream_socket_enable_crypto($sp, true, STREAM_CRYPTO_METHOD_TLS_SERVER);
+                 //stream_socket_enable_crypto($sp, true, STREAM_CRYPTO_METHOD_TLS_SERVER);
 		
 		stream_set_timeout($sp, $timeout);
 		
