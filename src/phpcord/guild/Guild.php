@@ -369,7 +369,7 @@ class Guild {
 	 */
 	public function getAuditLog(): AuditLog {
 		$auditlog = $this->auditlog;
-		if (!$auditlog instanceof AuditLog) $auditlog = AuditLogInitializer::create($this->id, json_decode(RestAPIHandler::getInstance()->getAuditLog($this->getId())->getRawData(), true));
+		if (!$auditlog instanceof AuditLog) $auditlog = AuditLogInitializer::create($this->id, json_decode(RestAPIHandler::getInstance()->getAuditLog($this->getId())->getRawData(), true) ?? []);
 		
 		if (CacheLevels::canCache(CacheLevels::TYPE_BAN_LIST)) $this->auditlog = $auditlog;
 		
@@ -388,7 +388,7 @@ class Guild {
 	 */
 	public function getBanList(): ?GuildBanList {
 		$banList = $this->banList;
-		if (!$banList instanceof GuildBanList) $banList = GuildSettingsInitializer::createBanList($this->id, json_decode(RestAPIHandler::getInstance()->getBans($this->getId())->getRawData(), true));
+		if (!$banList instanceof GuildBanList) $banList = GuildSettingsInitializer::createBanList($this->id, json_decode(RestAPIHandler::getInstance()->getBans($this->getId())->getRawData(), true) ?? []);
 		
 		if (CacheLevels::canCache(CacheLevels::TYPE_BAN_LIST)) $this->banList = $banList;
 		
