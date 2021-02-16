@@ -320,6 +320,17 @@ class Guild {
 	}
 	
 	/**
+	 * Returns an array with all members stored in cache
+	 *
+	 * @api
+	 *
+	 * @return GuildMember[]
+	 */
+	public function getMembers(): array {
+		return $this->members;
+	}
+	
+	/**
 	 * Adds a member to the cache
 	 *
 	 * @internal
@@ -511,6 +522,17 @@ class Guild {
 	}
 	
 	/**
+	 * Returns an array with all channels the guild has in cache
+	 *
+	 * @api
+	 *
+	 * @return GuildChannel[]
+	 */
+	public function getChannels(): array {
+		return $this->channels;
+	}
+	
+	/**
 	 * Creates a role on the guild (NOT CACHE)
 	 *
 	 * @api
@@ -562,6 +584,17 @@ class Guild {
 	 */
 	public function hasRole(string $id): bool {
 		return ($this->getRole($id) instanceof GuildRole);
+	}
+	
+	/**
+	 * Returns an array with all roles the guild has in cache
+	 *
+	 * @api
+	 *
+	 * @return array
+	 */
+	public function getRoles(): array {
+		return $this->roles;
 	}
 	
 	/**

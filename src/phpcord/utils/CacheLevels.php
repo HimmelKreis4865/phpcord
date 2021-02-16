@@ -15,7 +15,6 @@ final class CacheLevels {
 	
 	public const CACHE_MINIMUM = 10;
 	
-	
 	public const TYPE_MEMBERS = 1;
 	
 	public const TYPE_CHANNEL = 2;

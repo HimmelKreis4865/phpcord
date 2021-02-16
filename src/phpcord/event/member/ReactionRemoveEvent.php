@@ -1,8 +1,9 @@
 <?php
 
-namespace phpcord\event;
+namespace phpcord\event\member;
 
 use phpcord\guild\Emoji;
+use phpcord\event\Event;
 
 class ReactionRemoveEvent extends Event {
 	/** @var string $channel_id */

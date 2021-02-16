@@ -285,6 +285,12 @@ final class RestAPIHandler {
 		return $this->createRestResponse($request->submit());
 	}
 	
+	public function registerGlobalSlashCommand(string $applicationId, array $data): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId);
+		$request->addHTTPData("content", json_encode($data));
+		return $this->createRestResponse($request->submit());
+	}
+	
 	public function getSlashCommands(string $applicationId): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/commands", HTTPRequest::REQUEST_GET);
 		return $this->createRestResponse($request->submit());

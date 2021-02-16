@@ -42,7 +42,7 @@ class GuildHandler extends BaseIntentHandler {
 				break;
 				
 			case "GUILD_DELETE":
-				(new GuildDeleteEvent($data["guild_id"], !isset($data["unavailable"])))->call();
+				(new GuildDeleteEvent($data["id"], !isset($data["unavailable"])))->call();
 				break;
 		}
 	}
