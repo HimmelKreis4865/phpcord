@@ -3,15 +3,11 @@
 namespace phpcord\http;
 
 use phpcord\Discord;
-use phpcord\exception\HTTPException;
-use phpcord\guild\GuildInvite;
 use phpcord\utils\InstantiableTrait;
 use function array_merge;
 use function is_null;
-use function json_decode;
 use function json_encode;
 use function urlencode;
-use function var_dump;
 
 final class RestAPIHandler {
 	use InstantiableTrait;
@@ -48,7 +44,6 @@ final class RestAPIHandler {
 		$request->setContentType($contentType);
 		$request->addHTTPData("content", $data);
 		//$request->addHTTPData("file", json_encode(json_decode($data, true)["file"]));
-		var_dump($request);
 		return $this->createRestResponse($request->submit());
 	}
 

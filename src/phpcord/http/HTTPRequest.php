@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace phpcord\http;
 
+use phpcord\Discord;
 use phpcord\utils\MainLogger;
+use function array_merge;
+use function count;
 use function file_get_contents;
 use function strpos;
 use function stream_context_create;
 use function urlencode;
-use function var_dump;
 
 class HTTPRequest {
 	
@@ -107,9 +109,11 @@ class HTTPRequest {
 	 * @return string|null|bool
 	 */
 	public function submit() {
-		$context = stream_context_create([
+		$array = [
 			"http" => $this->http
-		]);
+		];
+		if (count(Discord::getInstance()->sslSettings) > 0) $array = array_merge($array, ["ssl" => Discord::getInstance()->sslSettings]);
+		$context = stream_context_create($array);
 		return file_get_contents($this->url, false, $context);
 	}
 }

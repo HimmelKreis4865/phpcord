@@ -26,7 +26,6 @@ use function floor;
 use function microtime;
 use function set_time_limit;
 use function str_replace;
-use function var_dump;
 use const DIRECTORY_SEPARATOR;
 
 final class Discord {
@@ -73,6 +72,8 @@ final class Discord {
 	
 	/** @var int|mixed $cacheLevel */
 	public static $cacheLevel = 0;
+	
+	public $sslSettings = [];
 
 	public function __construct(array $options = []) {
 		self::$lastInstance = $this;
@@ -88,6 +89,7 @@ final class Discord {
 	    $this->intentReceiveManager = new IntentReceiveManager();
 	    if (isset($options["cache_level"])) self::$cacheLevel = $options["cache_level"];
 		MainLogger::logInfo("§aLoading complete, waiting for a login now...");
+		if (isset($this->options["ssl"])) $this->sslSettings = $this->options["ssl"];
     }
 	
 	/**
