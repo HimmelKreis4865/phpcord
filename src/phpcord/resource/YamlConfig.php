@@ -3,7 +3,6 @@
 namespace phpcord\resource;
 
 use function file_put_contents;
-use function var_dump;
 use function yaml_emit;
 
 class YamlConfig extends Config {

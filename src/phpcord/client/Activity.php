@@ -2,6 +2,8 @@
 
 namespace phpcord\client;
 
+use InvalidArgumentException;
+use ReflectionClass;
 use function array_merge;
 use function json_encode;
 use function strtolower;
@@ -96,6 +98,7 @@ final class Activity {
 	/**
 	 * Set the bot streaming with a string as game
 	 * Can be anything
+	 *
 	 * @api
 	 *
 	 * @param string $game
@@ -140,8 +143,8 @@ final class Activity {
 	 * @param string $status
 	 */
 	public function setStatus(string $status = self::STATUS_ONLINE) {
-		$ref = new \ReflectionClass($this);
-		if (!$ref->getConstant("STATUS_" . strtoupper($status))) throw new \InvalidArgumentException("Please enter a valid status!");
+		$ref = new ReflectionClass($this);
+		if (!$ref->getConstant("STATUS_" . strtoupper($status))) throw new InvalidArgumentException("Please enter a valid status!");
 		
 		$this->status = strtolower($status);
 	}

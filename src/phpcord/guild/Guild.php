@@ -2,7 +2,6 @@
 
 namespace phpcord\guild;
 
-use phpcord\channel\BaseTextChannel;
 use phpcord\channel\ChannelType;
 use phpcord\channel\embed\ColorUtils;
 use phpcord\channel\TextChannel;
@@ -12,7 +11,6 @@ use phpcord\user\User;
 use phpcord\utils\AuditLogInitializer;
 use phpcord\utils\CacheLevels;
 use phpcord\utils\ChannelInitializer;
-use phpcord\utils\ClientInitializer;
 use phpcord\utils\GuildSettingsInitializer;
 use phpcord\utils\IntUtils;
 use InvalidArgumentException;
@@ -26,7 +24,6 @@ use function json_decode;
 use function strlen;
 use function strval;
 use function substr;
-use function var_dump;
 
 class Guild {
 	/** @var string $name */
@@ -156,7 +153,6 @@ class Guild {
 		$this->premium_subscription_count = $premium_subscription_count;
 		$this->features = $features;
 		$this->welcomeScreen = $welcomeScreen;
-		var_dump($welcomeScreen);
 		$this->getBanList(); // initializing the ban-list
 	}
 

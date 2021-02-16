@@ -2,7 +2,7 @@
 
 namespace phpcord\utils;
 
-use phpcord\Discord;
+use const PHP_INT_MAX;
 
 final class CacheLevels {
 	public const CACHE_ALL = 0;
@@ -37,6 +37,6 @@ final class CacheLevels {
 	 * @return bool
 	 */
 	public static function canCache(int $action): bool {
-		return true;
+		return $action < PHP_INT_MAX;
 	}
 }

@@ -58,5 +58,3 @@ class VoiceChannel extends GuildChannel {
 		return new ChannelType(ChannelType::TYPE_CATEGORY);
 	}
 }
-
-

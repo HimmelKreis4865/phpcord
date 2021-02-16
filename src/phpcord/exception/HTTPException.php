@@ -2,6 +2,8 @@
 
 namespace phpcord\exception;
 
-class HTTPException extends \Exception {
+use Exception;
+
+class HTTPException extends Exception {
 
 }

@@ -8,7 +8,6 @@ use phpcord\channel\DMChannel;
 use phpcord\channel\NewsChannel;
 use phpcord\channel\TextChannel;
 use phpcord\channel\VoiceChannel;
-use phpcord\guild\AuditLog;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildPermissionMemberOverwrite;
 use phpcord\guild\GuildPermissionOverwrite;

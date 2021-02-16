@@ -2,6 +2,7 @@
 
 namespace phpcord\client;
 
+use InvalidArgumentException;
 use phpcord\user\User;
 
 class BotUser extends User {
@@ -64,7 +65,7 @@ class BotUser extends User {
 	 * @param Application|null $application
 	 */
 	public function __construct(string $guild_id, string $id, string $username, string $discriminator, int $public_flags = 0, ?string $avatar = null, int $version = 6, array $userSettings = [], bool $verified = false, bool $mfa_enabled = false, ?string $email = null, ?string $sessionId = null, array $relationShips = [], array $privateChannels = [], array $guilds = [], array $guild_join_requests = [], array $geo_ordered_rtc_regions = [], Application $application = null) {
-		if (!$application instanceof Application) throw new \InvalidArgumentException("Cannot create a bot without valid application!");
+		if (!$application instanceof Application) throw new InvalidArgumentException("Cannot create a bot without valid application!");
 		parent::__construct($guild_id, $id, $username, $discriminator, $public_flags, $avatar);
 		$this->version = $version;
 		$this->userSettings = $userSettings;

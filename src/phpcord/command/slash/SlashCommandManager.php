@@ -16,5 +16,6 @@ final class SlashCommandManager {
 	
 	public function registerCommand(SlashCommand $command) {
 		$command = $command->encode();
+		// todo: implement this correctly
 	}
 }

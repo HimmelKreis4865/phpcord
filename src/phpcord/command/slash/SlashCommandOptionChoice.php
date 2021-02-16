@@ -2,6 +2,7 @@
 
 namespace phpcord\command\slash;
 
+use InvalidArgumentException;
 use function is_int;
 use function is_string;
 
@@ -19,7 +20,7 @@ final class SlashCommandOptionChoice {
 	 * @param string|int $value
 	 */
 	public function __construct(string $name, $value) {
-		if (!is_string($value) and !is_int($value)) throw new \InvalidArgumentException("Cannot use $value as a SlashCommandOptionChoice! Please only use string or int");
+		if (!is_string($value) and !is_int($value)) throw new InvalidArgumentException("Cannot use $value as a SlashCommandOptionChoice! Please only use string or int");
 		$this->name = $name;
 		$this->value = $value;
 	}

@@ -2,6 +2,10 @@
 
 namespace phpcord\intents;
 
+use ReflectionClass;
+use function array_values;
+use function in_array;
+
 class IntentsManager implements IntentList {
 	/**
 	 * Return an Array of all listed intents
@@ -11,7 +15,7 @@ class IntentsManager implements IntentList {
 	 * @return int[]
 	 */
 	public static function getAllIntents(): array {
-		return array_values((new \ReflectionClass(__CLASS__))->getConstants());
+		return array_values((new ReflectionClass(__CLASS__))->getConstants());
 	}
 
 	/**

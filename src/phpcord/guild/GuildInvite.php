@@ -2,7 +2,6 @@
 
 namespace phpcord\guild;
 
-use phpcord\channel\BaseTextChannel;
 use phpcord\Discord;
 use phpcord\user\User;
 

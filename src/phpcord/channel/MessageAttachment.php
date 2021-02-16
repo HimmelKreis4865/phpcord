@@ -2,6 +2,7 @@
 
 namespace phpcord\channel;
 
+use RuntimeException;
 use function file_get_contents;
 use function substr;
 
@@ -31,7 +32,7 @@ class MessageAttachment implements Sendable {
 	public function setFile(string $filename, string $content = null) {
 		if ($content === null) {
 			$content = @file_get_contents($filename);
-			if ($content === null) throw new \RuntimeException("Could not get filecontent for file $filename! Please supply a valid path!");
+			if ($content === null) throw new RuntimeException("Could not get filecontent for file $filename! Please supply a valid path!");
 		}
 		$this->fields["file"] = [
 			"content" => $content,

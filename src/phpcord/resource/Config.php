@@ -7,7 +7,6 @@ use function array_shift;
 use function explode;
 use function file_exists;
 use function fopen;
-use function var_dump;
 
 abstract class Config {
 	/** @var mixed $parsedContent */

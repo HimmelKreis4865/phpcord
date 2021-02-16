@@ -2,6 +2,7 @@
 
 namespace phpcord\guild;
 
+use InvalidArgumentException;
 use phpcord\channel\embed\ColorUtils;
 use phpcord\channel\embed\components\RGB;
 use phpcord\Discord;
@@ -204,7 +205,7 @@ class GuildRole {
 	 */
 	public function addPermission($permission) {
 		if ($permission instanceof Permission) $permission = $permission->toInt();
-		if (!is_numeric($permission)) throw new \InvalidArgumentException("Could not set permission $permission");
+		if (!is_numeric($permission)) throw new InvalidArgumentException("Could not set permission $permission");
 		$this->permissions |= $permission;
 	}
 	/**
@@ -217,7 +218,7 @@ class GuildRole {
 	 */
 	public function removePermission($permission) {
 		if ($permission instanceof Permission) $permission = $permission->toInt();
-		if (!is_numeric($permission)) throw new \InvalidArgumentException("Could not set permission $permission");
+		if (!is_numeric($permission)) throw new InvalidArgumentException("Could not set permission $permission");
 		$this->permissions &= ~$permission;
 	}
 	

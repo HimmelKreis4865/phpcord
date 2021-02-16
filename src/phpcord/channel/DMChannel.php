@@ -2,7 +2,6 @@
 
 namespace phpcord\channel;
 
-use phpcord\guild\GuildChannel;
 use phpcord\user\User;
 
 /**

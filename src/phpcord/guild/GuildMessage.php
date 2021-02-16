@@ -2,6 +2,7 @@
 
 namespace phpcord\guild;
 
+use InvalidArgumentException;
 use phpcord\Discord;
 use phpcord\guild\store\GuildStoredMessage;
 use phpcord\http\RestAPIHandler;
@@ -455,7 +456,7 @@ class GuildMessage {
 	 */
 	public function pin(): bool {
 		if (in_array($this->getType(), [self::TYPE_CALL, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION, self::TYPE_GUILD_MEMBER_JOIN, self::TYPE_CHANNEL_PINNED_MESSAGE, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3, self::TYPE_CHANNEL_FOLLOW_ADD]))
-			throw new \InvalidArgumentException("Could not pin a message of type " . $this->getType());
+			throw new InvalidArgumentException("Could not pin a message of type " . $this->getType());
 		return !RestAPIHandler::getInstance()->pinMessage($this->getChannelId(), $this->getId())->isFailed();
 	}
 	

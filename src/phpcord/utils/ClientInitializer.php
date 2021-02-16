@@ -11,7 +11,6 @@ use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildRole;
 use phpcord\guild\IncompleteGuild;
 use function is_null;
-use function var_dump;
 
 class ClientInitializer {
 	/**

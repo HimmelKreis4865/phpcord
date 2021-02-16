@@ -7,8 +7,6 @@ use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\ArrayUtils;
 use function array_map;
-use function is_numeric;
-use function var_dump;
 
 class GuildMember extends User {
 	/** @var array $roles */

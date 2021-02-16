@@ -5,7 +5,6 @@ namespace phpcord\channel\embed;
 use phpcord\channel\embed\components\RGB;
 use function str_replace;
 use function strtoupper;
-use function var_dump;
 
 final class ColorUtils {
 	/**
@@ -111,7 +110,6 @@ final class ColorUtils {
 	public static function fromRgb(RGB $rgb): ?self {
 		$hex = $rgb->toHex();
 		$val = hexdec(str_replace("#", "", $hex));
-		var_dump($val);
 		if (!is_int($val)) return null;
 		return new self($val);
 	}

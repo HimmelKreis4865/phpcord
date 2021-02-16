@@ -2,14 +2,13 @@
 
 namespace phpcord\channel;
 
-use phpcord\Discord;
+use OutOfBoundsException;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\MessageSentPromise;
 use phpcord\guild\store\GuildStoredMessage;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\MessageInitializer;
 use function json_decode;
-use function var_dump;
 
 abstract class BaseTextChannel extends GuildChannel {
 	/** @var string|null $last_message_id */
@@ -55,7 +54,6 @@ abstract class BaseTextChannel extends GuildChannel {
 	 * @return MessageSentPromise
 	 */
 	public function send($message): MessageSentPromise {
-		var_dump($message);
 		if (is_string($message) or is_numeric($message)) $message = new TextMessage(strval($message));
 		if (!$message instanceof Sendable) return new MessageSentPromise(true);
 		$result = RestAPIHandler::getInstance()->sendMessage($this->id, $message->getFormattedData(), $message->getContentType());
@@ -75,7 +73,7 @@ abstract class BaseTextChannel extends GuildChannel {
 	 * @return array
 	 */
 	public function getMessages(int $limit = 50): array {
-		if ($limit < 1 or $limit > 100) throw new \OutOfBoundsException("You can only get 1-100 messages per call!");
+		if ($limit < 1 or $limit > 100) throw new OutOfBoundsException("You can only get 1-100 messages per call!");
 
 		$response = json_decode(RestAPIHandler::getInstance()->getMessages($this->id, $limit)->getRawData(), true);
 		$messages = [];

@@ -3,9 +3,23 @@
 namespace phpcord\stream;
 
 use phpcord\utils\MainLogger;
-use function file_exists;
 use function fwrite;
-use const STREAM_CRYPTO_METHOD_ANY_CLIENT;
+use function base64_encode;
+use function openssl_random_pseudo_bytes;
+use function stream_socket_client;
+use function stream_context_create;
+use function stream_set_timeout;
+use function stripos;
+use function fread;
+use function ord;
+use function intval;
+use function pack;
+use function chr;
+use function is_int;
+use function get_resource_type;
+use function strtolower;
+use function is_null;
+use function fclose;
 
 class StreamHandler implements WriteableInterface, ReadableInterface {
 	

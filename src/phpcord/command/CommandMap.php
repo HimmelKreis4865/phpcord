@@ -3,7 +3,6 @@
 namespace phpcord\command;
 
 use phpcord\channel\BaseTextChannel;
-use phpcord\guild\GuildMember;
 use phpcord\guild\GuildMessage;
 
 abstract class CommandMap {

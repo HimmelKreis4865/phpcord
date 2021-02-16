@@ -9,7 +9,6 @@ use phpcord\guild\GuildUpdatedMessage;
 use phpcord\guild\store\GuildStoredMessage;
 use function array_merge;
 use function is_null;
-use function var_dump;
 
 class MessageInitializer {
 	/**

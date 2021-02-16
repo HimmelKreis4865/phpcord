@@ -2,8 +2,6 @@
 
 namespace phpcord\channel\embed\components;
 
-use phpcord\channel\embed\ColorUtils;
-
 interface ColorComponent {
     /**
      * Transfers a Component to a HEX Code
@@ -23,5 +21,3 @@ interface ColorComponent {
      */
     public static function isValid($data): bool;
 }
-
-

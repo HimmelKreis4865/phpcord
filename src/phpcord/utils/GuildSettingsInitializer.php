@@ -13,7 +13,6 @@ use phpcord\guild\GuildWelcomeScreenField;
 use phpcord\guild\Webhook;
 use function intval;
 use function is_array;
-use function var_dump;
 
 class GuildSettingsInitializer {
 	/**

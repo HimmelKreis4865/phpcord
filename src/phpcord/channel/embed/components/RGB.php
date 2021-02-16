@@ -2,6 +2,16 @@
 
 namespace phpcord\channel\embed\components;
 
+use InvalidArgumentException;
+use function mt_rand;
+use function count;
+use function is_array;
+use function intval;
+use function array_filter;
+use function is_numeric;
+use function sprintf;
+use function array_shift;
+
 class RGB implements ColorComponent {
 
     public const MIN_VAL = 0;
@@ -55,7 +65,7 @@ class RGB implements ColorComponent {
     public function __construct($red, int $green = 0, int $blue = 0) {
         if (is_array($red)) {
             $rgb = self::fromArray($red);
-            if ($rgb === null) throw new \InvalidArgumentException("Could not parse rgb due to invalid input array!");
+            if ($rgb === null) throw new InvalidArgumentException("Could not parse rgb due to invalid input array!");
             $this->parseRGB($rgb);
             return;
         }
@@ -163,5 +173,3 @@ class RGB implements ColorComponent {
         return (is_array($data) and self::fromArray($data) instanceof static);
     }
 }
-
-

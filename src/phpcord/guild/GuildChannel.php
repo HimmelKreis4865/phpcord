@@ -4,9 +4,6 @@ namespace phpcord\guild;
 
 use phpcord\channel\ChannelType;
 use phpcord\http\RestAPIHandler;
-use function array_filter;
-use function var_dump;
-
 abstract class GuildChannel {
 	/** @var string $name */
 	public $name;

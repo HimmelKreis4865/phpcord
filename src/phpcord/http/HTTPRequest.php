@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace phpcord\http;
 
 use phpcord\Discord;
-use phpcord\utils\MainLogger;
 use function array_merge;
 use function count;
 use function file_get_contents;

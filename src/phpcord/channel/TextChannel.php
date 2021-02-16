@@ -2,6 +2,8 @@
 
 namespace phpcord\channel;
 
+use OutOfBoundsException;
+use OutOfRangeException;
 use phpcord\guild\FollowWebhook;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildInvite;
@@ -51,7 +53,7 @@ class TextChannel extends BaseTextChannel {
 	 * @param int $messages
 	 */
 	public function bulkDelete(int $messages = 1) {
-		if ($messages < 1 or $messages > 100) throw new \OutOfBoundsException("You can only delete 1-100 messages per call!");
+		if ($messages < 1 or $messages > 100) throw new OutOfBoundsException("You can only delete 1-100 messages per call!");
 
 		if ($messages === 1) {
 			$this->deleteMessage($this->last_message_id);
@@ -158,7 +160,7 @@ class TextChannel extends BaseTextChannel {
 	 */
 	public function createInvite($duration = 0, int $max_uses = 0, bool $temporary_membership = false, bool $unique = false, ?string $target_user = null): ?GuildInvite {
 		if (is_string($duration)) $duration = DateUtils::convertTimeToSeconds($duration);
-		if (!IntUtils::isInRange($max_uses, 0, 100)) throw new \OutOfRangeException("Max uses must be in range between 0 and 100!");
+		if (!IntUtils::isInRange($max_uses, 0, 100)) throw new OutOfRangeException("Max uses must be in range between 0 and 100!");
 		$result = RestAPIHandler::getInstance()->createInvite($this->getId(), $duration, $max_uses, $temporary_membership, $unique, $target_user);
 		if ($result->isFailed() or strlen($result->getRawData()) === 0) return null;
 		return GuildSettingsInitializer::createInvitation(json_decode($result->getRawData(), true));

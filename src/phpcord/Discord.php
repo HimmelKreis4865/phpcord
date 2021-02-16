@@ -2,6 +2,7 @@
 
 namespace phpcord;
 
+use BadMethodCallException;
 use phpcord\command\CommandMap;
 use phpcord\command\SimpleCommandMap;
 use phpcord\connection\ConnectionHandler;
@@ -28,7 +29,6 @@ use function floor;
 use function microtime;
 use function set_time_limit;
 use function str_replace;
-use function var_dump;
 use const DIRECTORY_SEPARATOR;
 
 final class Discord {
@@ -143,7 +143,7 @@ final class Discord {
 		MainLogger::logInfo("Logging in...");
 		if ($this->loggedIn) throw new ClientException("Could not connect to an already connected client!");
 
-		if (is_null($token) and !isset($this->options["token"])) throw new \BadMethodCallException("Couldn't login to Discord since there is no token specified");
+		if (is_null($token) and !isset($this->options["token"])) throw new BadMethodCallException("Couldn't login to Discord since there is no token specified");
 
 		$token = $token ?? $this->options["token"];
 
@@ -210,8 +210,6 @@ final class Discord {
 	 * @param string $message
 	 * @param ConvertManager $manager
 	 * @param StreamHandler $stream
-	 *
-	 * @throws exception\EventException
 	 */
 	public function handle(string $message, ConvertManager &$manager, StreamHandler $stream) {
 		$this->registerAutoload();

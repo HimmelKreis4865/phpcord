@@ -10,8 +10,6 @@ use phpcord\intents\handlers\MemberHandler;
 use phpcord\intents\handlers\MessageHandler;
 use phpcord\intents\handlers\ReactionHandler;
 use phpcord\Discord;
-use function var_dump;
-
 class IntentReceiveManager {
 	/** @var bool $initialized */
 	private $initialized = false;

@@ -2,6 +2,8 @@
 
 namespace phpcord\exception;
 
-class WebSocketException extends \Exception {
+use Exception;
+
+class WebSocketException extends Exception {
 
 }

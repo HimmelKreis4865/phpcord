@@ -3,11 +3,8 @@
 namespace phpcord\event\message;
 
 use phpcord\channel\BaseTextChannel;
-use phpcord\Discord;
 use phpcord\event\Event;
-use phpcord\guild\Guild;
 use phpcord\guild\GuildMessage;
-use phpcord\guild\GuildChannel;
 
 class MessageEvent extends Event {
 	/** @var GuildMessage $message */

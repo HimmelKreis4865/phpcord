@@ -6,6 +6,7 @@ use phpcord\connection\ConnectOptions;
 use phpcord\connection\ConvertManager;
 use phpcord\Discord;
 use phpcord\utils\MainLogger;
+use Throwable;
 use function stream_context_create;
 use function var_dump;
 
@@ -53,7 +54,7 @@ class StreamLoop {
 			if ($handler->isExpired()) return;
 			try {
 				$result = $handler->read();
-			} catch (\Throwable $exception) {
+			} catch (Throwable $exception) {
 				var_dump("ERROR: " . $exception->getMessage());
 				return;
 			}

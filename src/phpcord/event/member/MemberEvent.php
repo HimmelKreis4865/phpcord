@@ -33,5 +33,3 @@ class MemberEvent extends Event {
 		return $this->getMember()->guild_id;
 	}
 }
-
-

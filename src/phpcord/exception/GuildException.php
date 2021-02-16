@@ -2,6 +2,8 @@
 
 namespace phpcord\exception;
 
-class GuildException extends \LogicException {
+use LogicException;
+
+class GuildException extends LogicException {
 
 }
