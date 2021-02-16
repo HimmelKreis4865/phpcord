@@ -37,6 +37,6 @@ final class CacheLevels {
 	 * @return bool
 	 */
 	public static function canCache(int $action): bool {
-		return $action < PHP_INT_MAX;
+		return $action !== PHP_INT_MAX;
 	}
 }

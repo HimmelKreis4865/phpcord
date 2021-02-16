@@ -19,16 +19,21 @@ class MessageSentPromise {
 
 	/** @var bool $failed */
 	public $failed;
+	
+	/** @var GuildMessage|null $message */
+	protected $message;
 
 	/**
 	 * MessageSentPromise constructor.
 	 *
 	 * @param bool $failed
+	 * @param GuildMessage|null $message
 	 * @param string|null $guildId
 	 * @param string|null $channelId
 	 */
-	public function __construct(bool $failed, string $guildId = null, string $channelId = null) {
+	public function __construct(bool $failed, GuildMessage $message = null, string $guildId = null, string $channelId = null) {
 		$this->channelId = $channelId;
+		$this->message = $message;
 		$this->guildId = $guildId;
 		$this->failed = $failed;
 	}
@@ -73,6 +78,7 @@ class MessageSentPromise {
 	 * @return GuildMessage|null
 	 */
 	public function getMessage(): ?GuildMessage {
-		return Discord::getInstance()->getClient()->getGuild($this->guildId)->getChannel($this->channelId)->getMessage($this->id);
+		if ($this->isFailed()) return null;
+		return $this->message;
 	}
 }

@@ -58,9 +58,8 @@ abstract class BaseTextChannel extends GuildChannel {
 		if (!$message instanceof Sendable) return new MessageSentPromise(true);
 		$result = RestAPIHandler::getInstance()->sendMessage($this->id, $message->getFormattedData(), $message->getContentType());
 		if (!$result or $result->isFailed()) return new MessageSentPromise(true);
-		if (!json_decode($result->getRawData(), true)) return new MessageSentPromise(true);
-
-		return new MessageSentPromise(false, $this->getGuildId(), $this->getId());
+		if (!($result = json_decode($result->getRawData(), true))) return new MessageSentPromise(true);
+		return new MessageSentPromise(false, MessageInitializer::fromStore($this->getGuildId(), $result), $this->getGuildId(), $this->getId());
 	}
 	
 	/**

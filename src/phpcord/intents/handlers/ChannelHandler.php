@@ -8,6 +8,7 @@ use phpcord\event\channel\ChannelDeleteEvent;
 use phpcord\event\channel\ChannelPinsUpdateEvent;
 use phpcord\event\channel\ChannelUpdateEvent;
 use phpcord\utils\ChannelInitializer;
+use function var_dump;
 
 class ChannelHandler extends BaseIntentHandler {
 	public function getIntents(): array {
@@ -18,20 +19,21 @@ class ChannelHandler extends BaseIntentHandler {
 		switch ($intent) {
 			case "CHANNEL_CREATE":
 				$channel = ChannelInitializer::createChannel($data, $data["guild_id"]);
-				(new ChannelCreateEvent($channel))->call();
+				var_dump("adding channel to guild");
 				$discord->client->getGuild($channel->guild_id)->addChannel($channel);
+				(new ChannelCreateEvent($channel))->call();
 				break;
 
 			case "CHANNEL_UPDATE":
 				$channel = ChannelInitializer::createChannel($data, $data["guild_id"]);
-				(new ChannelUpdateEvent($channel))->call();
 				$discord->client->getGuild($channel->guild_id)->updateChannel($channel);
+				(new ChannelUpdateEvent($channel))->call();
 				break;
 
 			case "CHANNEL_DELETE":
 				$channel = ChannelInitializer::createChannel($data, $data["guild_id"]);
-				(new ChannelDeleteEvent($channel))->call();
 				$discord->client->getGuild($channel->guild_id)->removeChannel($channel);
+				(new ChannelDeleteEvent($channel))->call();
 				break;
 
 			case "CHANNEL_PINS_UPDATE":
