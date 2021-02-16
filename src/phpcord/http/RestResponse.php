@@ -2,12 +2,6 @@
 
 namespace phpcord\http;
 
-use function explode;
-use function is_null;
-use function is_numeric;
-use function str_replace;
-use function var_dump;
-
 class RestResponse {
 	/** @var mixed $raw_data */
 	protected $raw_data;
@@ -43,5 +37,3 @@ class RestResponse {
 		return $this->raw_data;
 	}
 }
-
-

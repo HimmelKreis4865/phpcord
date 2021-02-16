@@ -6,6 +6,7 @@ use phpcord\connection\ConnectOptions;
 use phpcord\connection\ConvertManager;
 use phpcord\Discord;
 use phpcord\utils\MainLogger;
+use function stream_context_create;
 use function var_dump;
 
 class StreamLoop {
@@ -45,7 +46,8 @@ class StreamLoop {
 	public function run() {
 		$handler = $this->handler;
 
-		$handler->connect("gateway.discord.gg", 443);
+		$context = ((count(Discord::getInstance()->sslSettings) > 0) ? stream_context_create(["ssl" => Discord::getInstance()->sslSettings]) : null);
+		$handler->connect("gateway.discord.gg", 443, [], 1, true, $context);
 
 		while (true) {
 			if ($handler->isExpired()) return;
