@@ -5,7 +5,7 @@ namespace phpcord\intents\handlers;
 use phpcord\Discord;
 use phpcord\event\member\ReactionAddEvent;
 use phpcord\guild\Emoji;
-use phpcord\event\ReactionRemoveEvent;
+use phpcord\event\member\ReactionRemoveEvent;
 use phpcord\utils\MemberInitializer;
 
 class ReactionHandler extends BaseIntentHandler {
