@@ -11,6 +11,7 @@ use phpcord\connection\ConvertManager;
 use phpcord\event\client\ClientReadyEvent;
 use phpcord\event\Event;
 use phpcord\event\EventListener;
+use phpcord\event\guild\GuildCreateEvent;
 use phpcord\exception\ClientException;
 use phpcord\guild\MessageSentPromise;
 use phpcord\http\RestAPIHandler;
@@ -225,14 +226,12 @@ final class Discord {
 			case 0:
 				if ($message["t"] === "GUILD_CREATE") {
 					$client = $this->client ?? new Client();
-					new ClientInitializer($client, $message["d"]);
-					$event = new ClientReadyEvent($client);
-					$event->call();
-					if ($event->isCancelled()) return;
+					$guildId = ClientInitializer::create($client, $message["d"]);
 					$this->client = $client;
-					
+					(new GuildCreateEvent($client->getGuild($guildId)))->call();
 				} else if ($message["t"] === "READY") {
 					$this->client->user = ClientInitializer::createBotUser($message["d"]);
+					(new ClientReadyEvent($this->client))->call();
 				}
 				$this->intentReceiveManager->executeIntent($this, $message["t"], $message["d"]);
 				break;

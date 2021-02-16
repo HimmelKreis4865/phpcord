@@ -14,5 +14,3 @@ class NewsChannel extends TextChannel {
 		return new ChannelType(ChannelType::TYPE_TEXT);
 	}
 }
-
-

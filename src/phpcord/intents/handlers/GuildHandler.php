@@ -3,16 +3,19 @@
 namespace phpcord\intents\handlers;
 
 use phpcord\Discord;
+use phpcord\event\guild\GuildDeleteEvent;
+use phpcord\event\guild\GuildUpdateEvent;
 use phpcord\event\user\UserBanEvent;
 use phpcord\event\user\UserUnbanEvent;
 use phpcord\guild\GuildBanEntry;
+use phpcord\utils\ClientInitializer;
 use phpcord\utils\MemberInitializer;
 use function var_dump;
 
 class GuildHandler extends BaseIntentHandler {
 
 	public function getIntents(): array {
-		return ["GUILD_BAN_ADD", "GUILD_BAN_REMOVE"];
+		return ["GUILD_BAN_ADD", "GUILD_BAN_REMOVE", "GUILD_DELETE", "GUILD_UPDATE"];
 	}
 
 	public function handle(Discord $discord, string $intent, array $data) {
@@ -29,8 +32,18 @@ class GuildHandler extends BaseIntentHandler {
 				(new UserUnbanEvent($user))->call();
 				$discord->getClient()->getGuild($user->getGuildId())->getBanList()->removeBan($user->getId());
 				break;
+				
+			case "GUILD_UPDATE":
+				$client = clone Discord::getInstance()->getClient();
+				$guildId = ClientInitializer::create($client, $data);
+				Discord::getInstance()->client = $client;
+				
+				(new GuildUpdateEvent($client->getGuild($guildId)))->call();
+				break;
+				
+			case "GUILD_DELETE":
+				(new GuildDeleteEvent($data["guild_id"], !isset($data["unavailable"])))->call();
+				break;
 		}
 	}
 }
-
-

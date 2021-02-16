@@ -64,4 +64,15 @@ class MessageSentPromise {
 	public function isFailed(): bool {
 		return $this->failed;
 	}
+	
+	/**
+	 * Tries to fetch the message the promise belongs to
+	 *
+	 * @api
+	 *
+	 * @return GuildMessage|null
+	 */
+	public function getMessage(): ?GuildMessage {
+		return Discord::getInstance()->getClient()->getGuild($this->guildId)->getChannel($this->channelId)->getMessage($this->id);
+	}
 }

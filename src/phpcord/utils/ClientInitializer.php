@@ -23,8 +23,10 @@ class ClientInitializer {
 	 *
 	 * @param Client $client
 	 * @param array $data
+	 *
+	 * @return string the guild id
 	 */
-	public function __construct(Client &$client, array $data) {
+	public static function create(Client &$client, array $data): string {
 		$roles = [];
 		$members = [];
 		$channels = [];
@@ -59,6 +61,7 @@ class ClientInitializer {
 			intval($data["max_members"]), $data["vanity_url_code"], $data["system_channel_id"],
 			$data["public_updates_channel_id"], intval($data["premium_subscription_count"], $screen)
 		);
+		return $guild_id;
 	}
 	
 	/**
