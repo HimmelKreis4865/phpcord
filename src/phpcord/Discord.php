@@ -22,10 +22,12 @@ use phpcord\utils\PermissionIds;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
+use function file_exists;
 use function floor;
 use function microtime;
 use function set_time_limit;
 use function str_replace;
+use function var_dump;
 use const DIRECTORY_SEPARATOR;
 
 final class Discord {
@@ -196,7 +198,8 @@ final class Discord {
 	 */
 	public function registerAutoload() {
 		spl_autoload_register(function($class) {
-			if (!class_exists($class)) require_once str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
+			$file = __DIR__ . DIRECTORY_SEPARATOR . str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
+			if (!class_exists($class) and file_exists($file)) require_once $file;
 		});
 	}
 	
