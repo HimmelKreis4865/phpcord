@@ -149,5 +149,3 @@ class SimpleCommandMap extends CommandMap {
 		return true;
 	}
 }
-
-

@@ -22,7 +22,7 @@ use function is_string;
 use function json_decode;
 use function strlen;
 
-class TextChannel extends BaseTextChannel {
+class TextChannel extends ExtendedTextChannel {
 	/** @var int $rate_limit_per_user */
 	public $rate_limit_per_user = 0;
 	

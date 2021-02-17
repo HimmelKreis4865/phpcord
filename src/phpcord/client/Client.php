@@ -2,13 +2,18 @@
 
 namespace phpcord\client;
 
+use InvalidArgumentException;
+use phpcord\channel\DMChannel;
 use phpcord\Discord;
 use phpcord\guild\Guild;
 use phpcord\guild\GuildInvite;
 use phpcord\http\RestAPIHandler;
+use phpcord\user\User;
 use phpcord\utils\GuildSettingsInitializer;
 use function array_rand;
+use function get_class;
 use function is_array;
+use function is_string;
 use function json_decode;
 
 class Client {
@@ -20,6 +25,9 @@ class Client {
 	
 	/** @var BotUser|null $user */
 	public $user;
+	
+	/** @var DMChannel[] $dms */
+	public $dms = [];
 
 	/**
 	 * Client constructor.
@@ -117,5 +125,58 @@ class Client {
 		$activity = $activity->encode();
 		
 		Discord::getInstance()->toSend[] = $activity;
+	}
+	
+	/**
+	 * Adds a DM channel to the cache
+	 *
+	 * @internal
+	 *
+	 * @param DMChannel $channel
+	 */
+	public function addDMChannel(DMChannel $channel) {
+		$this->dms[$channel->getId()] = $channel;
+	}
+	
+	/**
+	 * Returns a DM channel by ID
+	 *
+	 * @api
+	 *
+	 * @param int $id
+	 *
+	 * @return DMChannel|null
+	 */
+	public function getDMChannel(int $id): ?DMChannel {
+		return @$this->dms[$id];
+	}
+	
+	/**
+	 * Returns an array with all dms a user is involved
+	 *
+	 * @param User|string $user
+	 *
+	 * @return array
+	 */
+	public function getDMsWithUser($user): array {
+		if ($user instanceof User) $user = $user->getId();
+		if (!is_string($user)) throw new InvalidArgumentException("Expected value of type string or User, not " . get_class($user));
+		return array_filter($this->dms, function(DMChannel $channel) use ($user) {
+			foreach ($channel->getRecipients() as $recipient) {
+				if ($recipient->getId() === $user) return true;
+			}
+			return false;
+		});
+	}
+	
+	/**
+	 * Returns an arry with all dm channels
+	 *
+	 * @api
+	 *
+	 * @return DMChannel[]
+	 */
+	public function getDMs(): array {
+		return $this->dms;
 	}
 }

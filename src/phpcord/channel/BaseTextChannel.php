@@ -11,17 +11,9 @@ use phpcord\utils\MessageInitializer;
 use function json_decode;
 
 abstract class BaseTextChannel extends GuildChannel {
+	
 	/** @var string|null $last_message_id */
 	public $last_message_id = null;
-
-	/** @var string|null $topic */
-	public $topic = null;
-
-	/** @var string|null $parent_id */
-	public $parent_id = null;
-
-	/** @var bool $nsfw */
-	public $nsfw;
 	
 	/**
 	 * BaseTextChannel constructor.
@@ -31,17 +23,35 @@ abstract class BaseTextChannel extends GuildChannel {
 	 * @param string $name
 	 * @param int $position
 	 * @param array $permissions
-	 * @param bool $nsfw
 	 * @param string|null $last_message_id
-	 * @param string|null $topic
-	 * @param string|null $parent_id
 	 */
-	public function __construct(string $guild_id, string $id, string $name, int $position = 0, array $permissions = [], bool $nsfw = false, ?string $last_message_id = null, ?string $topic = null, ?string $parent_id = null) {
+	public function __construct(string $guild_id, string $id, string $name, int $position = 0, array $permissions = [], ?string $last_message_id = null) {
 		parent::__construct($guild_id, $id, $name, $position, $permissions);
-		$this->nsfw = $nsfw;
 		$this->last_message_id = $last_message_id;
-		$this->topic = $topic;
-		$this->parent_id = $parent_id;
+	}
+	
+	/**
+	 * Returns the id of the channel
+	 *
+	 * @warning for dm: not the user id, even tho it's just a dm
+	 *
+	 * @api
+	 *
+	 * @return string
+	 */
+	public function getId(): string {
+		return $this->id;
+	}
+	
+	/**
+	 * Returns the last message id of the channel (when fetching, it's not yet updated!)
+	 *
+	 * @api
+	 *
+	 * @return string|null
+	 */
+	public function getLastMessageId(): ?string {
+		return $this->last_message_id;
 	}
 	
 	/**
@@ -59,7 +69,7 @@ abstract class BaseTextChannel extends GuildChannel {
 		$result = RestAPIHandler::getInstance()->sendMessage($this->id, $message->getFormattedData(), $message->getContentType());
 		if (!$result or $result->isFailed()) return new MessageSentPromise(true);
 		if (!($result = json_decode($result->getRawData(), true))) return new MessageSentPromise(true);
-		return new MessageSentPromise(false, MessageInitializer::fromStore($this->getGuildId(), $result), $this->getGuildId(), $this->getId());
+		return new MessageSentPromise(false, MessageInitializer::fromStore($this->getGuildId(), $result), $this->getId());
 	}
 	
 	/**

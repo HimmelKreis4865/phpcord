@@ -151,9 +151,9 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @return GuildMember
+	 * @return null|GuildMember
 	 */
-	public function getMember(): GuildMember {
+	public function getMember(): ?GuildMember {
 		return $this->member;
 	}
 

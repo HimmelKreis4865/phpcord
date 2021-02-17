@@ -2,11 +2,14 @@
 
 namespace phpcord\guild;
 
+use phpcord\channel\DMChannel;
 use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\ArrayUtils;
+use phpcord\utils\ChannelInitializer;
 use function array_map;
+use function json_decode;
 
 class GuildMember extends User {
 	/** @var array $roles */
@@ -61,28 +64,6 @@ class GuildMember extends User {
 		$this->deafened = $deafened;
 		$this->muted = $muted;
 		$this->pending = $pending;
-	}
-	
-	/**
-	 * Returns whether this member is a human or not
-	 *
-	 * @api
-	 *
-	 * @return bool
-	 */
-	public function isHuman(): bool {
-		return !$this->bot;
-	}
-	
-	/**
-	 * Returns whether this is a bot or not, opposite to @see isHuman()
-	 *
-	 * @api
-	 *
-	 * @return bool
-	 */
-	public function isBot(): bool {
-		return $this->bot;
 	}
 	
 	/**
@@ -279,4 +260,9 @@ class GuildMember extends User {
 		return !RestAPIHandler::getInstance()->removeRoleFromUser($this->getGuildId(), $this->getId(), $role)->isFailed();
 	}
 	
+	public function createDM(): ?DMChannel {
+		$val = RestAPIHandler::getInstance()->createDM($this->getId());
+		if ($val->isFailed() or !($result = json_decode($val->getRawData(), true))) return null;
+		return ChannelInitializer::createDMChannel($result);
+	}
 }

@@ -51,12 +51,6 @@ class ChannelInitializer {
 			case ChannelType::TYPE_CATEGORY:
 				$channel = new CategoryChannel($guild_id, $data["id"], $data["name"], $data["position"] ?? 0, $permissions);
 				break;
-
-			case ChannelType::TYPE_DM:
-				$channel = new DMChannel($guild_id, $data["id"], $data["name"], $data["position"] ?? 0, array_map(function ($key) use ($guild_id) {
-					return MemberInitializer::createUser($key, $guild_id);
-				}, $data["recipients"] ?? []));
-
 		}
 		return $channel;
 	}
@@ -72,5 +66,11 @@ class ChannelInitializer {
 	 */
 	public static function createIncomplete(array $data, string $guildId): ?IncompleteChannel {
 		return new IncompleteChannel($guildId, $data["id"], $data["name"], $data["type"] ?? ChannelType::TYPE_TEXT);
+	}
+	
+	public static function createDMChannel(array $data): DMChannel {
+		return new DMChannel($data["id"], array_map(function($key) {
+			return MemberInitializer::createUser($key, "-");
+		}, $data["recipients"] ?? []), @$data["last_message_id"]);
 	}
 }

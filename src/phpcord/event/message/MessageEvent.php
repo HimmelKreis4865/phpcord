@@ -3,22 +3,24 @@
 namespace phpcord\event\message;
 
 use phpcord\channel\BaseTextChannel;
+use phpcord\channel\Channel;
+use phpcord\channel\DMChannel;
 use phpcord\event\Event;
 use phpcord\guild\GuildMessage;
 
 class MessageEvent extends Event {
 	/** @var GuildMessage $message */
 	protected $message;
-	/** @var BaseTextChannel $channel */
+	/** @var BaseTextChannel|DMChannel $channel */
     protected $channel;
 
 	/**
 	 * MessageEvent constructor.
 	 *
 	 * @param GuildMessage $message
-	 * @param BaseTextChannel $channel
+	 * @param BaseTextChannel|DMChannel $channel
 	 */
-	public function __construct(GuildMessage $message, BaseTextChannel $channel) {
+	public function __construct(GuildMessage $message, $channel) {
 		$this->message = $message;
 		$this->channel = $channel;
 	}
@@ -37,12 +39,11 @@ class MessageEvent extends Event {
 	/**
 	 * Returns the channel the message was sent in
 	 *
-	 * @return BaseTextChannel
+	 * @api
+	 *
+	 * @return BaseTextChannel|DMChannel
 	 */
-	public function getChannel(): BaseTextChannel {
+	public function getChannel() {
 		return $this->channel;
 	}
 }
-
-
-

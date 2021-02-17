@@ -43,7 +43,6 @@ final class RestAPIHandler {
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages", HTTPRequest::REQUEST_POST, false);
 		$request->setContentType($contentType);
 		$request->addHTTPData("content", $data);
-		//$request->addHTTPData("file", json_encode(json_decode($data, true)["file"]));
 		return $this->createRestResponse($request->submit());
 	}
 
@@ -293,6 +292,12 @@ final class RestAPIHandler {
 	
 	public function getSlashCommands(string $applicationId): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/commands", HTTPRequest::REQUEST_GET);
+		return $this->createRestResponse($request->submit());
+	}
+	
+	public function createDM(int $id): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "users/@me/channels");
+		$request->addHTTPData("content", json_encode(["recipient_id" => $id]));
 		return $this->createRestResponse($request->submit());
 	}
 }

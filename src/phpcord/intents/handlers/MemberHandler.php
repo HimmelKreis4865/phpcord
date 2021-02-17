@@ -36,11 +36,8 @@ class MemberHandler extends BaseIntentHandler {
 				break;
 
 			case "TYPING_START":
-				$member = MemberInitializer::createMember($data["member"], $data["guild_id"]);
-				(new MemberTypingStartEvent($member))->call();
+				(new MemberTypingStartEvent($data["user_id"], $data["timestamp"], $data["channel_id"]))->call();
 				break;
 		}
 	}
 }
-
-

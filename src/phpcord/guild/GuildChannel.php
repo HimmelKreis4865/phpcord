@@ -2,14 +2,12 @@
 
 namespace phpcord\guild;
 
-use phpcord\channel\ChannelType;
+use phpcord\channel\Channel;
 use phpcord\http\RestAPIHandler;
-abstract class GuildChannel {
+
+abstract class GuildChannel extends Channel {
 	/** @var string $name */
 	public $name;
-
-	/** @var string $id */
-	public $id;
 
 	/** @var int $position */
 	public $position;
@@ -30,21 +28,13 @@ abstract class GuildChannel {
 	 * @param array $permissions
 	 */
 	public function __construct(string $guild_id, string $id, string $name, int $position = 0, array $permissions = []) {
-		$this->id = $id;
+		parent::__construct($id);
 		$this->name = $name;
 		$this->position = $position;
 		$this->permissions = $permissions;
 		$this->guild_id = $guild_id;
 	}
 	
-	/**
-	 * Returns the channel type of subclasses
-	 *
-	 * @internal
-	 *
-	 * @return ChannelType
-	 */
-	abstract public function getType(): ChannelType;
 
 	/**
 	 * Returns the ID of the channel

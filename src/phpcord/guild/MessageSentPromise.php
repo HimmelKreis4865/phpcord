@@ -11,9 +11,6 @@ class MessageSentPromise {
 	/** @var string|null $channelId */
 	protected $channelId;
 
-	/** @var string|null $guildId */
-	protected $guildId;
-
 	/** @var null | callable $answerCallable */
 	public $answerCallable = null;
 
@@ -28,13 +25,11 @@ class MessageSentPromise {
 	 *
 	 * @param bool $failed
 	 * @param GuildMessage|null $message
-	 * @param string|null $guildId
 	 * @param string|null $channelId
 	 */
-	public function __construct(bool $failed, GuildMessage $message = null, string $guildId = null, string $channelId = null) {
+	public function __construct(bool $failed, GuildMessage $message = null, string $channelId = null) {
 		$this->channelId = $channelId;
 		$this->message = $message;
-		$this->guildId = $guildId;
 		$this->failed = $failed;
 	}
 
@@ -44,7 +39,7 @@ class MessageSentPromise {
 	 * @api
 	 *
 	 * @param GuildMember|string $member
-	 * @param callable $answerCallable
+	 * @param callable $answerCallable Contains 2 parameters, (BaseTextChannel|DMChannel) $channel and (GuildMessage) $message
 	 */
 	public function setAnswerHandler($member, callable $answerCallable): void {
 		if ($member instanceof GuildMember) $member = $member->getId();

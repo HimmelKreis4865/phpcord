@@ -5,9 +5,9 @@ namespace phpcord\channel;
 use phpcord\user\User;
 
 /**
- * DOES NOT WORK CORRECTLY RIGHT NOW!
- *
  * Class DMChannel
+ *
+ * @warning replying on messages won't work!!!
  *
  * @package phpcord\channel
  */
@@ -15,18 +15,20 @@ class DMChannel extends BaseTextChannel {
 	/** @var User[] */
 	public $recipients = [];
 	
+	/** @var string|null $last_message_id */
+	public $last_message_id;
+	
+	
 	/**
 	 * DMChannel constructor.
 	 *
-	 * @param string $guild_id
 	 * @param string $id
-	 * @param string $name
-	 * @param int $position
 	 * @param array $recipients
 	 * @param string|null $last_message_id
 	 */
-	public function __construct(string $guild_id, string $id, string $name, int $position = 0, array $recipients = [], ?string $last_message_id = null) {
-		parent::__construct($guild_id, $id, $name, $position, [], false, $last_message_id);
+	public function __construct(string $id,array $recipients = [], ?string $last_message_id = null) {
+		parent::__construct("-", $id, $id, 0, [], $last_message_id);
+		$this->last_message_id = $last_message_id;
 		$this->recipients = $recipients;
 	}
 	

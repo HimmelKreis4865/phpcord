@@ -41,8 +41,9 @@ class User {
 	 * @param string $discriminator
 	 * @param int $public_flags
 	 * @param string|null $avatar
+	 * @param bool $bot
 	 */
-	public function __construct(string $guild_id, string $id, string $username, string $discriminator, int $public_flags = 0, ?string $avatar = null) {
+	public function __construct(string $guild_id, string $id, string $username, string $discriminator, int $public_flags = 0, ?string $avatar = null, bool $bot = false) {
 		$this->id = $id;
 		$this->username = $username;
 		$this->tag = $username . "#" . strval($discriminator);
@@ -50,6 +51,7 @@ class User {
 		$this->avatar = $avatar;
 		$this->public_flags = $public_flags;
 		$this->guild_id = $guild_id;
+		$this->bot = $bot;
 	}
 	
 	/**
@@ -180,5 +182,27 @@ class User {
 	 */
 	public function kick(?string $reason = null): bool {
 		return !RestAPIHandler::getInstance()->removeMember($this->getGuildId(), $this->getId(), $reason)->isFailed();
+	}
+	
+	/**
+	 * Returns whether this member is a human or not
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
+	public function isHuman(): bool {
+		return !$this->bot;
+	}
+	
+	/**
+	 * Returns whether this is a bot or not, opposite to @see isHuman()
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
+	public function isBot(): bool {
+		return $this->bot;
 	}
 }

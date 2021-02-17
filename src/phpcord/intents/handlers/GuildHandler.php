@@ -23,7 +23,6 @@ class GuildHandler extends BaseIntentHandler {
 			case "GUILD_BAN_ADD":
 				$user = MemberInitializer::createUser($data["user"], $data["guild_id"]);
 				(new UserBanEvent($user))->call();
-				var_dump($data);
 				$discord->getClient()->getGuild($user->getGuildId())->getBanList()->addBan(new GuildBanEntry($user, ""));
 				break;
 
