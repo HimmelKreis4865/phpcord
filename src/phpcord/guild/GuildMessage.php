@@ -3,10 +3,12 @@
 namespace phpcord\guild;
 
 use InvalidArgumentException;
+use phpcord\channel\embed\MessageEmbed;
 use phpcord\Discord;
 use phpcord\guild\store\GuildStoredMessage;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
+use phpcord\utils\ArrayUtils;
 use phpcord\utils\MemberInitializer;
 use function array_filter;
 use function array_map;
@@ -469,5 +471,19 @@ class GuildMessage {
 	 */
 	public function unpin(): bool {
 		return !RestAPIHandler::getInstance()->unpinMessage($this->getChannelId(), $this->getId())->isFailed();
+	}
+	
+	public function edit(?string $content, ?MessageEmbed $embed = null): bool {
+		// todo: validate message was sent by the application
+		$data = [];
+		if ($content !== null) {
+			$this->content = $content;
+			$data["content"] = $content;
+		}
+		if ($embed !== null) {
+			$data["embed"] = ArrayUtils::filterNullRecursive($embed->data);
+		}
+		
+		return !RestAPIHandler::getInstance()->editMessage($this->getChannelId(), $this->getId(), $data)->isFailed();
 	}
 }

@@ -9,7 +9,7 @@ use phpcord\utils\ArrayUtils;
 class MessageEmbed implements Sendable {
 	
 	/** @var array $data */
-	private $data = [];
+	public $data = [];
 	
 	/**
 	 * Sets the title of the embed

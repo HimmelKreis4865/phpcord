@@ -300,4 +300,10 @@ final class RestAPIHandler {
 		$request->addHTTPData("content", json_encode(["recipient_id" => $id]));
 		return $this->createRestResponse($request->submit());
 	}
+	
+	public function editMessage(string $channelId, string $id, array $data): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages/" . $id, HTTPRequest::REQUEST_PATCH);
+		$request->addHTTPData("content", json_encode($data));
+		return $this->createRestResponse($request->submit());
+	}
 }
