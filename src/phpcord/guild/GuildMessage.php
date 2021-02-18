@@ -473,6 +473,16 @@ class GuildMessage {
 		return !RestAPIHandler::getInstance()->unpinMessage($this->getChannelId(), $this->getId())->isFailed();
 	}
 	
+	/**
+	 * Edits a message, don't edit messages that are not sent by your bot!
+	 *
+	 * @api
+	 *
+	 * @param string|null $content
+	 * @param MessageEmbed|null $embed
+	 *
+	 * @return bool
+	 */
 	public function edit(?string $content, ?MessageEmbed $embed = null): bool {
 		// todo: validate message was sent by the application
 		$data = [];

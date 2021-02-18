@@ -187,6 +187,27 @@ class TextChannel extends ExtendedTextChannel {
 	}
 	
 	/**
+	 * Changes the parent id (=category) of a channel
+	 *
+	 * @api
+	 *
+	 * @param string|null $parent_id
+	 */
+	public function setParentId(?string $parent_id): void {
+		$this->parent_id = $parent_id;
+		$this->update();
+	}
+	
+	/**
+	 * @see setParentId()
+	 *
+	 * @param string|null $parent_id
+	 */
+	public function setCategory(?string $parent_id): void {
+		$this->setParentId($parent_id);
+	}
+	
+	/**
 	 * @see GuildChannel::getModifyData()
 	 *
 	 * @internal
