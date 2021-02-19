@@ -161,12 +161,12 @@ class GuildRole {
 	 * @return bool
 	 */
 	public function hasPermission($permission): bool {
-		$perm = null;
+		$perm = $permission;
 		if (is_string($permission)) {
 			if (!isset(PermissionIds::PERMISSIONS[$permission])) return false;
 			$perm = PermissionIds::PERMISSIONS[$permission];
 		}
-		if (!is_int($perm) or !in_array($perm, array_values(PermissionIds::PERMISSIONS))) return false;
+		if (!is_int($perm) and !in_array($perm, array_values(PermissionIds::PERMISSIONS))) return false;
 		if ($this->hasPermissionInt(ADMINISTRATOR)) return true;
 		return $this->hasPermissionInt($permission);
 	}
