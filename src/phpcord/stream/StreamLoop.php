@@ -47,7 +47,7 @@ class StreamLoop {
 	public function run() {
 		$handler = $this->handler;
 
-		$context = ((count(Discord::getInstance()->sslSettings) > 0) ? stream_context_create(["ssl" => Discord::getInstance()->sslSettings]) : null);
+		$context = ((count(Discord::getInstance()->sslSettings) > 0) ? stream_context_create(["ssl" => array_merge(Discord::getInstance()->sslSettings, [ "SNI_enabled" => true, "peer_name" => "gateway.discord.gg", "SNI_server_name" => "gateway.discord.gg", "CN_match" => "gateway.discord.gg"])]) : null);
 		$handler->connect("gateway.discord.gg", 443, [], 1, true, $context);
 
 		while (true) {
