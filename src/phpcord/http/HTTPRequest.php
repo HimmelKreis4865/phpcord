@@ -113,8 +113,6 @@ class HTTPRequest {
 		];
 		if (count(Discord::getInstance()->sslSettings) > 0) $array = array_merge($array, ["ssl" => Discord::getInstance()->sslSettings]);
 		$context = stream_context_create($array);
-		return file_get_contents($this->url, false, $context);
+		return @file_get_contents($this->url, false, $context);
 	}
 }
-
-

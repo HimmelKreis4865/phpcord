@@ -3,6 +3,11 @@
 namespace phpcord\utils;
 
 use phpcord\Discord;
+use function array_keys;
+use function array_merge;
+use function array_values;
+use function str_replace;
+use const PHP_EOL;
 
 class MainLogger {
 	/** @var string[] includes all available terminal colors */
@@ -53,7 +58,7 @@ class MainLogger {
 	 * @param string $info
 	 */
 	public static function logInfo(string $info) {
-		self::log(self::TERMINAL_COLORS["RESET"] . "[INFO]: " . $info);
+		self::log("§r[INFO]: " . $info);
 	}
 	/**
 	 * Logs an info to the terminal
@@ -63,7 +68,7 @@ class MainLogger {
 	 * @param string $warning
 	 */
 	public static function logWarning(string $warning) {
-		self::log(self::TERMINAL_COLORS["YELLOW"] . "[WARNING]: " . $warning);
+		self::log("§e[WARNING]: " . $warning);
 	}
 	
 	/**
@@ -74,7 +79,7 @@ class MainLogger {
 	 * @param string $error
 	 */
 	public static function logError(string $error) {
-		self::log(self::TERMINAL_COLORS["DARK_RED"] . "[ERROR]: " . $error);
+		self::log("§4[ERROR]: " . $error);
 	}
 	
 	/**
@@ -85,7 +90,7 @@ class MainLogger {
 	 * @param string $emergency
 	 */
 	public static function logEmergency(string $emergency) {
-		self::log(self::TERMINAL_COLORS["DARK_RED"] . "[EMERGENCY]: " . $emergency);
+		self::log("§5[EMERGENCY]: " . $emergency);
 	}
 	
 	/**
@@ -96,7 +101,7 @@ class MainLogger {
 	 * @param string $notice
 	 */
 	public static function logNotice(string $notice) {
-		self::log(self::TERMINAL_COLORS["LIGHT_BLUE"] . "[NOTICE]: " . $notice);
+		self::log("§b[NOTICE]: " . $notice);
 	}
 	
 	/**
@@ -107,7 +112,7 @@ class MainLogger {
 	 * @param string $debug
 	 */
 	public static function logDebug(string $debug) {
-		if (Discord::$debugMode) self::log(self::TERMINAL_COLORS["LIGHT_GRAY"] . "[DEBUG]: " . $debug);
+		if (Discord::$debugMode) self::log("§7[DEBUG]: " . $debug);
 	}
 	
 	/**
@@ -118,7 +123,10 @@ class MainLogger {
 	 * @param string $message
 	 */
 	public static function log(string $message) {
-		echo self::dateFormat() . " " . self::convertColored($message) . self::TERMINAL_COLORS["RESET"] . PHP_EOL;
+		$message = self::dateFormat() . " " . $message;
+		LogStore::addMessage(self::removeColors($message));
+		
+		echo self::convertColored($message) . self::TERMINAL_COLORS["RESET"] . PHP_EOL;
 	}
 	
 	/**
@@ -129,7 +137,7 @@ class MainLogger {
 	 * @return string
 	 */
 	private static function dateFormat(): string {
-		return self::TERMINAL_COLORS["TURQUOISE"] . "[" . date("H:i:s.") . self::getMilliseconds() . "]";
+		return "§6[" . date("H:i:s.") . self::getMilliseconds() . "]";
 	}
 	
 	/**
@@ -161,5 +169,18 @@ class MainLogger {
 			$message = str_replace($key, $color, $message);
 		}
 		return $message;
+	}
+	
+	/**
+	 * Removes all colors of a string
+	 *
+	 * @api
+	 *
+	 * @param string $message
+	 *
+	 * @return string
+	 */
+	public static function removeColors(string $message): string {
+		return str_replace(array_merge(array_keys(self::COLOR_UNITS), array_values(self::TERMINAL_COLORS)), "", $message);
 	}
 }

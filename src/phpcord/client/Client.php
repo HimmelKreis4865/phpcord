@@ -21,7 +21,7 @@ class Client {
 	public $guilds;
 	
 	/** @var int $ping */
-	public $ping;
+	public $ping = -1;
 	
 	/** @var BotUser|null $user */
 	public $user;

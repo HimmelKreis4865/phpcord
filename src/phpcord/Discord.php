@@ -9,27 +9,30 @@ use phpcord\connection\ConnectionHandler;
 use phpcord\client\Client;
 use phpcord\connection\ConnectOptions;
 use phpcord\connection\ConvertManager;
-use phpcord\event\client\ClientReadyEvent;
 use phpcord\event\Event;
 use phpcord\event\EventListener;
-use phpcord\event\guild\GuildCreateEvent;
 use phpcord\exception\ClientException;
 use phpcord\guild\MessageSentPromise;
 use phpcord\http\RestAPIHandler;
 use phpcord\intents\IntentReceiveManager;
 use phpcord\stream\StreamHandler;
-use phpcord\utils\ClientInitializer;
+use phpcord\utils\LogStore;
 use phpcord\utils\MainLogger;
 use phpcord\utils\PermissionIds;
 use InvalidArgumentException;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
+use function date;
 use function file_exists;
 use function floor;
 use function microtime;
+use function register_shutdown_function;
 use function set_time_limit;
 use function str_replace;
+use function strlen;
 use const DIRECTORY_SEPARATOR;
+use const PHP_EOL;
 
 final class Discord {
 	/** @var int the version that is used for the gateway and restapi */
@@ -39,7 +42,7 @@ final class Discord {
 	public $client;
 
 	/** @var array $options */
-	private $options;
+	public $options;
 
 	/** @var bool $debugMode */
 	public static $debugMode = false;
@@ -53,9 +56,6 @@ final class Discord {
 	/** @var MessageSentPromise[] $answerHandlers */
 	public $answerHandlers = [];
 
-	/** @var string $basedir */
-	protected $basedir;
-	
 	/** @var self|null $lastInstance */
 	public static $lastInstance;
 
@@ -80,11 +80,16 @@ final class Discord {
 
 	public function __construct(array $options = []) {
 		self::$lastInstance = $this;
-		//$this->setErrorHandler();
 		$this->registerAutoload();
+		$this->registerErrorHandler();
+		$this->registerShutdownHandler();
+		$this->options = $options;
+		
+		$dir = __DIR__;
+		LogStore::setLogFile(($dir[(strlen($dir) - 1)] === DIRECTORY_SEPARATOR ? $dir : $dir . DIRECTORY_SEPARATOR) . "save.log");
+		LogStore::addMessage("\n\n" . "[STARTING PHPCORD AT " . date("d.m.Y H:i:s") . "]\n");
 		$this->client = new Client();
 		MainLogger::logInfo("Starting discord application...");
-		$this->options = $options;
 		PermissionIds::initDefinitions();
 		if (isset($options["debugMode"]) and is_bool($options["debugMode"])) self::$debugMode = $options["debugMode"];
 		MainLogger::logInfo("Loading intent receive manager...");
@@ -150,6 +155,7 @@ final class Discord {
 		$this->loggedIn = true;
 
 		$this->intentReceiveManager->init();
+		
 		MainLogger::logInfo("Authenticating REST API...");
 		RestAPIHandler::getInstance()->setAuth($token);
 		$connectionHandler = new ConnectionHandler();
@@ -164,7 +170,7 @@ final class Discord {
 	 *
 	 * @param string|EventListener $eventListener
 	 *
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
 	public function registerEvents($eventListener) {
 		if (is_string($eventListener)) $eventListener = new $eventListener();
@@ -197,10 +203,21 @@ final class Discord {
 	 *
 	 * @internal
 	 */
-	public function registerAutoload() {
+	protected function registerAutoload() {
 		spl_autoload_register(function($class) {
 			$file = __DIR__ . DIRECTORY_SEPARATOR . str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
 			if (!class_exists($class) and file_exists($file)) require_once $file;
+		});
+	}
+	
+	protected function registerErrorHandler() {
+		// todo: implement this
+	}
+	
+	protected function registerShutdownHandler() {
+		register_shutdown_function(function() {
+			echo PHP_EOL . PHP_EOL . "Shutdown :(" . PHP_EOL;
+			LogStore::saveLog();
 		});
 	}
 	
@@ -222,15 +239,6 @@ final class Discord {
 				break;
 
 			case 0:
-				if ($message["t"] === "GUILD_CREATE") {
-					$client = $this->client ?? new Client();
-					$guildId = ClientInitializer::create($client, $message["d"]);
-					$this->client = $client;
-					(new GuildCreateEvent($client->getGuild($guildId)))->call();
-				} else if ($message["t"] === "READY") {
-					$this->client->user = ClientInitializer::createBotUser($message["d"]);
-					(new ClientReadyEvent($this->client))->call();
-				}
 				$this->intentReceiveManager->executeIntent($this, $message["t"], $message["d"]);
 				break;
 

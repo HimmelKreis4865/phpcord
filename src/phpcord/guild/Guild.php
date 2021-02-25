@@ -395,7 +395,10 @@ class Guild {
 	 */
 	public function getBanList(): ?GuildBanList {
 		$banList = $this->banList;
-		if (!$banList instanceof GuildBanList) $banList = GuildSettingsInitializer::createBanList($this->id, json_decode(RestAPIHandler::getInstance()->getBans($this->getId())->getRawData(), true) ?? []);
+		
+		if (($result = RestAPIHandler::getInstance()->getBans($this->getId()))->isFailed()) return null;
+		
+		if (!$banList instanceof GuildBanList) $banList = GuildSettingsInitializer::createBanList($this->id, json_decode($result->getRawData(), true) ?? []);
 		
 		if (CacheLevels::canCache(CacheLevels::TYPE_BAN_LIST)) $this->banList = $banList;
 		
