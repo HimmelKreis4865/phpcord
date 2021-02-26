@@ -5,6 +5,9 @@ namespace phpcord\intents;
 use ReflectionClass;
 use function array_values;
 use function in_array;
+use function array_filter;
+use function array_map;
+use function is_numeric;
 
 class IntentsManager implements IntentList {
 	/**
@@ -27,7 +30,11 @@ class IntentsManager implements IntentList {
 	 */
 	public static function allIntentsSum(): int {
 		$sum = 0;
-		foreach (self::getAllIntents() as $intent) {
+		foreach (array_map(function($key) {
+			return intval($key);
+		}, array_filter(self::getAllIntents(), function($key) {
+			return is_numeric($key);
+		})) as $intent) {
 			$sum |= $intent;
 		}
 		return $sum;
