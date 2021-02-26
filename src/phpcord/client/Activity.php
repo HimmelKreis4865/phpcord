@@ -162,5 +162,3 @@ final class Activity {
 		return json_encode($data);
 	}
 }
-
-

@@ -6,6 +6,7 @@ use phpcord\channel\BaseTextChannel;
 use phpcord\guild\GuildMessage;
 
 abstract class CommandMap {
+	
 	/**
 	 * Registers a command to the map if it doesn't already exist
 	 *
@@ -86,4 +87,17 @@ abstract class CommandMap {
 	 * @return bool
 	 */
 	abstract public function executeCommand(BaseTextChannel $channel, GuildMessage $message): bool;
+	
+	/**
+	 * Changes the value of an option
+	 *
+	 * @api
+	 *
+	 * @param string $option
+	 * @param mixed $value
+	 */
+	public function setOption(string $option, $value) {
+		$ref = new \ReflectionClass(__CLASS__);
+		if ($ref->hasProperty($option)) $this->{$option} = $value;
+	}
 }
