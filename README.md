@@ -10,3 +10,6 @@ Check <a href="https://app.gitbook.com/@himmelkreis4865/s/phpcord/">the official
 **When it comes to bugs / problems, please visit <a href="https://app.gitbook.com/@himmelkreis4865/s/phpcord/">the official documentation here</a> before!**
 
 You're always welcome to open <a href="https://github.com/HimmelKreis4865/phpcord/issues/new">Issue</a>
+
+# Credits
+cacert.pem is a copy from <a href="https://curl.se/docs/caextract.html">curl.se</a> - I don't take any responsiblity 
