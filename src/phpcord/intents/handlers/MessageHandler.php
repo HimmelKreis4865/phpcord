@@ -39,9 +39,14 @@ class MessageHandler extends BaseIntentHandler {
 					unset($discord->answerHandlers[$message->channelId . ":" . $message->getMember()->getId()]);
 					return;
 				}
-  				
-  				// calling CommandMap to check for a command
-				$discord->getCommandMap()->executeCommand($channel, $message);
+				
+				// calling CommandMap to check for a command
+  				try {
+					$commandMap = $discord->getCommandMap();
+					$commandMap->executeCommand($channel, $message);
+				} catch (\InvalidArgumentException $exception) {
+				
+				}
 
 				(new MessageSendEvent($message, $channel))->call();
 				break;
