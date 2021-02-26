@@ -27,12 +27,10 @@ use function date;
 use function file_exists;
 use function floor;
 use function microtime;
-use function register_shutdown_function;
 use function set_time_limit;
 use function str_replace;
 use function strlen;
 use const DIRECTORY_SEPARATOR;
-use const PHP_EOL;
 
 final class Discord {
 	/** @var int the version that is used for the gateway and restapi */
@@ -215,10 +213,7 @@ final class Discord {
 	}
 	
 	protected function registerShutdownHandler() {
-		register_shutdown_function(function() {
-			echo PHP_EOL . PHP_EOL . "Shutdown :(" . PHP_EOL;
-			LogStore::saveLog();
-		});
+		// todo: implement this
 	}
 	
 	/**
