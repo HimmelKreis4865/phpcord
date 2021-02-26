@@ -7,12 +7,13 @@ use phpcord\event\member\MemberAddEvent;
 use phpcord\event\member\MemberTypingStartEvent;
 use phpcord\event\member\MemberUpdateEvent;
 use phpcord\event\user\MemberRemoveEvent;
+use phpcord\event\user\PresenceUpdateEvent;
 use phpcord\utils\MemberInitializer;
 
 class MemberHandler extends BaseIntentHandler {
 
 	public function getIntents(): array {
-		return ["GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE", "GUILD_MEMBER_REMOVE", "TYPING_START"];
+		return ["GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE", "GUILD_MEMBER_REMOVE", "TYPING_START", "PRESENCE_UPDATE"];
 	}
 
 	public function handle(Discord $discord, string $intent, array $data) {
@@ -40,6 +41,10 @@ class MemberHandler extends BaseIntentHandler {
 
 			case "TYPING_START":
 				(new MemberTypingStartEvent($data["user_id"], $data["timestamp"], $data["channel_id"]))->call();
+				break;
+			
+			case "PRESENCE_UPDATE":
+				(new PresenceUpdateEvent(@$data["user"]["id"], $data["status"] ?? "", $data["activities"] ?? []))->call();
 				break;
 		}
 	}
