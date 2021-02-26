@@ -21,6 +21,7 @@ class MemberHandler extends BaseIntentHandler {
 				$member = MemberInitializer::createMember($data, $data["guild_id"]);
 				(new MemberAddEvent($member))->call();
 				$discord->client->getGuild($member->getGuildId())->addMember($member);
+				$discord->client->getGuild($member->getGuildId())->member_count++;
 				break;
 
 			case "GUILD_MEMBER_UPDATE":
@@ -33,6 +34,8 @@ class MemberHandler extends BaseIntentHandler {
 				$member = MemberInitializer::createUser($data["user"], $data["guild_id"]);
 				(new MemberRemoveEvent($member))->call();
 				$discord->client->getGuild($member->getGuildId())->removeMember($member);
+				
+				$discord->client->getGuild($member->getGuildId())->member_count--;
 				break;
 
 			case "TYPING_START":
