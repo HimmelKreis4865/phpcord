@@ -104,6 +104,9 @@ class Guild {
 	
 	/** @var GuildWelcomeScreen|null $welcomeScreen */
 	public $welcomeScreen = null;
+	
+	/** @var int $premium_tier */
+	public $premium_tier = 0;
 
 	/**
 	 * Guild constructor.
@@ -132,8 +135,9 @@ class Guild {
 	 * @param int|null $premium_subscription_count
 	 * @param array|null $features
 	 * @param GuildWelcomeScreen|null $welcomeScreen
+	 * @param int $premium_tier
 	 */
-	public function __construct(string $name, string $id, ?string $owner_id, ?string $icon = null, ?string $banner = null, ?string $afk_channel = null, ?string $rules_channel_id = null, array $channels = [], array $members = [], array $roles = [], string $description = null, int $member_count = 10000, string $preferred_locale = "en-US", string $region = "europe", int $default_message_notifications = 0, int $verification_level = 0, int $max_members = 10000, ?string $vanity_url = null, ?string $system_channel_id = null, ?string $public_updates_channel_id = null, ?int $premium_subscription_count = 0, ?array $features = null, ?GuildWelcomeScreen $welcomeScreen = null) {
+	public function __construct(string $name, string $id, ?string $owner_id, ?string $icon = null, ?string $banner = null, ?string $afk_channel = null, ?string $rules_channel_id = null, array $channels = [], array $members = [], array $roles = [], string $description = null, int $member_count = 10000, string $preferred_locale = "en-US", string $region = "europe", int $default_message_notifications = 0, int $verification_level = 0, int $max_members = 10000, ?string $vanity_url = null, ?string $system_channel_id = null, ?string $public_updates_channel_id = null, ?int $premium_subscription_count = 0, ?array $features = null, ?GuildWelcomeScreen $welcomeScreen = null, int $premium_tier = 0) {
 		$this->name = $name;
 		$this->id = $id;
 		$this->owner_id = $owner_id;
@@ -157,6 +161,7 @@ class Guild {
 		$this->premium_subscription_count = $premium_subscription_count;
 		$this->features = $features;
 		$this->welcomeScreen = $welcomeScreen;
+		$this->premium_tier = $premium_tier;
 		$this->getBanList(); // initializing the ban-list
 	}
 
@@ -509,6 +514,39 @@ class Guild {
 		if (is_int($member)) $member = strval($member);
 		if (is_string($member)) return ($member === $this->owner_id);
 		return false;
+	}
+	
+	/**
+	 * Returns the ID of the guild's owner
+	 *
+	 * @api
+	 *
+	 * @return string|null
+	 */
+	public function getOwnerId(): ?string {
+		return $this->owner_id;
+	}
+	
+	/**
+	 * Returns the boost level / premium tier of the guild
+	 *
+	 * @api
+	 *
+	 * @return int
+	 */
+	public function getPremiumTier(): int {
+		return $this->premium_tier;
+	}
+	
+	/**
+	 * Returns the number of boosts given to the guild
+	 *
+	 * @api
+	 *
+	 * @return int|null
+	 */
+	public function getPremiumSubscriptionCount(): ?int {
+		return $this->premium_subscription_count;
 	}
 	
 	/**

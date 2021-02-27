@@ -58,7 +58,7 @@ class ClientInitializer {
 			$data["rules_channel_id"], $channels, $members, $roles, $data["description"], intval($data["member_count"]),
 			$data["preferred_locale"], $data["region"], intval($data["default_message_notifications"]), intval($data["verification_level"]),
 			intval($data["max_members"]), $data["vanity_url_code"], $data["system_channel_id"],
-			$data["public_updates_channel_id"], intval($data["premium_subscription_count"], $screen)
+			$data["public_updates_channel_id"], intval($data["premium_subscription_count"]), $data["features"] ?? [], $screen, $data["premium_tier"] ?? 0
 		);
 		return $guild_id;
 	}

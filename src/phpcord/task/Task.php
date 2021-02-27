@@ -23,6 +23,7 @@ abstract class Task {
 	/** @var bool $cancelled */
 	private $cancelled = false;
 	
+	/** @var int $interval */
 	private $interval;
 	
 	/**
@@ -32,7 +33,7 @@ abstract class Task {
 	 * @param bool $repeating
 	 * @param int $interval
 	 */
-	public function __construct(int $delay = 0, bool $repeating = true, int $interval = 0) {
+	public function __construct(int $delay = 0, bool $repeating = false, int $interval = 1) {
 		do {
 			$this->id = mt_rand(PHP_INT_MIN, PHP_INT_MAX);
 		} while (TaskManager::getInstance()->getTask($this->id) instanceof Task);
