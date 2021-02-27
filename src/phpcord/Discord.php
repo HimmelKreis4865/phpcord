@@ -16,6 +16,7 @@ use phpcord\guild\MessageSentPromise;
 use phpcord\http\RestAPIHandler;
 use phpcord\intents\IntentReceiveManager;
 use phpcord\stream\StreamHandler;
+use phpcord\task\TaskManager;
 use phpcord\utils\LogStore;
 use phpcord\utils\MainLogger;
 use phpcord\utils\PermissionIds;
@@ -251,6 +252,8 @@ final class Discord {
 	 * @param StreamHandler $stream
 	 */
 	public function onUpdate(StreamHandler $stream) {
+		TaskManager::getInstance()->onUpdate();
+		
 		foreach ($this->toSend as $key => $item) {
 			unset($this->toSend[$key]);
 			$stream->write($item);

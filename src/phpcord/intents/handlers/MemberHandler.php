@@ -14,7 +14,7 @@ use phpcord\utils\MemberInitializer;
 class MemberHandler extends BaseIntentHandler {
 
 	public function getIntents(): array {
-		return ["GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE", "GUILD_MEMBER_REMOVE", "TYPING_START", "PRESENCE_UPDATE"];
+		return ["GUILD_MEMBER_ADD", "GUILD_MEMBER_UPDATE", "GUILD_MEMBER_REMOVE", "TYPING_START", "PRESENCE_UPDATE", "VOICE_STATE_UPDATE"];
 	}
 
 	public function handle(Discord $discord, string $intent, array $data) {
@@ -52,6 +52,13 @@ class MemberHandler extends BaseIntentHandler {
 			
 			case "PRESENCE_UPDATE":
 				(new PresenceUpdateEvent(@$data["user"]["id"], $data["status"] ?? "", $data["activities"] ?? []))->call();
+				break;
+				
+			case "VOICE_STATE_UPDATE":
+				// todo: Implement this features
+				if (($channel = @$data["channel_id"]) === null) {
+					// voice leave
+				}
 				break;
 		}
 	}
