@@ -21,11 +21,15 @@ use function is_int;
 use function is_null;
 use function is_string;
 use function json_decode;
+use function str_replace;
 use function strlen;
 use function strval;
 use function substr;
 
 class Guild {
+	
+	protected const BASE_ICON_URL = "https://cdn.discordapp.com/icons/%id%/%icon%.png";
+	
 	/** @var string $name */
 	public $name;
 
@@ -422,6 +426,40 @@ class Guild {
 		$result = RestAPIHandler::getInstance()->addBan($this->getId(), $user, $reason, $messageDeleteDays);
 		if ($result) $this->banList->addBan(new GuildBanEntry($this->getMemberById($user), $reason));
 		return $result->isFailed();
+	}
+	
+	/**
+	 * Returns the membercount of the guild (should be updated on adds / removes)
+	 *
+	 * @api
+	 *
+	 * @return int
+	 */
+	public function getMemberCount(): int {
+		return $this->member_count;
+	}
+	
+	/**
+	 * Returns the complete url of the icon or null if default icon is selected
+	 *
+	 * @api
+	 *
+	 * @return string|null
+	 */
+	public function getIconUrl(): ?string {
+		if ($this->getIcon() === null) return null;
+		return str_replace(["%id%", "%icon%"], [$this->getId(), $this->getIcon()], self::BASE_ICON_URL);
+	}
+	
+	/**
+	 * Returns the raw icon hash, @see getIconUrl() for a complete url
+	 *
+	 * @api
+	 *
+	 * @return string|null
+	 */
+	public function getIcon(): ?string {
+		return $this->icon;
 	}
 	
 	/**
