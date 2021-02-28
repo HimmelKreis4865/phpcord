@@ -5,6 +5,7 @@ namespace phpcord\guild;
 use phpcord\channel\ChannelType;
 use phpcord\channel\embed\ColorUtils;
 use phpcord\channel\TextChannel;
+use phpcord\channel\VoiceChannel;
 use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
@@ -17,6 +18,7 @@ use InvalidArgumentException;
 use phpcord\utils\Permission;
 use function array_filter;
 use function array_map;
+use function count;
 use function is_int;
 use function is_null;
 use function is_string;
@@ -25,6 +27,7 @@ use function str_replace;
 use function strlen;
 use function strval;
 use function substr;
+use function var_dump;
 
 class Guild {
 	
@@ -609,6 +612,28 @@ class Guild {
 	 */
 	public function getChannels(): array {
 		return $this->channels;
+	}
+	
+	/**
+	 * Removes a member from voice CACHE!
+	 *
+	 * @internal
+	 *
+	 * @param string $id
+	 *
+	 * @return string|null the id of the channel the user was in
+	 */
+	public function removeMemberFromVoice(string $id): ?string {
+		foreach (array_filter($this->getChannels(), function($channel) {
+			return ($channel instanceof VoiceChannel);
+		}) as $channel) {
+			/** @var VoiceChannel $channel */
+			if (isset($channel->users[$id])) {
+				unset($channel->users[$id]);
+				return $channel->getId();
+			}
+		}
+		return null;
 	}
 	
 	/**

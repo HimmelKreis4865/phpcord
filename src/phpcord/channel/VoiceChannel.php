@@ -3,6 +3,7 @@
 namespace phpcord\channel;
 
 use phpcord\guild\GuildChannel;
+use phpcord\guild\VoiceStateData;
 
 class VoiceChannel extends GuildChannel {
 	/** @var int the default bitrate */
@@ -16,6 +17,9 @@ class VoiceChannel extends GuildChannel {
 
 	/** @var string|null $parent_id */
 	public $parent_id = null;
+	
+	/** @var VoiceStateData[] $users */
+	public $users = [];
 	
 	/**
 	 * VoiceChannel constructor.

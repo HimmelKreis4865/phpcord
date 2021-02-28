@@ -10,6 +10,7 @@ use phpcord\guild\GuildInvite;
 use phpcord\guild\GuildRole;
 use phpcord\guild\GuildWelcomeScreen;
 use phpcord\guild\GuildWelcomeScreenField;
+use phpcord\guild\VoiceStateData;
 use phpcord\guild\Webhook;
 use function intval;
 use function is_array;
@@ -108,7 +109,7 @@ class GuildSettingsInitializer {
 		return new GuildWelcomeScreen($data["description"], $fields);
 	}
 	
-	public static function createGuildInteraction(array $data) {
-	
+	public static function createVoiceState(array $data): VoiceStateData {
+		return new VoiceStateData($data["user_id"], $data["self_mute"] ?? false, $data["self_deaf"] ?? false, $data["mute"] ?? false, $data["deaf"] ?? false, $data["self_stream"] ?? false, $data["self_video"] ?? false);
 	}
 }
