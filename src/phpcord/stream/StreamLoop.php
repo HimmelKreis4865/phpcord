@@ -7,7 +7,10 @@ use phpcord\connection\ConvertManager;
 use phpcord\Discord;
 use phpcord\utils\MainLogger;
 use Throwable;
+use function error_get_last;
 use function stream_context_create;
+use function strlen;
+use function substr;
 use function var_dump;
 
 class StreamLoop {
@@ -51,14 +54,25 @@ class StreamLoop {
 		$handler->connect("gateway.discord.gg", 443, [], 1, true, $context);
 
 		while (true) {
-			if ($handler->isExpired()) return;
-			try {
-				$result = $handler->read();
-			} catch (Throwable $exception) {
-				var_dump("ERROR: " . $exception->getMessage());
-				return;
+			if ($handler->isExpired()) {
+				if (!$handler->reconnect()) {
+					MainLogger::logEmergency("Could not connect to discord gateway! Please check your connection");
+					return;
+				}
+				continue;
 			}
+			$result = $handler->read();
 
+			if (is_array(error_get_last())) {
+				if (((substr(error_get_last()["message"], 0, strlen("fread():")) === "fread():") and error_get_last()["line"] === 117) or ((substr(error_get_last()["message"], 0, strlen("fwrite():")) === "fwrite():") and error_get_last()["line"] === 103)) {
+					if (!$handler->reconnect()) {
+						MainLogger::logEmergency("Could not connect to discord gateway! Please check your connection");
+						return;
+					}
+					continue;
+				}
+			}
+			
 			if (!is_bool($result) and !is_int($result) and strlen($result) > 0) {
 				$encoded = json_decode($result, true);
 				MainLogger::logDebug("received a raw message: " . $result);

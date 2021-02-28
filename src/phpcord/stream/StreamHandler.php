@@ -3,9 +3,11 @@
 namespace phpcord\stream;
 
 use phpcord\utils\MainLogger;
+use function error_get_last;
 use function fwrite;
 use function base64_encode;
 use function openssl_random_pseudo_bytes;
+use function socket_last_error;
 use function stream_socket_client;
 use function stream_context_create;
 use function stream_set_timeout;
@@ -20,11 +22,15 @@ use function get_resource_type;
 use function strtolower;
 use function is_null;
 use function fclose;
+use function var_dump;
 
 class StreamHandler implements WriteableInterface, ReadableInterface {
 	
 	/** @var resource|null $stream */
 	public $stream;
+	
+	/** @var null | array $data */
+	protected $data = null;
 
 	/**
 	 * @param string $host
@@ -37,6 +43,9 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 	 * @return false|resource
 	 */
 	public function connect(string $host = '', int $port = 80, $headers = [], int $timeout = 1, bool $ssl = true, $context = null) {
+		
+		$this->data = ["host" => $host, "port" => $port, "headers" => $headers, "timeout" => $timeout, "ssl" => $ssl, "context" => $context];
+		
 		$key = base64_encode(openssl_random_pseudo_bytes(16));
 		$header = "GET / HTTP/1.1\r\n"
 			. "Host: $host\r\n"
@@ -53,7 +62,7 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 		$port = $port < 1 ? ($ssl ? 443 : 80) : $port;
 		$address = ($ssl ? 'ssl://' : '') . $host . ':' . $port;
 		$ctx = $context ?? stream_context_create();
-
+		
 		$sp = stream_socket_client($address, $errno, $str, $timeout, STREAM_CLIENT_CONNECT, $ctx);
 
 		if (!$sp) return false;
@@ -168,7 +177,13 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 	}
 
 	public function close(): void {
-		fclose($this->stream);
+		if (!is_null($this->stream)) fclose($this->stream);
 		$this->stream = null; // preventing any issues with invalid streams and stuff
+	}
+	
+	public function reconnect(): bool {
+		$this->close();
+		if (($d = $this->data) === null) return false;
+		return !is_bool($this->connect($d["host"], $d["port"], $d["headers"], $d["timeout"], $d["ssl"], $d["context"]));
 	}
 }
