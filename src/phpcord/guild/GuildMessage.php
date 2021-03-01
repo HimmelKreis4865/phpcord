@@ -4,6 +4,8 @@ namespace phpcord\guild;
 
 use InvalidArgumentException;
 use phpcord\channel\embed\MessageEmbed;
+use phpcord\channel\Sendable;
+use phpcord\channel\TextMessage;
 use phpcord\Discord;
 use phpcord\guild\store\GuildStoredMessage;
 use phpcord\http\RestAPIHandler;
@@ -13,7 +15,10 @@ use phpcord\utils\MemberInitializer;
 use function array_filter;
 use function array_map;
 use function is_null;
+use function is_numeric;
+use function is_string;
 use function json_decode;
+use function strval;
 
 class GuildMessage {
 
@@ -333,12 +338,15 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @param string $message
+	 * @param string|Sendable $message
 	 *
 	 * @return bool
 	 */
-	public function reply(string $message): bool {
-		return !(RestAPIHandler::getInstance()->sendReply(["channel_id" => (int) $this->channelId, "message_id" => (int) $this->id, "guild_id" => (int) $this->guildId], ["content" => $message]))->isFailed();
+	public function reply($message): bool {
+		if (is_string($message) or is_numeric($message)) $message = new TextMessage(strval($message));
+		if (!$message instanceof Sendable) return false;
+		
+		return !(RestAPIHandler::getInstance()->sendReply(["channel_id" => (int) $this->channelId, "message_id" => (int) $this->id, "guild_id" => (int) $this->guildId], json_decode($message->getFormattedData(), true)))->isFailed();
 	}
 	
 	/**
