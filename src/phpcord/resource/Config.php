@@ -140,6 +140,33 @@ abstract class Config {
 		return true;
 	}
 	
+	public function remove(string $key): bool {
+		if (!$this->exists($key)) return false;
+		unset($this->parsedContent[$key]);
+		return true;
+	}
+	
+	public function removeNested(string $key): bool {
+		if (!$this->existsNested($key)) return false;
+		
+		$vars = explode(".", $key);
+		
+		$currentNode =& $this->parsedContent;
+		while(count($vars) > 0){
+			$nodeName = array_shift($vars);
+			if(isset($currentNode[$nodeName])){
+				if(count($vars) === 0){ //final node
+					unset($currentNode[$nodeName]);
+				}elseif(is_array($currentNode[$nodeName])){
+					$currentNode =& $currentNode[$nodeName];
+				}
+			}else{
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * Returns the whole file content (with cached values, so it might not be sync)
 	 *
