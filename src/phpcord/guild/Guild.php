@@ -15,10 +15,10 @@ use phpcord\utils\ChannelInitializer;
 use phpcord\utils\GuildSettingsInitializer;
 use phpcord\utils\IntUtils;
 use InvalidArgumentException;
+use phpcord\utils\Math;
 use phpcord\utils\Permission;
 use function array_filter;
 use function array_map;
-use function count;
 use function is_int;
 use function is_null;
 use function is_string;
@@ -27,7 +27,6 @@ use function str_replace;
 use function strlen;
 use function strval;
 use function substr;
-use function var_dump;
 
 class Guild {
 	
@@ -588,6 +587,34 @@ class Guild {
 		$result = RestAPIHandler::getInstance()->createChannel($this->getId(), $query);
 		if ($result->isFailed()) return null;
 		return ChannelInitializer::createChannel(json_decode($result->getRawData(), true), $this->getId());
+	}
+	
+	/**
+	 * Returns an array with all bots on the guild
+	 *
+	 * @api
+	 *
+	 * @return GuildMember[]
+	 */
+	public function getBots(): array {
+		return array_filter($this->getMembers(), function(GuildMember $member) {
+			return $member->isBot();
+		});
+	}
+	
+	/**
+	 * Returns the creation date of the guild
+	 *
+	 * @api
+	 *
+	 * @param string $timezone
+	 * @param string $format
+	 * @return string
+	 *
+	 * @throws \Exception
+	 */
+	public function getCreationDate(string $timezone = "Europe/London", string $format = "H:i:s d.m.Y"): string {
+		return Math::getCreationDate($this->getId(), $timezone, $format);
 	}
 	
 	/**

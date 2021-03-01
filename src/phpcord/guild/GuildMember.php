@@ -8,6 +8,7 @@ use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\ArrayUtils;
 use phpcord\utils\ChannelInitializer;
+use phpcord\utils\Math;
 use function array_map;
 use function json_decode;
 
@@ -119,6 +120,21 @@ class GuildMember extends User {
 		return $this->update(null, $muted);
 	}
 	
+	/**
+	 * Returns the creation date of the member's account
+	 *
+	 * @api
+	 *
+	 * @param string $timezone
+	 * @param string $format
+	 * @return string
+	 *
+	 * @throws \Exception
+	 */
+	public function getCreationDate(string $timezone = "Europe/London", string $format = "H:i:s d.m.Y"): string {
+	    return Math::getCreationDate($this->getId(), $timezone, $format);
+    }
+
 	/**
 	 * Deafens a player (by server) in voice channels
 	 * -> The given player has to be in a voice channel to perform this action, otherwise Bad request will be returned from gateway!
