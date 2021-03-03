@@ -127,6 +127,9 @@ class GuildMember extends User {
 	 *
 	 * @param string $timezone
 	 * @param string $format
+	 * -> https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters
+	 * Check this link for a list of all valid formats
+	 *
 	 * @return string
 	 *
 	 * @throws \Exception
@@ -265,7 +268,7 @@ class GuildMember extends User {
 	 *
 	 * @api
 	 *
-	 * @param $role
+	 * @param string|GuildRole $role
 	 *
 	 * @return bool
 	 */
@@ -276,6 +279,13 @@ class GuildMember extends User {
 		return !RestAPIHandler::getInstance()->removeRoleFromUser($this->getGuildId(), $this->getId(), $role)->isFailed();
 	}
 	
+	/**
+	 * Creates a dm between the bot and the target member
+	 *
+	 * @api
+	 *
+	 * @return DMChannel|null
+	 */
 	public function createDM(): ?DMChannel {
 		$val = RestAPIHandler::getInstance()->createDM($this->getId());
 		if ($val->isFailed() or !($result = json_decode($val->getRawData(), true))) return null;

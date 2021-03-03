@@ -59,7 +59,7 @@ abstract class BaseTextChannel extends GuildChannel {
 	 *
 	 * @api
 	 *
-	 * @param $message
+	 * @param string|Sendable $message
 	 *
 	 * @return MessageSentPromise
 	 */

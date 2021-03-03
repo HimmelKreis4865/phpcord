@@ -25,9 +25,15 @@ class GuildInteraction {
 	/** @var string $channelId */
 	protected $channelId;
 	
-	/** @var GuildMember $member */
+	/** @var GuildMember|null $member */
 	protected $member;
 	
 	public function __construct(string $id, string $token, string $guildId, string $channelId, GuildMember $member = null, int $type = self::TYPE_COMMAND) {
+		$this->id = $id;
+		$this->token = $token;
+		$this->guildId = $guildId;
+		$this->channelId = $channelId;
+		$this->member = $member;
+		$this->type = $type;
 	}
 }

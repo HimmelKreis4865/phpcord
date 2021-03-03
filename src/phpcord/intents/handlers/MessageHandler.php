@@ -2,18 +2,14 @@
 
 namespace phpcord\intents\handlers;
 
+use InvalidArgumentException;
 use phpcord\channel\BaseTextChannel;
 use phpcord\channel\DMChannel;
 use phpcord\Discord;
-use phpcord\event\message\DMMessageDeleteEvent;
-use phpcord\event\message\DMMessageSendEvent;
-use phpcord\event\message\DMMessageUpdateEvent;
 use phpcord\event\message\MessageDeleteEvent;
 use phpcord\event\message\MessageSendEvent;
 use phpcord\event\message\MessageUpdateEvent;
-use phpcord\guild\GuildMember;
 use phpcord\utils\MessageInitializer;
-use function is_null;
 
 class MessageHandler extends BaseIntentHandler {
 
@@ -44,7 +40,7 @@ class MessageHandler extends BaseIntentHandler {
   				try {
 					$commandMap = $discord->getCommandMap();
 					$commandMap->executeCommand($channel, $message);
-				} catch (\InvalidArgumentException $exception) {
+				} catch (InvalidArgumentException $exception) {
 				
 				}
 
@@ -67,8 +63,7 @@ class MessageHandler extends BaseIntentHandler {
 			case "MESSAGE_CREATE":
 				$message = MessageInitializer::create($data);
 				
-				$id = @$message->getMember()->getId();
-				if (is_null($id)) return;
+				if (strlen(($id = $message->getMember()->getId())) < 2) return;
 				
 				if (isset($discord->answerHandlers[$message->channelId . ":" . $id])) {
 					$val = $discord->answerHandlers[$message->channelId . ":" . $id];

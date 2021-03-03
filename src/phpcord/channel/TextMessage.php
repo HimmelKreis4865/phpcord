@@ -49,12 +49,12 @@ class TextMessage implements Sendable {
 	/**
 	 * @todo: What is that?
 	 *
-	 * @param $nonce
+	 * @param int|string $nonce
 	 *
 	 * @return $this
 	 */
 	public function setNonce($nonce): self {
-		if (is_int($nonce) or is_string($nonce)) $this->data["nonce"] = $nonce;
+		$this->data["nonce"] = $nonce;
 		return $this;
 	}
 	

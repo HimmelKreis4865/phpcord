@@ -2,6 +2,7 @@
 
 namespace phpcord\client;
 
+use DateTime;
 use InvalidArgumentException;
 use phpcord\channel\DMChannel;
 use phpcord\Discord;
@@ -29,6 +30,9 @@ class Client {
 	/** @var DMChannel[] $dms */
 	public $dms = [];
 
+	/** @var DateTime $startTime the starttime in seconds */
+	protected $startTime;
+	
 	/**
 	 * Client constructor.
 	 *
@@ -36,6 +40,7 @@ class Client {
 	 */
 	public function __construct(array $guilds = []) {
 		$this->guilds = $guilds;
+		$this->startTime = new DateTime("now");
 	}
 
 	/**
@@ -96,6 +101,23 @@ class Client {
 		$data = RestAPIHandler::getInstance()->getInvite($code);
 		if ($data->isFailed() or !is_array(($value = @json_decode($data->getRawData(), true)))) return null;
 		return GuildSettingsInitializer::createInvitation($value);
+	}
+	
+	/**
+	 * Returns the uptime of the bot in a specific format
+	 * -> https://www.php.net/manual/de/dateinterval.format.php
+	 * Check this link for a list of all valid formats
+	 *
+	 * @api
+	 *
+	 * @param string $format
+	 *
+	 * @return string
+	 */
+	public function getUptime(string $format = "%H:%I:%S"): string {
+		$now = new DateTime("now");
+		$interval = $this->startTime->diff($now);
+		return $interval->format($format);
 	}
 	
 	/**

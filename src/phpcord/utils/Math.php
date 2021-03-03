@@ -18,7 +18,7 @@ final class Math {
      *
      * @api
      *
-     * @param $snowflake
+     * @param string|int $snowflake
      * @param string $timezone
      * @param string $format
      *

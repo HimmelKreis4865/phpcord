@@ -15,7 +15,6 @@ use phpcord\utils\MemberInitializer;
 use function array_filter;
 use function array_map;
 use function is_null;
-use function is_numeric;
 use function is_string;
 use function json_decode;
 use function strval;
@@ -343,7 +342,7 @@ class GuildMessage {
 	 * @return bool
 	 */
 	public function reply($message): bool {
-		if (is_string($message) or is_numeric($message)) $message = new TextMessage(strval($message));
+		if (is_string($message)) $message = new TextMessage(strval($message));
 		if (!$message instanceof Sendable) return false;
 		
 		return !(RestAPIHandler::getInstance()->sendReply(["channel_id" => (int) $this->channelId, "message_id" => (int) $this->id, "guild_id" => (int) $this->guildId], json_decode($message->getFormattedData(), true)))->isFailed();
@@ -391,7 +390,7 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @param $user
+	 * @param User|string $user
 	 * @param Emoji $emoji
 	 *
 	 * @return bool

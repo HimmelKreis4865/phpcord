@@ -10,6 +10,7 @@ use phpcord\guild\Guild;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildRole;
 use phpcord\guild\IncompleteGuild;
+use function array_map;
 use function is_null;
 
 class ClientInitializer {
@@ -53,12 +54,17 @@ class ClientInitializer {
 		$screen = null;
 		if (isset($data["welcome_screen"]) and !is_null($data["welcome_screen"])) $screen = GuildSettingsInitializer::initWelcomeScreen($data["welcome_screen"]);
 		
+		
+		$emojis = array_map(function($data) use ($guild_id) {
+			return GuildSettingsInitializer::createGuildEmoji($data, $guild_id);
+		}, $data["emojis"] ?? []);
+		
 		$client->guilds[$guild_id] = new Guild(
-			$data["name"], $data["id"], $data["owner_id"], $data["icon"], $data["banner"], $data["afk_channel_id"],
-			$data["rules_channel_id"], $channels, $members, $roles, $data["description"], intval($data["member_count"]),
-			$data["preferred_locale"], $data["region"], intval($data["default_message_notifications"]), intval($data["verification_level"]),
-			intval($data["max_members"]), $data["vanity_url_code"], $data["system_channel_id"],
-			$data["public_updates_channel_id"], intval($data["premium_subscription_count"]), $data["features"] ?? [], $screen, $data["premium_tier"] ?? 0
+			$data["name"], $data["id"], $data["owner_id"], $data["icon"], @$data["banner"], @$data["afk_channel_id"],
+			@$data["rules_channel_id"], $channels, $members, $roles, $data["description"] ?? "", intval($data["member_count"] ?? 2),
+			@$data["preferred_locale"], @$data["region"], intval($data["default_message_notifications"]), intval($data["verification_level"]),
+			intval($data["max_members"]), $emojis, @$data["vanity_url_code"], @$data["system_channel_id"],
+			@$data["public_updates_channel_id"], intval($data["premium_subscription_count"] ?? 0), $data["features"] ?? [], $screen, $data["premium_tier"] ?? 0
 		);
 		return $guild_id;
 	}
@@ -87,7 +93,7 @@ class ClientInitializer {
 	 */
 	public static function createBotUser(array $data): ?BotUser {
 		if (!isset($data["application"]) or !isset($data["user"])) return null;
-		return new BotUser(-1, $data["user"]["id"], $data["user"]["username"], $data["user"]["discriminator"], $data["user"]["flags"] ?? 0, @$data["avatar"], $data["version"] ?? Discord::VERSION, $data["user_settings"] ?? [], $data["user"]["verified"] ?? false, $data["user"]["mfa_enabled"] ?? false, @$data["user"]["email"], @$data["session_id"], $data["relationships"] ?? [], $data["private_channels"] ?? [], array_filter(array_map(function($key) {
+		return new BotUser("-", $data["user"]["id"], $data["user"]["username"], $data["user"]["discriminator"], $data["user"]["flags"] ?? 0, @$data["avatar"], $data["version"] ?? Discord::VERSION, $data["user_settings"] ?? [], $data["user"]["verified"] ?? false, $data["user"]["mfa_enabled"] ?? false, @$data["user"]["email"], @$data["session_id"], $data["relationships"] ?? [], $data["private_channels"] ?? [], array_filter(array_map(function($key) {
 			return @$key["id"];
 		}, $data["guilds"] ?? []), function($key) {
 			return !is_null($key);

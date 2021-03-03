@@ -6,6 +6,7 @@ use phpcord\guild\Emoji;
 use phpcord\guild\FollowWebhook;
 use phpcord\guild\GuildBanEntry;
 use phpcord\guild\GuildBanList;
+use phpcord\guild\GuildEmoji;
 use phpcord\guild\GuildInvite;
 use phpcord\guild\GuildRole;
 use phpcord\guild\GuildWelcomeScreen;
@@ -107,6 +108,10 @@ class GuildSettingsInitializer {
 			$fields[] = new GuildWelcomeScreenField($channel["channel_id"], $channel["description"], (isset($channel["emoji_name"]) ? new Emoji($channel["emoji_name"], @$channel["emoji_id"]) : null));
 		}
 		return new GuildWelcomeScreen($data["description"], $fields);
+	}
+	
+	public static function createGuildEmoji(array $data, string $guildId): GuildEmoji {
+		return new GuildEmoji($guildId, $data["name"], $data["id"], MemberInitializer::createUser($data["user"] ?? [], $guildId), $data["require_colons"] ?? true, $data["managed"] ?? true, $data["animated"] ?? false, $data["available"] ?? true);
 	}
 	
 	public static function createVoiceState(array $data): VoiceStateData {

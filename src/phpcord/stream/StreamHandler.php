@@ -3,11 +3,9 @@
 namespace phpcord\stream;
 
 use phpcord\utils\MainLogger;
-use function error_get_last;
 use function fwrite;
 use function base64_encode;
 use function openssl_random_pseudo_bytes;
-use function socket_last_error;
 use function stream_socket_client;
 use function stream_context_create;
 use function stream_set_timeout;
@@ -22,7 +20,6 @@ use function get_resource_type;
 use function strtolower;
 use function is_null;
 use function fclose;
-use function var_dump;
 
 class StreamHandler implements WriteableInterface, ReadableInterface {
 	
@@ -37,7 +34,7 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 	 * @param int $port
 	 * @param array $headers
 	 * @param int $timeout
-	 * @param false $ssl
+	 * @param bool $ssl
 	 * @param null $context
 	 *
 	 * @return false|resource

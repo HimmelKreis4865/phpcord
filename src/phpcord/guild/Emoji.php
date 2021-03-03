@@ -4,7 +4,7 @@ namespace phpcord\guild;
 
 use function is_null;
 
-final class Emoji {
+class Emoji {
 	/** @var string $name */
 	protected $name;
 	

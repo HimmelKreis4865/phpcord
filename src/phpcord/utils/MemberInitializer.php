@@ -17,7 +17,8 @@ class MemberInitializer {
 	 *
 	 * @return User
 	 */
-	public static function createUser(array $data, string $guild_id): User {
+	public static function createUser(array $data, string $guild_id): ?User {
+		if (!isset($data["id"]) or !isset($data["username"]) or !isset($data["discriminator"])) return null;
 		return new User($guild_id, $data["id"], $data["username"], strval($data["discriminator"]), $data["public_flags"] ?? 0, $data["avatar"] ?? "", $data["bot"] ?? false);
 	}
 	
@@ -37,6 +38,5 @@ class MemberInitializer {
 	
 	public static function createMentioned(array $member, string $guild_id): GuildMember {
 		return new GuildMember($guild_id, $member["id"], $member["username"], strval($member["discriminator"]), $member["member"]["roles"] ?? [], $member["bot"] ?? false,  ($member["member"]["nick"] ?? $member["username"]), $member["public_flags"] ?? 0, @$member["avatar"], $member["member"]["joined_at"], @$member["member"]["premium_since"]);
-		
 	}
 }

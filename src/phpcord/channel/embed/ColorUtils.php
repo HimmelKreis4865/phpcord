@@ -92,7 +92,7 @@ final class ColorUtils {
 	 *
 	 * @internal
 	 *
-	 * @return static
+	 * @return self
 	 */
 	public static function createBlack(): self {
 		return new self(0);
@@ -105,7 +105,7 @@ final class ColorUtils {
 	 *
 	 * @param RGB $rgb
 	 *
-	 * @return static|null
+	 * @return self|null
 	 */
 	public static function fromRgb(RGB $rgb): ?self {
 		$hex = $rgb->toHex();
@@ -121,7 +121,7 @@ final class ColorUtils {
 	 *
 	 * @param string $hex
 	 *
-	 * @return static|null
+	 * @return self|null
 	 */
 	public static function fromString(string $hex): ?self {
 		if (strtolower($hex) === "random") return new self(RGB::RANDOM()->toHex());
@@ -143,7 +143,7 @@ final class ColorUtils {
 	 *
 	 * @param int $dec
 	 *
-	 * @return static|null
+	 * @return self|null
 	 */
 	public static function fromInt(int $dec): ?self {
 		if ($dec >= self::HEX_MIN and $dec <= self::HEX_MAX) return new self($dec);

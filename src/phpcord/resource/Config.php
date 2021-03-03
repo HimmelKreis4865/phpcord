@@ -59,13 +59,13 @@ abstract class Config {
 	 *
 	 * @param string $key
 	 *
-	 * @param $value
+	 * @param mixed $value
 	 */
 	public function setNested(string $key, $value): void {
 		$vars = explode(".", $key);
 		$base = array_shift($vars);
 		
-		if(!isset($this->config[$base])){
+		if(!isset($this->parsedContent[$base])){
 			$this->parsedContent[$base] = [];
 		}
 		
@@ -88,7 +88,7 @@ abstract class Config {
 	 * @api
 	 *
 	 * @param string $key
-	 * @param null $default
+	 * @param mixed $default
 	 *
 	 * @return mixed
 	 */
@@ -101,7 +101,7 @@ abstract class Config {
 	 *
 	 * @param string $key
 	 *
-	 * @param $value
+	 * @param mixed $value
 	 */
 	public function set(string $key, $value) {
 		$this->parsedContent[$key] = $value;

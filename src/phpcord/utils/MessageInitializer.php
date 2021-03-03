@@ -25,7 +25,7 @@ class MessageInitializer {
 		if (!is_null(@$data["referenced_message"])) {
 			$reference = self::fromStore($data["guild_id"] ?? "-", $data["referenced_message"]);
 		}
-		return new GuildMessage($data["guild_id"] ?? "-", $data["id"], $data["channel_id"], $data["content"], MemberInitializer::createMember(array_merge(["user" => $data["author"]], $data["member"] ?? []), $data["guild_id"] ?? "-"), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, $reference, $data["attachments"] ?? [], @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? [], $data["reactions"] ?? []);
+		return new GuildMessage($data["guild_id"] ?? "-", $data["id"] ?? "", $data["channel_id"] ?? "", $data["content"] ?? "", MemberInitializer::createMember(array_merge(["user" => $data["author"]], $data["member"] ?? []), $data["guild_id"] ?? "-"), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, $reference, $data["attachments"] ?? [], @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? [], $data["reactions"] ?? []);
 	}
 	
 	/**

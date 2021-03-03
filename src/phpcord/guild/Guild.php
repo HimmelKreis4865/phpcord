@@ -94,6 +94,9 @@ class Guild {
 
 	/** @var string $id */
 	public $id;
+	
+	/** @var array|GuildEmoji[] $emojis */
+	public $emojis = [];
 
 	/** @var AuditLog|null $auditlog */
 	public $auditlog = null;
@@ -131,6 +134,7 @@ class Guild {
 	 * @param int $default_message_notifications
 	 * @param int $verification_level
 	 * @param int $max_members
+	 * @param GuildEmoji[] $emojis
 	 * @param string|null $vanity_url
 	 * @param string|null $system_channel_id
  	 * @param string|null $public_updates_channel_id
@@ -139,7 +143,7 @@ class Guild {
 	 * @param GuildWelcomeScreen|null $welcomeScreen
 	 * @param int $premium_tier
 	 */
-	public function __construct(string $name, string $id, ?string $owner_id, ?string $icon = null, ?string $banner = null, ?string $afk_channel = null, ?string $rules_channel_id = null, array $channels = [], array $members = [], array $roles = [], string $description = null, int $member_count = 10000, string $preferred_locale = "en-US", string $region = "europe", int $default_message_notifications = 0, int $verification_level = 0, int $max_members = 10000, ?string $vanity_url = null, ?string $system_channel_id = null, ?string $public_updates_channel_id = null, ?int $premium_subscription_count = 0, ?array $features = null, ?GuildWelcomeScreen $welcomeScreen = null, int $premium_tier = 0) {
+	public function __construct(string $name, string $id, ?string $owner_id, ?string $icon = null, ?string $banner = null, ?string $afk_channel = null, ?string $rules_channel_id = null, array $channels = [], array $members = [], array $roles = [], string $description = null, int $member_count = 10000, string $preferred_locale = "en-US", string $region = "europe", int $default_message_notifications = 0, int $verification_level = 0, int $max_members = 10000, array $emojis = [], ?string $vanity_url = null, ?string $system_channel_id = null, ?string $public_updates_channel_id = null, ?int $premium_subscription_count = 0, ?array $features = null, ?GuildWelcomeScreen $welcomeScreen = null, int $premium_tier = 0) {
 		$this->name = $name;
 		$this->id = $id;
 		$this->owner_id = $owner_id;
@@ -150,6 +154,11 @@ class Guild {
 		$this->channels = $channels;
 		$this->members = $members;
 		$this->roles = $roles;
+		$_emojis = [];
+		foreach ($emojis as $emoji) {
+			if ($emoji instanceof GuildEmoji) $_emojis[$emoji->getId()] = $emoji;
+		}
+		$this->emojis = $_emojis;
 		$this->description = $description;
 		$this->member_count = $member_count;
 		$this->preferred_locale = $preferred_locale;
@@ -240,7 +249,7 @@ class Guild {
 	 *
 	 * @internal
 	 *
-	 * @param $channel
+	 * @param string|GuildChannel $channel
 	 */
 	public function removeChannel($channel) {
 		if ($channel instanceof GuildChannel) $channel = $channel->getId();
@@ -252,7 +261,7 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @param $id
+	 * @param string|int $id
 	 *
 	 * @return GuildMember|null
 	 */
@@ -319,12 +328,11 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @param int $discriminator
+	 * @param string $discriminator
 	 *
 	 * @return array
 	 */
-	public function getMembersByDiscriminator(int $discriminator): array {
-		if ($discriminator > 9999 or $discriminator < 0001) return [];
+	public function getMembersByDiscriminator(string $discriminator): array {
 		return array_filter($this->members, function($key) use ($discriminator) {
 			return ($key->discriminator === $discriminator);
 		});
@@ -368,7 +376,7 @@ class Guild {
 	 *
 	 * @internal
 	 *
-	 * @param $member
+	 * @param User|string $member
 	 */
 	public function removeMember($member) {
 		if ($member instanceof User) $member = $member->getId();
@@ -431,7 +439,7 @@ class Guild {
 		if ($messageDeleteDays !== null and !IntUtils::isInRange($messageDeleteDays, 0, 7)) return false;
 		if ($user instanceof User) $user = $user->getId();
 		$result = RestAPIHandler::getInstance()->addBan($this->getId(), $user, $reason, $messageDeleteDays);
-		if ($result) $this->banList->addBan(new GuildBanEntry($this->getMemberById($user), $reason));
+		if (!$result->isFailed()) $this->banList->addBan(new GuildBanEntry($this->getMemberById($user), $reason));
 		return $result->isFailed();
 	}
 	
@@ -609,6 +617,9 @@ class Guild {
 	 *
 	 * @param string $timezone
 	 * @param string $format
+	 * -> https://www.php.net/manual/en/datetime.format.php#refsect1-datetime.format-parameters
+	 * Check this link for a list of all valid formats
+	 *
 	 * @return string
 	 *
 	 * @throws \Exception
@@ -628,6 +639,49 @@ class Guild {
 	 */
 	public function deleteChannel(string $id): bool {
 		return !RestAPIHandler::getInstance()->deleteChannel($id)->isFailed();
+	}
+	
+	
+	/**
+	 * Returns an array with all custom emojis of the guild
+	 *
+	 * @api
+	 *
+	 * @return GuildEmoji[]
+	 */
+	public function getEmojis(): array {
+		return $this->emojis;
+	}
+	
+	/**
+	 * Returns an array with all emojis by a name
+	 *
+	 * @api
+	 *
+	 * @param string $name
+	 *
+	 * @return array
+	 */
+	public function getEmojisByName(string $name): array {
+		return array_filter($this->getEmojis(), function($emoji) use ($name) {
+			return ($emoji->getName() === $name);
+		});
+	}
+	
+	/**
+	 * Returns an emoji by id or null if it doesn't exist
+	 *
+	 * @api
+	 *
+	 * @param string $id
+	 *
+	 * @return GuildEmoji|null
+	 */
+	public function getEmojiById(string $id): ?GuildEmoji {
+		foreach ($this->getEmojis() as $emoji) {
+			if ($emoji->getId() === $id) return $emoji;
+		}
+		return null;
 	}
 	
 	/**
@@ -695,11 +749,11 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @param string $id
+	 * @param string|GuildRole $id
 	 *
 	 * @return GuildRole|null
 	 */
-	public function getRole(string $id): ?GuildRole {
+	public function getRole($id): ?GuildRole {
 		if ($id instanceof GuildRole) return $id;
 		return @$this->roles[$id];
 	}
@@ -780,11 +834,11 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @param int $id
+	 * @param string $id
 	 *
 	 * @return bool
 	 */
-	public function deleteRole(int $id): bool {
+	public function deleteRole(string $id): bool {
 		return !RestAPIHandler::getInstance()->deleteRole($this->getId(), $id)->isFailed();
 	}
 }

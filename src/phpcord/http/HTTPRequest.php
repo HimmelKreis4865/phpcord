@@ -65,9 +65,9 @@ class HTTPRequest {
 	 * @api
 	 *
 	 * @param string $key
-	 * @param string $value
+	 * @param string|int|bool|float $value
 	 */
-	public function addRawGet(string $key, string $value) {
+	public function addRawGet(string $key, $value) {
 		if (strpos($this->url, "?") === false) {
 			$this->url .= "?" . $key . "=" . urlencode($value);
 			return;
@@ -81,7 +81,7 @@ class HTTPRequest {
 	 * @api
 	 *
 	 * @param string $key
-	 * @param $data
+	 * @param mixed $data
 	 */
 	public function addHTTPData(string $key, $data) {
 		$this->http[$key] = $data;

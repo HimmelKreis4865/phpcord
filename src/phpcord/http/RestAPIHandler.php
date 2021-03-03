@@ -193,7 +193,7 @@ final class RestAPIHandler {
 		return $this->createRestResponse($request->submit());
 	}
 	
-	public function modifyRole(string $guildId, string $id,  string $name, int $color, string $permissions, bool $hoist = false, bool $mentionable = false): RestResponse {
+	public function modifyRole(string $guildId, string $id,  string $name, int $color, int $permissions, bool $hoist = false, bool $mentionable = false): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/roles/" . $id, HTTPRequest::REQUEST_PATCH);
 		$request->addHTTPData("content", json_encode(["name" => $name, "color" => $color, "permissions" => $permissions, "hoist" => $hoist, "mentionable" => $mentionable]));
 		return $this->createRestResponse($request->submit());
@@ -295,7 +295,7 @@ final class RestAPIHandler {
 		return $this->createRestResponse($request->submit());
 	}
 	
-	public function createDM(int $id): RestResponse {
+	public function createDM(string $id): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "users/@me/channels");
 		$request->addHTTPData("content", json_encode(["recipient_id" => $id]));
 		return $this->createRestResponse($request->submit());

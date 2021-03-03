@@ -6,12 +6,10 @@ use phpcord\connection\ConnectOptions;
 use phpcord\connection\ConvertManager;
 use phpcord\Discord;
 use phpcord\utils\MainLogger;
-use Throwable;
 use function error_get_last;
 use function stream_context_create;
 use function strlen;
 use function substr;
-use function var_dump;
 
 class StreamLoop {
 	/** @var callable $onSend */
@@ -73,7 +71,7 @@ class StreamLoop {
 				}
 			}
 			
-			if (!is_bool($result) and !is_int($result) and strlen($result) > 0) {
+			if (!is_bool($result) and strlen($result) > 0) {
 				$encoded = json_decode($result, true);
 				MainLogger::logDebug("received a raw message: " . $result);
 

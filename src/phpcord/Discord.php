@@ -124,7 +124,7 @@ final class Discord {
 	 *
 	 * @api
 	 *
-	 * @return CommandMap|null
+	 * @return CommandMap
 	 */
 	public function getCommandMap(): CommandMap {
 		if ($this->commandMap instanceof CommandMap) return $this->commandMap;
@@ -182,7 +182,6 @@ final class Discord {
 		}
 	}
 
-
 	/**
 	 * Registers an event-class string to a listener
 	 *
@@ -192,7 +191,7 @@ final class Discord {
 	 * @param string $method_name
 	 * @param string $event
 	 */
-	public static function registerEvent(EventListener $listener, string $method_name, string $event) {
+	public function registerEvent(EventListener $listener, string $method_name, string $event) {
 		if (!is_subclass_of($event, Event::class)) return;
 		self::$listeners[$event][] = [$listener, $method_name];
 	}
@@ -241,7 +240,7 @@ final class Discord {
 			case 11:
 				$last = $manager->last_heartbeat ?? microtime(true);
 
-				if ($this->client !== null) $this->client->ping = floor((microtime(true) - $last) * 1000);
+				if ($this->client !== null) $this->client->ping = (int) floor(((microtime(true) - $last) * 1000));
 				break;
 		}
 	}

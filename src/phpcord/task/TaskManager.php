@@ -42,7 +42,7 @@ final class TaskManager {
 	 *
 	 * @internal
 	 *
-	 * @param $task
+	 * @param Task|int $task
 	 */
 	public function removeTask($task) {
 		if ($task instanceof Task) $task = $task->id;

@@ -17,7 +17,6 @@ use phpcord\utils\MessageInitializer;
 use function array_filter;
 use function array_map;
 use function array_merge;
-use function is_bool;
 use function is_string;
 use function json_decode;
 use function strlen;
@@ -68,9 +67,9 @@ class TextChannel extends ExtendedTextChannel {
 	 *
 	 * @api
 	 *
-	 * @param int $id
+	 * @param string $id
 	 */
-	public function deleteMessage(int $id) {
+	public function deleteMessage(string $id) {
 		RestAPIHandler::getInstance()->deleteMessage($id, $this->getId());
 	}
 	
@@ -101,7 +100,7 @@ class TextChannel extends ExtendedTextChannel {
 		if (strlen($name) > 80 or strlen($name) === 0) return null;
 		
 		$data = RestAPIHandler::getInstance()->createWebhook($this->getId(), $name, $avatar);
-		if (is_bool($data)) return null;
+		if ($data->isFailed()) return null;
 		if (is_array(($data = json_decode($data->getRawData(), true)))) return GuildSettingsInitializer::initWebhook($data);
 		return null;
 	}
