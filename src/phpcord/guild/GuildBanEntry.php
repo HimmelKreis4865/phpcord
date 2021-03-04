@@ -2,6 +2,7 @@
 
 namespace phpcord\guild;
 
+use phpcord\Discord;
 use phpcord\user\User;
 
 class GuildBanEntry {
@@ -42,5 +43,11 @@ class GuildBanEntry {
 	 */
 	public function getReason(): ?string {
 		return $this->reason;
+	}
+	
+	public function unban(): bool {
+		$guild = Discord::getInstance()->getClient()->getGuild($this->getUser()->getGuildId());
+		if ($guild instanceof Guild) return $guild->removeBan($this->getUser()->getId());
+		return false;
 	}
 }

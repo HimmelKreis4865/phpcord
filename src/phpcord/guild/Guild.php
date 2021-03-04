@@ -487,7 +487,7 @@ class Guild {
 	 * @return bool
 	 */
 	public function removeBan(string $id): bool {
-		$result = RestAPIHandler::getInstance()->addBan($this->getId(), $id);
+		$result = RestAPIHandler::getInstance()->removeBan($this->getId(), $id);
 		if (!$result->isFailed()) $this->banList->removeBan($id);
 		return $result->isFailed();
 	}
