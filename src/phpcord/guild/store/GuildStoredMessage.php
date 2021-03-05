@@ -38,4 +38,15 @@ class GuildStoredMessage extends GuildMessage {
 		
 		parent::__construct($guildId, $id, $channelId, $content, null, $embed, $timestamp, $tts, $pinned, $referenced_message, $attachments, $edited_timestamp, $type, $flags, $mention_everyone, $mentions, $mention_roles);
 	}
+	
+	/**
+	 * Returns the author of the message - member will be null here
+	 *
+	 * @api
+	 *
+	 * @return User
+	 */
+	public function getAuthor(): User {
+		return $this->author;
+	}
 }
