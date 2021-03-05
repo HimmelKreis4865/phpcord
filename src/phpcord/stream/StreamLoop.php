@@ -58,7 +58,7 @@ class StreamLoop {
 		$handler->connect("gateway.discord.gg", 443, [], 1, true, $context);
 
 		while (!$this->closed) {
-			usleep(1000 * 50);
+			Discord::getInstance()->onUpdate($handler);
 			
 			if ($handler->isExpired()) {
 				MainLogger::logDebug("Reconnecting to the gateway...");
