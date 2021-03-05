@@ -78,6 +78,8 @@ final class Discord {
 	public $sslSettings = [];
 
 	public function __construct(array $options = []) {
+		set_time_limit(0);
+		
 		self::$lastInstance = $this;
 		$this->registerAutoload();
 		$this->registerErrorHandler();
@@ -143,7 +145,6 @@ final class Discord {
 	 * @throws ClientException
 	 */
 	public function login(string $token = null): void {
-		set_time_limit(0);
 		MainLogger::logInfo("Logging in...");
 		if ($this->loggedIn) throw new ClientException("Could not connect to an already connected client!");
 
@@ -223,7 +224,7 @@ final class Discord {
 	 * @param ConvertManager $manager
 	 * @param StreamHandler $stream
 	 */
-	public function handle(string $message, ConvertManager &$manager, StreamHandler $stream) {
+	public function handle(string $message, ConvertManager $manager, StreamHandler $stream) {
 		$this->registerAutoload();
 		$message = json_decode($message, true);
 		$interval = null;

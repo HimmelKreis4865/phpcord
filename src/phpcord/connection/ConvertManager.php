@@ -10,10 +10,7 @@ class ConvertManager {
 	/** @var Discord $discord */
 	public $discord;
 
-	public $heartbeat_interval;
+	public $heartbeat_interval = 41500;
 
-	public $last_heartbeat;
+	public $last_heartbeat = 0;
 }
-
-
-

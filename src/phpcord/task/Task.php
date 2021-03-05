@@ -4,7 +4,6 @@ namespace phpcord\task;
 
 use phpcord\utils\MainLogger;
 use function mt_rand;
-use function var_dump;
 use const PHP_INT_MAX;
 
 abstract class Task {

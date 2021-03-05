@@ -3,9 +3,11 @@
 namespace phpcord\stream;
 
 use phpcord\utils\MainLogger;
+use function error_get_last;
 use function fwrite;
 use function base64_encode;
 use function openssl_random_pseudo_bytes;
+use function stream_set_blocking;
 use function stream_socket_client;
 use function stream_context_create;
 use function stream_set_timeout;
@@ -17,9 +19,11 @@ use function pack;
 use function chr;
 use function is_int;
 use function get_resource_type;
+use function strpos;
 use function strtolower;
 use function is_null;
 use function fclose;
+use function usleep;
 
 class StreamHandler implements WriteableInterface, ReadableInterface {
 	
@@ -28,6 +32,8 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 	
 	/** @var null | array $data */
 	protected $data = null;
+	
+	public $expired = false;
 
 	/**
 	 * @param string $host
@@ -40,7 +46,7 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 	 * @return false|resource
 	 */
 	public function connect(string $host = '', int $port = 80, $headers = [], int $timeout = 1, bool $ssl = true, $context = null) {
-		
+		$this->expired = false;
 		$this->data = ["host" => $host, "port" => $port, "headers" => $headers, "timeout" => $timeout, "ssl" => $ssl, "context" => $context];
 		
 		$key = base64_encode(openssl_random_pseudo_bytes(16));
@@ -64,6 +70,8 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 
 		if (!$sp) return false;
 		
+		//stream_set_blocking($sp, false);
+		
 		stream_set_timeout($sp, $timeout);
 		
 		if (!fwrite($sp, $header)) return false;
@@ -80,7 +88,7 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 
 	public function write($data, bool $final = true) {
 		if ($this->isExpired()) return false;
-		MainLogger::logDebug("Sending: $data");
+		MainLogger::logDebug("[WebSocket] Sending: $data");
 		$header = chr(($final ? 0x80 : 0) | 0x01); // 0x01 text mode
 
 		if (strlen($data) < 126) {
@@ -170,17 +178,25 @@ class StreamHandler implements WriteableInterface, ReadableInterface {
 	}
 
 	public function isExpired(): bool {
-		return (is_int($this->stream) or (is_null($this->stream) or (strtolower(get_resource_type($this->stream)) !== "stream")));
+		if (is_array(error_get_last())) {
+			if (strpos(error_get_last()["file"], "StreamHandler.php") !== false) return true;
+		}
+		return ($this->expired or is_int($this->stream) or (is_null($this->stream) or (strtolower(get_resource_type($this->stream)) !== "stream")));
+	}
+	
+	public function expire(): void {
+		$this->expired = true;
 	}
 
 	public function close(): void {
-		if (!is_null($this->stream)) fclose($this->stream);
+		if (!is_null($this->stream)) @fclose($this->stream);
 		$this->stream = null; // preventing any issues with invalid streams and stuff
 	}
 	
 	public function reconnect(): bool {
 		$this->close();
 		if (($d = $this->data) === null) return false;
+		usleep(1000 * 250);
 		return !is_bool($this->connect($d["host"], $d["port"], $d["headers"], $d["timeout"], $d["ssl"], $d["context"]));
 	}
 }
