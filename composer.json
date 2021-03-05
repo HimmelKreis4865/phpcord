@@ -1,7 +1,7 @@
 {
   "name": "himmelkreis4865/phpcord",
   "description": "A simple discord bot library written in PHP",
-  "type": "project",
+  "type": "library",
   "license": "GPL-3.0",
   "require": {
     "php": "^7.2"
