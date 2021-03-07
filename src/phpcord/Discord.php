@@ -76,6 +76,8 @@ final class Discord {
 	public static $cacheLevel = 0;
 	
 	public $sslSettings = [];
+	
+	public $reconnecting = false;
 
 	public function __construct(array $options = []) {
 		set_time_limit(0);
@@ -254,9 +256,11 @@ final class Discord {
 	public function onUpdate(StreamHandler $stream) {
 		TaskManager::getInstance()->onUpdate();
 		
-		foreach ($this->toSend as $key => $item) {
-			unset($this->toSend[$key]);
-			$stream->write($item);
+		if (!$this->reconnecting) {
+			foreach ($this->toSend as $key => $item) {
+				unset($this->toSend[$key]);
+				$stream->write($item);
+			}
 		}
 	}
 

@@ -9,13 +9,11 @@ use phpcord\utils\MainLogger;
 use RuntimeException;
 use function array_merge;
 use function count;
-use function error_get_last;
 use function is_string;
 use function json_decode;
 use function json_encode;
 use function stream_context_create;
 use function strlen;
-use function usleep;
 
 class StreamLoop {
 	/** @var callable $onSend */
@@ -48,7 +46,6 @@ class StreamLoop {
 		$this->onSend = $onSend;
 		$this->options = $options;
 		$this->handler = new StreamHandler();
-
 	}
 
 	public function run() {
@@ -56,12 +53,15 @@ class StreamLoop {
 
 		$context = ((count(Discord::getInstance()->sslSettings) > 0) ? stream_context_create(["ssl" => array_merge(Discord::getInstance()->sslSettings, [ "SNI_enabled" => true, "peer_name" => "gateway.discord.gg", "SNI_server_name" => "gateway.discord.gg", "CN_match" => "gateway.discord.gg"])]) : null);
 		$handler->connect("gateway.discord.gg", 443, [], 1, true, $context);
-
+		
+		Discord::getInstance()->reconnecting = true;
+		
 		while (!$this->closed) {
 			Discord::getInstance()->onUpdate($handler);
 			
 			if ($handler->isExpired()) {
 				MainLogger::logDebug("Reconnecting to the gateway...");
+				Discord::getInstance()->reconnecting = true;
 				$handler->close();
 				$handler = new StreamHandler();
 				$context = ((count(Discord::getInstance()->sslSettings) > 0) ? stream_context_create(["ssl" => array_merge(Discord::getInstance()->sslSettings, [ "SNI_enabled" => true, "peer_name" => "gateway.discord.gg", "SNI_server_name" => "gateway.discord.gg", "CN_match" => "gateway.discord.gg"])]) : null);
@@ -88,6 +88,7 @@ class StreamLoop {
 						$this->manager->heartbeat_interval = $parsed["d"]["heartbeat_interval"];
 						$handler->write(json_encode([ "op" => 2, "d" => ["token" => $this->options->getToken(), "intents" => $this->options->getIntents(), "properties" => [ "\$os" => "phpcord", "\$browser" => "phpcord", "\$" => "phpcord" ]] ]));
 						$this->heartbeat($handler);
+						Discord::getInstance()->reconnecting = false;
 						break;
 						
 					default:
@@ -115,7 +116,7 @@ class StreamLoop {
 		$this->manager->last_heartbeat = microtime(true);
 		$handler->write(json_encode(["op" => 1, "d" => $this->lastS]));
 		
-		if ($this->heartbeatCount > 30) {
+		if ($this->heartbeatCount > 2) {
 			$this->heartbeatCount = 0;
 			$handler->expire();
 		}
