@@ -116,7 +116,7 @@ class StreamLoop {
 		$this->manager->last_heartbeat = microtime(true);
 		$handler->write(json_encode(["op" => 1, "d" => $this->lastS]));
 		
-		if ($this->heartbeatCount > 2) {
+		if ($this->heartbeatCount > 30) {
 			$this->heartbeatCount = 0;
 			$handler->expire();
 		}
