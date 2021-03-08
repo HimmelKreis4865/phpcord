@@ -91,6 +91,12 @@ class StreamLoop {
 						Discord::getInstance()->reconnecting = false;
 						break;
 						
+					case 7:
+					case 9:
+						MainLogger::logDebug("Received a reconnect opcode (" . $parsed["op"] . ")");
+						$handler->expire();
+						break;
+						
 					default:
 						if ($this->onSend !== null) {
 							$callable = $this->onSend;
