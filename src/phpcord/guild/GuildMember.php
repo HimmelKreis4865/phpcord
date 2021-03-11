@@ -14,10 +14,7 @@ use function json_decode;
 
 class GuildMember extends User {
 	/** @var array $roles */
-	public $roles = [];
-
-	/** @var bool $bot */
-	public $bot = false;
+	private $roles;
 
 	/** @var string $nick */
 	public $nick = "";
@@ -197,11 +194,16 @@ class GuildMember extends User {
 	 */
 	public function getRoles(): array {
 		$guildId = $this->getGuildId();
-		return array_filter(array_map(function($key) use ($guildId) {
+		$roles = array_filter(array_map(function($key) use ($guildId): ?GuildRole {
 			return Discord::$lastInstance->getClient()->getGuild($guildId)->getRole($key);
 		}, $this->roles), function($key) {
 			return !is_null($key);
 		});
+		$finalRoles = [];
+		foreach ($roles as $role) {
+			$finalRoles[$role->getId()] = $role;
+		}
+		return $finalRoles;
 	}
 	
 	/**
@@ -244,7 +246,7 @@ class GuildMember extends User {
 	 */
 	public function hasRole($role): bool {
 		if ($role instanceof GuildRole) $role = $role->getId();
-		return isset($this->roles[$role]);
+		return isset($this->getRoles()[$role]);
 	}
 	
 	/**
@@ -275,7 +277,9 @@ class GuildMember extends User {
 	public function removeRole($role): bool {
 		if ($role instanceof GuildRole) $role = $role->getId();
 		if (!$this->hasRole($role)) return false;
-		if (isset($this->roles[$role])) unset($this->roles[$role]);
+		foreach ($this->roles as $key => $id) {
+			if ($id === $role) unset($this->roles[$key]);
+		}
 		return !RestAPIHandler::getInstance()->removeRoleFromUser($this->getGuildId(), $this->getId(), $role)->isFailed();
 	}
 	

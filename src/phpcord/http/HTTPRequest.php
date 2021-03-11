@@ -69,7 +69,7 @@ class HTTPRequest {
 	 */
 	public function addRawGet(string $key, $value) {
 		if (strpos($this->url, "?") === false) {
-			$this->url .= "?" . $key . "=" . urlencode($value);
+			$this->url .= "?" . $key . "=" . urlencode(strval($value));
 			return;
 		}
 		$this->url .= "&" . $key . "=" . $value;
