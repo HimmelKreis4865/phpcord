@@ -4,9 +4,11 @@ namespace phpcord\intents\handlers;
 
 use phpcord\Discord;
 use phpcord\event\member\ReactionAddEvent;
+use phpcord\event\member\ReactionRemoveAllEvent;
 use phpcord\guild\Emoji;
 use phpcord\event\member\ReactionRemoveEvent;
 use phpcord\utils\MemberInitializer;
+use function var_dump;
 
 class ReactionHandler extends BaseIntentHandler {
 	public function getIntents(): array {
@@ -20,11 +22,11 @@ class ReactionHandler extends BaseIntentHandler {
 				break;
 
 			case "MESSAGE_REACTION_REMOVE":
-				(new ReactionRemoveEvent($data["user_id"], $data["message_id"], $data["channel_id"] ?? $data["user_id"], new Emoji($data["emoji"]["name"], @$data["emoji"]["id"]), false))->call();
+				(new ReactionRemoveEvent($data["user_id"], $data["message_id"], $data["guild_id"] ?? $data["user_id"] ?? "-", $data["guild_id"] ?? $data["user_id"] ?? "-", new Emoji($data["emoji"]["name"], @$data["emoji"]["id"])))->call();
 				break;
 
 			case "MESSAGE_REACTION_REMOVE_ALL":
-				(new ReactionRemoveEvent($data["user_id"], $data["message_id"], $data["channel_id"] ?? $data["user_id"], null, true))->call();
+				(new ReactionRemoveAllEvent($data["message_id"], $data["channel_id"] ?? $data["user_id"] ?? "-", $data["guild_id"] ?? $data["user_id"] ?? "-"))->call();
 				break;
 
 			case "MESSAGE_REACTION_REMOVE_EMOJI":
