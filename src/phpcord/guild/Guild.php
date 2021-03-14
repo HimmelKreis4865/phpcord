@@ -841,4 +841,22 @@ class Guild {
 	public function deleteRole(string $id): bool {
 		return !RestAPIHandler::getInstance()->deleteRole($this->getId(), $id)->isFailed();
 	}
+	
+	/**
+	 * Fetches all guild invites from restapi
+	 *
+	 * @api
+	 *
+	 * @return GuildInvite[]
+	 */
+	public function fetchInvites(): array {
+		$result = RestAPIHandler::getInstance()->getGuildInvites($this->getId());
+		if ($result->isFailed() or strlen($result->getRawData()) === 0) return [];
+		$invites = [];
+		foreach (json_decode($result->getRawData(), true) as $invite) {
+			$invite = GuildSettingsInitializer::createInvitation($invite);
+			$invites[$invite->getCode()] = $invite;
+		}
+		return $invites;
+	}
 }

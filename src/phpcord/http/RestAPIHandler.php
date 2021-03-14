@@ -278,6 +278,11 @@ final class RestAPIHandler {
 		return $this->createRestResponse($request->submit());
 	}
 	
+	public function getGuildInvites(string $guildId): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/invites", HTTPRequest::REQUEST_GET);
+		return $this->createRestResponse($request->submit());
+	}
+	
 	public function registerSlashCommand(string $guildId, string $applicationId, array $data): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/guilds/" . $guildId . "/commands");
 		$request->addHTTPData("content", json_encode($data));
