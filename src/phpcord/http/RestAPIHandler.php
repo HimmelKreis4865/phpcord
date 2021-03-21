@@ -267,6 +267,12 @@ final class RestAPIHandler {
 		return $this->createRestResponse($request->submit());
 	}
 	
+	public function crosspostMessage(string $channel, string $message): RestResponse {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $channel . "/messages/" . $message . "/crosspost");
+		$request->addHTTPData("content", json_encode([]));
+		return $this->createRestResponse($request->submit());
+	}
+	
 	public function createInvite(string $channelId, int $duration, int $max_uses, bool $temporary_membership = false, bool $unique = false, ?string $target_user = null): RestResponse {
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/invites");
 		$request->addHTTPData("content", json_encode(["max_age" => $duration, "max_uses" => $max_uses, "temporary" => $temporary_membership, "unique" => $unique, "target_user" => $target_user]));

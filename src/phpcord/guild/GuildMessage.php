@@ -4,6 +4,7 @@ namespace phpcord\guild;
 
 use InvalidArgumentException;
 use phpcord\channel\embed\MessageEmbed;
+use phpcord\channel\NewsChannel;
 use phpcord\channel\Sendable;
 use phpcord\channel\TextMessage;
 use phpcord\Discord;
@@ -346,6 +347,21 @@ class GuildMessage {
 		if (!$message instanceof Sendable) return false;
 		
 		return !(RestAPIHandler::getInstance()->sendReply(["channel_id" => (int) $this->channelId, "message_id" => (int) $this->id, "guild_id" => (int) $this->guildId], json_decode($message->getFormattedData(), true)))->isFailed();
+	}
+	
+	/**
+	 * Publishes a message to following channels
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
+	public function crosspost(): bool {
+		$channel = $this->getGuild()->getChannel($this->getChannelId());
+		if ($channel !== null and !($channel instanceof NewsChannel))
+			throw new InvalidArgumentException("Cannot crosspost a message in a channel that is no news channel!");
+		
+		return !(RestAPIHandler::getInstance()->crosspostMessage($this->getChannelId(), $this->getId()))->isFailed();
 	}
 	
 	/**

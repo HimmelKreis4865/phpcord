@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use phpcord\channel\BaseTextChannel;
 use phpcord\channel\DMChannel;
 use phpcord\Discord;
+use phpcord\event\message\MessageCrosspostEvent;
 use phpcord\event\message\MessageDeleteEvent;
 use phpcord\event\message\MessageSendEvent;
 use phpcord\event\message\MessageUpdateEvent;
@@ -47,6 +48,11 @@ class MessageHandler extends BaseIntentHandler {
 				(new MessageSendEvent($message, $channel))->call();
 				break;
 			case "MESSAGE_UPDATE":
+				if ($data["flags"] ?? 0 === 1) {
+					(new MessageCrosspostEvent($data["id"], $data["channel_id"], $data["guild_id"]))->call();
+					return;
+				}
+				
 				$message = MessageInitializer::createUpdated($data);
    				$channel = $discord->client->getGuild($message->guild_id)->getChannel($message->channel_id);
 				(new MessageUpdateEvent($message, $channel))->call();
