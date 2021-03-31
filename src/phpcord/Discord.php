@@ -12,6 +12,7 @@ use phpcord\connection\ConvertManager;
 use phpcord\event\Event;
 use phpcord\event\EventListener;
 use phpcord\exception\ClientException;
+use phpcord\extensions\ExtensionManager;
 use phpcord\guild\MessageSentPromise;
 use phpcord\http\RestAPIHandler;
 use phpcord\intents\IntentReceiveManager;
@@ -27,6 +28,7 @@ use ReflectionMethod;
 use function date;
 use function file_exists;
 use function floor;
+use function is_dir;
 use function microtime;
 use function set_time_limit;
 use function str_replace;
@@ -94,13 +96,23 @@ final class Discord {
 		$this->client = new Client();
 		MainLogger::logInfo("Starting discord application...");
 		PermissionIds::initDefinitions();
+		
 		if (isset($options["debugMode"]) and is_bool($options["debugMode"])) self::$debugMode = $options["debugMode"];
-		MainLogger::logInfo("Loading intent receive manager...");
+		
 		if (isset($options["intents"]) and is_int($options["intents"])) $this->setIntents($options["intents"]);
 	    $this->intentReceiveManager = new IntentReceiveManager();
+	    
+	    foreach ($options["extension_paths"] ?? [] as $path) {
+	    	$this->registerExtensionPath($path);
+		}
+	    
+	    MainLogger::logInfo("Loading extensions...");
+	    ExtensionManager::getInstance()->loadExtensions();
+	    
 	    if (isset($options["cache_level"])) self::$cacheLevel = $options["cache_level"];
+	    
 		MainLogger::logInfo("§aLoading complete, waiting for a login now...");
-		if (isset($this->options["ssl"])) $this->sslSettings = $this->options["ssl"];
+		$this->initSSLSettings();
     }
 	
 	/**
@@ -158,6 +170,9 @@ final class Discord {
 
 		$this->intentReceiveManager->init();
 		
+		MainLogger::logInfo("Enabling extensions...");
+		ExtensionManager::getInstance()->onEnable();
+		
 		MainLogger::logInfo("Authenticating REST API...");
 		RestAPIHandler::getInstance()->setAuth($token);
 		$connectionHandler = new ConnectionHandler();
@@ -165,6 +180,11 @@ final class Discord {
 		$connectionHandler->startConnection($this, new ConnectOptions($token, $this->intents));
 	}
 	
+	public function registerExtensionPath(string $path): void {
+		if (!is_dir($path)) throw new InvalidArgumentException("Path $path does not exist!");
+		ExtensionManager::getInstance()->registerExtensionPath($path);
+	}
+
 	/**
 	 * Registers Events on an EventListener subclass
 	 *
@@ -209,6 +229,26 @@ final class Discord {
 			$file = __DIR__ . DIRECTORY_SEPARATOR . str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
 			if (!class_exists($class) and file_exists($file)) require_once $file;
 		});
+	}
+	
+	private function initSSLSettings(): void {
+		$this->sslSettings = [
+			"verify_peer" => true,
+			"verify_peer_name" => true,
+			"cafile" => __DIR__ . DIRECTORY_SEPARATOR . "utils" . DIRECTORY_SEPARATOR . "cacert.pem",
+			'ciphers' => 'HIGH:TLSv1.2:TLSv1.1:TLSv1.0:!SSLv3:!SSLv2',
+		];
+	}
+	
+	/**
+	 * Returns whether the instance is already logged in or not
+	 *
+	 * @api
+	 *
+	 * @return bool
+	 */
+	public function isLoggedIn(): bool {
+		return $this->loggedIn;
 	}
 	
 	protected function registerErrorHandler() {
