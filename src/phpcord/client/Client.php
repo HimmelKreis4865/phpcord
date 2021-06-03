@@ -11,13 +11,14 @@ use phpcord\guild\GuildInvite;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\GuildSettingsInitializer;
+use Threaded;
 use function array_rand;
 use function get_class;
 use function is_array;
 use function is_string;
 use function json_decode;
 
-class Client {
+class Client extends Threaded {
 	/** @var Guild[]|null $guild todo: maybe make this to a SplFixedArray */
 	public $guilds;
 	

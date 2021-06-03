@@ -4,12 +4,15 @@
   "type": "library",
   "version": "1.0",
   "license": "GPL-3.0",
+  "minimum-stability": "dev",
   "require": {
     "php": "^7.2",
     "ext-openssl": "*",
     "ext-json": "*",
     "ext-yaml": "*",
-    "ext-sockets": "*"
+    "ext-sockets": "*",
+    "ext-pthreads": "*",
+    "php-promise/promise": "*"
   },
   "autoload": {
     "psr-4": {

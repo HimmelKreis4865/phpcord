@@ -2,133 +2,59 @@
 
 namespace phpcord\stream;
 
-use phpcord\connection\ConnectOptions;
-use phpcord\connection\ConvertManager;
-use phpcord\Discord;
+use phpcord\thread\Thread;
 use phpcord\utils\MainLogger;
 use RuntimeException;
-use function array_merge;
-use function count;
-use function is_string;
 use function json_decode;
 use function json_encode;
-use function stream_context_create;
-use function strlen;
+use function usleep;
+use function var_dump;
 
-class StreamLoop {
-	/** @var callable $onSend */
-	protected $onSend;
-
-	/** @var bool $closed */
-	private $closed = false;
-
-	/** @var StreamHandler $handler */
-	public $handler;
+class StreamLoop extends Thread {
 	
-	/** @var ConvertManager $manager */
-	public $manager;
-
-	/** @var ConnectOptions $data */
-	private $options;
+	public const GATEWAY = "ssl://gateway.discord.gg";
 	
-	/** @var null $lastS */
-	private $lastS = null;
+	public const MAX_FAILURES = 5;
+	
+	public $lastACK;
+	
+	protected $failureCount = 0;
 
-	/**
-	 * StreamLoop constructor.
-	 *
-	 * @param ConvertManager $manager
-	 * @param ConnectOptions $options
-	 * @param callable|null $onSend
-	 */
-	public function __construct(ConvertManager $manager, ConnectOptions $options, ?callable $onSend) {
-		$this->manager = $manager;
-		$this->onSend = $onSend;
-		$this->options = $options;
-		$this->handler = new StreamHandler();
-	}
-
-	public function run() {
-		$handler = $this->handler;
-
-		$context = ((count(Discord::getInstance()->sslSettings) > 0) ? stream_context_create(["ssl" => array_merge(Discord::getInstance()->sslSettings, [ "SNI_enabled" => true, "peer_name" => "gateway.discord.gg", "SNI_server_name" => "gateway.discord.gg", "CN_match" => "gateway.discord.gg"])]) : null);
-		$handler->connect("gateway.discord.gg", 443, [], 1, true, $context);
+	public function onRun() {
+		$opCodeHandler = new OPCodeHandler();
 		
-		Discord::getInstance()->reconnecting = true;
-		
-		while (!$this->closed) {
-			Discord::getInstance()->onUpdate($handler);
-			
-			if ($handler->isExpired()) {
-				MainLogger::logDebug("Reconnecting to the gateway...");
-				Discord::getInstance()->reconnecting = true;
-				$handler->close();
-				$handler = new StreamHandler();
-				$context = ((count(Discord::getInstance()->sslSettings) > 0) ? stream_context_create(["ssl" => array_merge(Discord::getInstance()->sslSettings, [ "SNI_enabled" => true, "peer_name" => "gateway.discord.gg", "SNI_server_name" => "gateway.discord.gg", "CN_match" => "gateway.discord.gg"])]) : null);
-				if (!$handler->connect("gateway.discord.gg", 443, [], 1, true, $context)) {
-					throw new RuntimeException("Failed to reconnect to discord gateway!");
-				}
+		// todo: dynamic autoload for threads
+		$ws = new WebSocket(self::GATEWAY, 443);
+
+		while (true) {
+			usleep(1000 * 50);
+			if ($ws->isInvalid()) {
+				$ws->close();
+				$ws = new WebSocket(self::GATEWAY, 443);
+				if (++$this->failureCount > self::MAX_FAILURES)
+					throw new RuntimeException("Failed to reconnect the gateway connection!");
+			}
+			if (!($message = $ws->read())) {
+				MainLogger::logDebug("Failed to read, reconnecting");
+				$ws->invalidate();
 				continue;
 			}
+			$this->failureCount = 0;
+			MainLogger::logDebug("Received $message");
+			$data = json_decode($message, true);
+			if (!$data or !isset($data["op"])) return;
+			$opCodeHandler->{"__" . $data["op"]}($ws, $this, $data);
 			
-			if (((microtime(true) - $this->manager->last_heartbeat) * 1000) >= ($this->manager->heartbeat_interval - 3000)) {
-				MainLogger::logDebug("[WebSocket] Sent heartbeat after " . ((microtime(true) - $this->manager->last_heartbeat) * 1000) . "ms #{$this->heartbeatCount}");
-				$this->heartbeat($handler);
-			}
-			
-			$input = $handler->read();
-			
-			if (is_string($input) and strlen($input) > 1) {
-				MainLogger::logDebug("[WebSocket] Received: " . $input);
-				$parsed = json_decode($input, true);
-				
-				if (@$parsed["s"] !== null) $this->lastS = $parsed["s"];
-				switch ($parsed["op"] ?? -1) {
-					case 10:
-						$this->manager->heartbeat_interval = $parsed["d"]["heartbeat_interval"];
-						$handler->write(json_encode([ "op" => 2, "d" => ["token" => $this->options->getToken(), "intents" => $this->options->getIntents(), "properties" => [ "\$os" => "phpcord", "\$browser" => "phpcord", "\$" => "phpcord" ]] ]));
-						$this->heartbeat($handler);
-						Discord::getInstance()->reconnecting = false;
-						break;
-						
-					case 7:
-					case 9:
-						MainLogger::logDebug("Received a reconnect opcode (" . $parsed["op"] . ")");
-						$handler->expire();
-						break;
-						
-					default:
-						if ($this->onSend !== null) {
-							$callable = $this->onSend;
-							$callable($this->manager, $handler, $input);
-						}
-						break;
+			if (QueuedSender::getInstance()->has()) {
+				foreach (QueuedSender::getInstance()->getFullQueue() as $buffer) {
+					$ws->write($buffer);
 				}
 			}
 		}
 	}
-	public function close() {
-		$this->closed = true;
-	}
 	
-	public function start() {
-		$this->run();
-	}
-	
-	public $heartbeatCount = 0;
-	
-	protected function heartbeat(StreamHandler $handler) {
-		$this->heartbeatCount++;
-		$this->manager->last_heartbeat = microtime(true);
-		$handler->write(json_encode(["op" => 1, "d" => $this->lastS]));
-		
-		if ($this->heartbeatCount > 30) {
-			$this->heartbeatCount = 0;
-			$handler->expire();
-		}
-	}
-
-	public function end() {
-		$this->closed = true;
+	public function identify(WebSocket $socket): void {
+		// todo: change this
+		$socket->write(json_encode(["op" => 2, "d" => ["token" => "", "intents" => 513, "properties" => ["\$os" => "linux", "\$browser" => "my_library", "\$device" => "my_library"]]]));
 	}
 }

@@ -3,8 +3,10 @@
 namespace phpcord\task;
 
 use phpcord\utils\InstantiableTrait;
+use Threaded;
+use function var_dump;
 
-final class TaskManager {
+final class TaskManager extends Threaded {
 	use InstantiableTrait;
 	
 	/** @var Task[] $tasks */
@@ -12,6 +14,10 @@ final class TaskManager {
 	
 	/** @var int $tick */
 	protected $tick = 0;
+	
+	public function __construct() {
+		self::$instance = $this;
+	}
 	
 	/**
 	 * Submits a new Task to the manager
@@ -61,7 +67,7 @@ final class TaskManager {
 	}
 	
 	/**
-	 * Called on update ~ every second
+	 * Called on update every 50ms
 	 *
 	 * @internal
 	 */

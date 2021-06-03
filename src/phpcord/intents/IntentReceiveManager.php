@@ -10,9 +10,10 @@ use phpcord\intents\handlers\MemberHandler;
 use phpcord\intents\handlers\MessageHandler;
 use phpcord\intents\handlers\ReactionHandler;
 use phpcord\Discord;
-class IntentReceiveManager {
-	/** @var bool $initialized */
-	private $initialized = false;
+use Threaded;
+use function var_dump;
+
+class IntentReceiveManager extends Threaded {
 
 	/** @var string[][] $intentHandlers */
 	protected $intentHandlers = [];
@@ -25,20 +26,20 @@ class IntentReceiveManager {
 	 *
 	 * @warning Please don't register an anonymous class, it will throw an Exception!
 	 *
-	 * @api
+	 * @internal
 	 *
 	 * @param BaseIntentHandler $intentHandler
 	 *
 	 * @return bool
 	 */
 	public function registerHandler(BaseIntentHandler $intentHandler): bool {
-		if (in_array(get_class($intentHandler), $this->registeredClasses)) return false;
 		foreach (array_filter($intentHandler->getIntents(), function($key) {
 			return IntentsManager::isValidIntent($key);
 		}) as $intent) {
-			$this->intentHandlers[$intent][] = get_class($intentHandler);
+			$list = $this->intentHandlers[$intent];
+			$list[] = get_class($intentHandler);
+			$this->intentHandlers[$intent] = $list;
 		}
-		$this->registeredClasses[] = get_class($intentHandler);
 		return true;
 	}
 	
@@ -66,7 +67,6 @@ class IntentReceiveManager {
 	 * @internal
 	 */
 	final public function init() {
-		$this->initialized = true;
 		$this->initDefaultHandlers();
 	}
 	
@@ -75,7 +75,7 @@ class IntentReceiveManager {
 	 *
 	 * @internal
 	 */
-	public function initDefaultHandlers() {
+	private function initDefaultHandlers() {
 		$this->registerHandler(new MessageHandler());
 		$this->registerHandler(new MemberHandler());
 		$this->registerHandler(new GuildHandler());

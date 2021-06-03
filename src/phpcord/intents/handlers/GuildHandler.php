@@ -14,6 +14,7 @@ use phpcord\event\user\UserUnbanEvent;
 use phpcord\guild\GuildBanEntry;
 use phpcord\utils\ClientInitializer;
 use phpcord\utils\MemberInitializer;
+use function var_dump;
 
 class GuildHandler extends BaseIntentHandler {
 
@@ -48,15 +49,14 @@ class GuildHandler extends BaseIntentHandler {
 				break;
 				
 			case "GUILD_CREATE":
-				$client = Discord::getInstance()->getClient() ?? new Client();
-				$guildId = ClientInitializer::create($client, $data);
-				Discord::getInstance()->client = $client;
-				(new GuildCreateEvent($client->getGuild($guildId)))->call();
+				if (Discord::getInstance()->getClient() === null) Discord::getInstance()->client = new Client();
+				$guildId = ClientInitializer::create(Discord::getInstance()->client, $data);
+				(new GuildCreateEvent(Discord::getInstance()->client->getGuild($guildId)))->call();
 				
 				// WORKAROUND, todo: improve this
 				// checks whether the guild was created due to join on a new guild / initialisation on startup
-				if ($client->getPing() > -1) {
-					(new GuildEnterEvent($client->getGuild($guildId)))->call();
+				if (Discord::getInstance()->client->getPing() > -1) {
+					(new GuildEnterEvent(Discord::getInstance()->client->getGuild($guildId)))->call();
 				}
 				break;
 				

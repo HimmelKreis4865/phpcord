@@ -8,16 +8,21 @@ use phpcord\command\SimpleCommandMap;
 use phpcord\connection\ConnectionHandler;
 use phpcord\client\Client;
 use phpcord\connection\ConnectOptions;
-use phpcord\connection\ConvertManager;
 use phpcord\event\Event;
 use phpcord\event\EventListener;
 use phpcord\exception\ClientException;
 use phpcord\extensions\ExtensionManager;
 use phpcord\guild\MessageSentPromise;
 use phpcord\http\RestAPIHandler;
+use phpcord\input\ConsoleCommandMap;
+use phpcord\input\InputLoop;
 use phpcord\intents\IntentReceiveManager;
-use phpcord\stream\StreamHandler;
+use phpcord\stream\QueuedSender;
+use phpcord\stream\StreamLoop;
+use phpcord\stream\WebSocket;
+use phpcord\task\defaults\HeartbeatTask;
 use phpcord\task\TaskManager;
+use phpcord\thread\Thread;
 use phpcord\utils\LogStore;
 use phpcord\utils\MainLogger;
 use phpcord\utils\PermissionIds;
@@ -25,17 +30,23 @@ use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use Threaded;
 use function date;
 use function file_exists;
-use function floor;
+use function get_class;
+use function getmypid;
+use function intval;
 use function is_dir;
-use function microtime;
+use function is_subclass_of;
+use function json_decode;
 use function set_time_limit;
 use function str_replace;
 use function strlen;
+use function usleep;
+use function var_dump;
 use const DIRECTORY_SEPARATOR;
 
-final class Discord {
+final class Discord extends Threaded {
 	/** @var int the version that is used for the gateway and restapi */
 	public const VERSION = 8;
 
@@ -46,45 +57,46 @@ final class Discord {
 	public $options;
 
 	/** @var bool $debugMode */
-	public static $debugMode = false;
+	public $debugMode;
 
-	/** @var array $listeners */
-	public static $listeners = [];
+	/** @var EventListener[][] $listeners */
+	public $listeners;
 
 	/** @var int $intents */
-	protected $intents = 513;
+	protected $intents;
 
 	/** @var MessageSentPromise[] $answerHandlers */
-	public $answerHandlers = [];
+	public $answerHandlers;
 
 	/** @var self|null $lastInstance */
 	public static $lastInstance;
 
-	private $loggedIn = false;
+	private $loggedIn;
 	
 	/** @var IntentReceiveManager $intentReceiveManager */
 	public $intentReceiveManager;
 	
-	/** @var int $heartbeat_interval */
-	public $heartbeat_interval;
-	
 	/** @var null|CommandMap $commandMap */
-	private $commandMap = null;
+	private $commandMap;
 	
-	/** @var array $toSend */
-	public $toSend = [];
+	public $sslSettings;
 	
-	/** @var int|mixed $cacheLevel */
-	public static $cacheLevel = 0;
+	/** @var int|null $lastSequence */
+	public $lastSequence;
 	
-	public $sslSettings = [];
-	
-	public $reconnecting = false;
+	/** @var int $heartbeatInterval The time we need to send the heartbeat in ms */
+	public $heartbeatInterval;
 
+	/** @var ConsoleCommandMap $consoleCommandMap */
+	protected $consoleCommandMap;
+	
 	public function __construct(array $options = []) {
 		set_time_limit(0);
 		
 		self::$lastInstance = $this;
+		
+		$this->defineVariables();
+		
 		$this->registerAutoload();
 		$this->registerErrorHandler();
 		$this->registerShutdownHandler();
@@ -97,7 +109,7 @@ final class Discord {
 		MainLogger::logInfo("Starting discord application...");
 		PermissionIds::initDefinitions();
 		
-		if (isset($options["debugMode"]) and is_bool($options["debugMode"])) self::$debugMode = $options["debugMode"];
+		if (isset($options["debugMode"]) and is_bool($options["debugMode"])) $this->debugMode = $options["debugMode"];
 		
 		if (isset($options["intents"]) and is_int($options["intents"])) $this->setIntents($options["intents"]);
 	    $this->intentReceiveManager = new IntentReceiveManager();
@@ -105,16 +117,25 @@ final class Discord {
 	    foreach ($options["extension_paths"] ?? [] as $path) {
 	    	$this->registerExtensionPath($path);
 		}
+		
+		$this->commandMap = new SimpleCommandMap();
+	    $this->consoleCommandMap = new ConsoleCommandMap();
 	    
 	    MainLogger::logInfo("Loading extensions...");
 	    ExtensionManager::getInstance()->loadExtensions();
-	    
-	    if (isset($options["cache_level"])) self::$cacheLevel = $options["cache_level"];
 	    
 		MainLogger::logInfo("§aLoading complete, waiting for a login now...");
 		$this->initSSLSettings();
     }
 	
+    private function defineVariables(): void {
+		$this->debugMode = false;
+		$this->listeners = [];
+		$this->intents = 513;
+		$this->answerHandlers = [];
+		$this->loggedIn = false;
+	}
+ 
 	/**
 	 * Changes the intents to another number
 	 *
@@ -127,16 +148,23 @@ final class Discord {
 	}
 	
 	/**
-	 * Enabled the CommandMap, if you don't enable it, you won't be able to access it
+	 * Legacy method
 	 *
-	 * @api
+	 * @deprecated
 	 */
     public function enableCommandMap(): void {
-		$this->commandMap = new SimpleCommandMap();
+		
 	}
-
+	
 	/**
-	 * CommandMap needs to be enabled for this action: @see enableCommandMap()
+	 * @return ConsoleCommandMap
+	 */
+	public function getConsoleCommandMap(): ConsoleCommandMap {
+    	return $this->consoleCommandMap;
+	}
+	
+	/**
+	 * Returns the instance of the commandmap for discord commands
 	 *
 	 * @api
 	 *
@@ -175,9 +203,15 @@ final class Discord {
 		
 		MainLogger::logInfo("Authenticating REST API...");
 		RestAPIHandler::getInstance()->setAuth($token);
-		$connectionHandler = new ConnectionHandler();
+		
+		$thread = new InputLoop($this->getConsoleCommandMap());
+		$thread->start();
+		
 		MainLogger::logInfo("Starting websocket client...");
-		$connectionHandler->startConnection($this, new ConnectOptions($token, $this->intents));
+		
+		$thread2 = new StreamLoop();
+		$thread2->start();
+		$this->loop();
 	}
 	
 	public function registerExtensionPath(string $path): void {
@@ -185,6 +219,17 @@ final class Discord {
 		ExtensionManager::getInstance()->registerExtensionPath($path);
 	}
 
+	public function loop(): void {
+		while (true) {
+			usleep(50 * 1000);
+			TaskManager::getInstance()->onUpdate();
+		}
+	}
+	
+	public function runHeartbeats(): void {
+		TaskManager::getInstance()->submitTask(new HeartbeatTask($this->heartbeatInterval));
+	}
+	
 	/**
 	 * Registers Events on an EventListener subclass
 	 *
@@ -196,9 +241,10 @@ final class Discord {
 	 */
 	public function registerEvents($eventListener) {
 		if (is_string($eventListener)) $eventListener = new $eventListener();
+		if (!is_subclass_of($eventListener, EventListener::class)) return;
 		$ref = new ReflectionClass($eventListener);
 		foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-			if ($method->isStatic() or !$method->getDeclaringClass()->implementsInterface(EventListener::class) or $method->getNumberOfParameters() !== 1) continue;
+			if ($method->isStatic() or $method->getNumberOfParameters() !== 1) continue;
 			$event = $method->getParameters()[0]->getClass();
 			if ($event === null or !$event->isSubclassOf(Event::class)) continue;
 			$this->registerEvent($eventListener, $method->getName(), $event->getName());
@@ -216,7 +262,11 @@ final class Discord {
 	 */
 	public function registerEvent(EventListener $listener, string $method_name, string $event) {
 		if (!is_subclass_of($event, Event::class)) return;
-		self::$listeners[$event][] = [$listener, $method_name];
+		if (($ref = new ReflectionClass($listener))->isAnonymous())
+			throw new InvalidArgumentException("Failed to register an anonymous EventListener class");
+		$list = $this->listeners[$event];
+		$list[] = [$listener, $method_name];
+		$this->listeners[$event] = $list;
 	}
 	
 	/**
@@ -259,51 +309,6 @@ final class Discord {
 		// todo: implement this
 	}
 	
-	/**
-	 * @internal
-	 *
-	 * @param string $message
-	 * @param ConvertManager $manager
-	 * @param StreamHandler $stream
-	 */
-	public function handle(string $message, ConvertManager $manager, StreamHandler $stream) {
-		$this->registerAutoload();
-		$message = json_decode($message, true);
-		$interval = null;
-		switch (intval($message["op"])) {
-			case 10:
-				$this->heartbeat_interval = $message["d"]["heartbeat_interval"];
-				$manager->heartbeat_interval = $this->heartbeat_interval;
-				break;
-
-			case 0:
-				$this->intentReceiveManager->executeIntent($this, $message["t"], $message["d"]);
-				break;
-
-			case 11:
-				$last = $manager->last_heartbeat ?? microtime(true);
-
-				if ($this->client !== null) $this->client->ping = (int) floor(((microtime(true) - $last) * 1000));
-				break;
-		}
-	}
-	
-	/**
-	 * @internal
-	 *
-	 * @param StreamHandler $stream
-	 */
-	public function onUpdate(StreamHandler $stream) {
-		TaskManager::getInstance()->onUpdate();
-		
-		if (!$this->reconnecting) {
-			foreach ($this->toSend as $key => $item) {
-				unset($this->toSend[$key]);
-				$stream->write($item);
-			}
-		}
-	}
-
 	/**
 	 * Returns the client that was made during login procedure
 	 *

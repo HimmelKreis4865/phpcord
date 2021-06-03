@@ -4,12 +4,13 @@ namespace phpcord\http;
 
 use phpcord\Discord;
 use phpcord\utils\InstantiableTrait;
+use Threaded;
 use function array_merge;
 use function is_null;
 use function json_encode;
 use function urlencode;
 
-final class RestAPIHandler {
+final class RestAPIHandler extends Threaded	{
 	use InstantiableTrait;
 
 	/** @var string $auth */

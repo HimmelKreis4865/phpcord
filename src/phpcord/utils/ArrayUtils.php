@@ -2,6 +2,7 @@
 
 namespace phpcord\utils;
 
+use function is_iterable;
 use function is_numeric;
 
 class ArrayUtils {
@@ -41,5 +42,14 @@ class ArrayUtils {
 				}
 			}
 		}
+	}
+	
+	public static function asArray(iterable $iterable): array {
+		$ar = [];
+		foreach ($iterable as $k => $v) {
+			if (is_iterable($v)) $v = self::asArray($v);
+			$ar[$k] = $v;
+		}
+		return $ar;
 	}
 }

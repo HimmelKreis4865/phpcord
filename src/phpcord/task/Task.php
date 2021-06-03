@@ -4,6 +4,7 @@ namespace phpcord\task;
 
 use phpcord\utils\MainLogger;
 use function mt_rand;
+use function var_dump;
 use const PHP_INT_MAX;
 
 abstract class Task {
@@ -69,9 +70,9 @@ abstract class Task {
 	 *
 	 * @internal
 	 *
-	 * @param int $second
+	 * @param int $tick
 	 */
-	final public function executeUpdate(int $second) {
+	final public function executeUpdate(int $tick) {
 		if (!$this->repeating and $this->lastRun !== -1) {
 			$this->cancel();
 			return;
@@ -80,9 +81,9 @@ abstract class Task {
 			$this->delay--;
 			return;
 		}
-		if ($this->lastRun === -1 or ($second >= ($this->lastRun + $this->interval))) {
-			$this->lastRun = $second;
-			$this->onRun($second);
+		if ($this->lastRun === -1 or ($tick >= ($this->lastRun + $this->interval))) {
+			$this->lastRun = $tick;
+			$this->onRun($tick);
 		}
 	}
 	
@@ -91,7 +92,7 @@ abstract class Task {
 	 *
 	 * @api
 	 *
-	 * @param int $second
+	 * @param int $tick
 	 */
-	abstract public function onRun(int $second): void;
+	abstract public function onRun(int $tick): void;
 }
