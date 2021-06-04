@@ -11,6 +11,7 @@ use phpcord\event\message\MessageDeleteEvent;
 use phpcord\event\message\MessageSendEvent;
 use phpcord\event\message\MessageUpdateEvent;
 use phpcord\utils\MessageInitializer;
+use function var_dump;
 
 class MessageHandler extends BaseIntentHandler {
 
@@ -19,6 +20,7 @@ class MessageHandler extends BaseIntentHandler {
 	}
 
 	public function handle(Discord $discord, string $intent, array $data) {
+		var_dump("handling");
 		if (($dmChannel = $discord->getClient()->getDMChannel($data["channel_id"] ?? "-1")) instanceof DMChannel) {
 			$this->handleDM($discord, $intent, $dmChannel, $data);
 			return;

@@ -18,6 +18,7 @@ use phpcord\intents\IntentReceiveManager;
 use phpcord\stream\OPCodeHandler;
 use phpcord\stream\StreamLoop;
 use phpcord\stream\ThreadConverter;
+use phpcord\task\AsyncPool;
 use phpcord\task\defaults\HeartbeatTask;
 use phpcord\task\TaskManager;
 use phpcord\utils\LogStore;
@@ -98,6 +99,9 @@ final class Discord {
 	/** @var null | int $lastACK */
 	public $lastACK = null;
 	
+	/** @var AsyncPool $asyncPool */
+	protected $asyncPool;
+	
 	public function __construct(array $options = []) {
 		set_time_limit(0);
 		
@@ -128,6 +132,7 @@ final class Discord {
 	    $this->consoleCommandMap = new ConsoleCommandMap();
 	    
 		$this->opCodeHandler = new OPCodeHandler();
+		$this->asyncPool = new AsyncPool();
 	    
 	    MainLogger::logInfo("Loading extensions...");
 	    ExtensionManager::getInstance()->loadExtensions();
@@ -154,6 +159,13 @@ final class Discord {
 	 */
     public function enableCommandMap(): void {
 		
+	}
+	
+	/**
+	 * @return AsyncPool
+	 */
+	public function getAsyncPool(): AsyncPool {
+		return $this->asyncPool;
 	}
 	
 	/**
@@ -226,12 +238,14 @@ final class Discord {
 			usleep(50 * 1000);
 			TaskManager::getInstance()->onUpdate();
 			$this->readThreads();
+			$this->getAsyncPool()->tick();
 		}
 	}
 	
 	public function readThreads(): void {
 		//var_dump($this->converter->pushThreadToMain);
 		foreach ($this->converter->pushThreadToMain as $k => $message) {
+			var_dump("got $message");
 			$this->handleMessage($message);
 			unset($this->converter->pushThreadToMain[$k]);
 		}

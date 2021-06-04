@@ -45,7 +45,7 @@ final class RestAPIHandler {
 			$result = $request->submit();
 			var_dump($result);
 			if (strval(($code = HTTPRequest::getResponseCode($result[1][0])))[0] != "2") {
-				MainLogger::logWarning("Request failure: {$request->url} answered with " . ($code));
+				MainLogger::logWarning("Request failure: {$request->url} answered with error code " . ($code));
 				$rejecter(new RequestFailure($code, $result[0]));
 				return;
 			}

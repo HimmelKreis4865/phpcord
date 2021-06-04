@@ -174,7 +174,7 @@ class Guild {
 		$this->features = $features;
 		$this->welcomeScreen = $welcomeScreen;
 		$this->premium_tier = $premium_tier;
-		$this->getBanList(); // initializing the ban-list
+		//$this->getBanList(); // initializing the ban-list   todo: fix this function
 	}
 
 	/**

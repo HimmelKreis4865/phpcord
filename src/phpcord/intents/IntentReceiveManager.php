@@ -47,6 +47,7 @@ class IntentReceiveManager {
 	 * @param array $data
 	 */
 	final public function executeIntent(Discord $discord, string $intent, array $data) {
+		var_dump("executing $intent");
 		if (!isset($this->intentHandlers[$intent])) return;
 		foreach ($this->intentHandlers[$intent] as $class) {
 			/** @var BaseIntentHandler $class */
