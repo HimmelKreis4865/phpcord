@@ -8,6 +8,8 @@ use phpcord\guild\MessageSentPromise;
 use phpcord\guild\store\GuildStoredMessage;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\MessageInitializer;
+use Promise\Promise;
+use RuntimeException;
 use function json_decode;
 
 abstract class BaseTextChannel extends GuildChannel {
@@ -61,15 +63,13 @@ abstract class BaseTextChannel extends GuildChannel {
 	 *
 	 * @param string|Sendable $message
 	 *
-	 * @return MessageSentPromise
+	 * @return Promise
 	 */
-	public function send($message): MessageSentPromise {
+	public function send($message): Promise {
 		if (is_string($message) or is_numeric($message)) $message = new TextMessage(strval($message));
-		if (!$message instanceof Sendable) return new MessageSentPromise(true);
-		$result = RestAPIHandler::getInstance()->sendMessage($this->id, $message->getFormattedData(), $message->getContentType());
-		if (!$result or $result->isFailed()) return new MessageSentPromise(true);
-		if (!($result = json_decode($result->getRawData(), true))) return new MessageSentPromise(true);
-		return new MessageSentPromise(false, MessageInitializer::fromStore($this->getGuildId(), $result), $this->getId());
+		if (!$message instanceof Sendable)
+			throw new RuntimeException("Expected subclass of interface " . Sendable::class);
+		return RestAPIHandler::getInstance()->sendMessage($this->getGuildId(), $this->getId(), $message->getFormattedData(), $message->getContentType());
 	}
 	
 	/**
@@ -79,20 +79,12 @@ abstract class BaseTextChannel extends GuildChannel {
 	 *
 	 * @param int $limit
 	 *
-	 * @return array
+	 * @return Promise
 	 */
-	public function getMessages(int $limit = 50): array {
+	public function getMessages(int $limit = 50): Promise {
 		if ($limit < 1 or $limit > 100) throw new OutOfBoundsException("You can only get 1-100 messages per call!");
 
-		$response = json_decode(RestAPIHandler::getInstance()->getMessages($this->id, $limit)->getRawData(), true);
-		$messages = [];
-
-		foreach ($response as $value) {
-			$msg = MessageInitializer::fromStore($this->getGuildId(), $value);
-			$messages[$msg->id] = $msg;
-		}
-
-		return $messages;
+		return RestAPIHandler::getInstance()->getMessages($this->getId(), $this->getGuildId(), $limit);
 	}
 	
 	/**
@@ -102,13 +94,10 @@ abstract class BaseTextChannel extends GuildChannel {
 	 *
 	 * @param string $id
 	 *
-	 * @return GuildStoredMessage|null
+	 * @return Promise
 	 */
-	public function getMessage(string $id): ?GuildStoredMessage {
-		$result = RestAPIHandler::getInstance()->getMessage($this->getId(), $id);
-		if ($result->isFailed()) return null;
-		if (!is_array(($array = @json_decode($result->getRawData(), true)))) return null;
-		return MessageInitializer::fromStore($this->getGuildId(), $array);
+	public function getMessage(string $id): Promise {
+		return RestAPIHandler::getInstance()->getMessage($this->getId(), $this->getGuildId(), $id);
 	}
 	
 	/**
@@ -120,7 +109,7 @@ abstract class BaseTextChannel extends GuildChannel {
 	 *
 	 * @return array
 	 */
-	public function getMessageIds(int $limit = 50): array {
+	public function getMessageIds(int $limit = 50): Promise {
 		return array_keys($this->getMessages($limit));
 	}
 	

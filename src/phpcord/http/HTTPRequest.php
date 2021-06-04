@@ -6,9 +6,17 @@ namespace phpcord\http;
 
 use phpcord\Discord;
 use phpcord\utils\ArrayUtils;
+use function array_filter;
+use function array_map;
 use function array_merge;
+use function array_shift;
 use function count;
+use function explode;
 use function file_get_contents;
+use function getallheaders;
+use function headers_list;
+use function intval;
+use function is_numeric;
 use function strpos;
 use function stream_context_create;
 use function urlencode;
@@ -61,6 +69,10 @@ class HTTPRequest {
 		$this->http["header"] .= "$key: $value\r\n";
 	}
 	
+	public function ignoreErrors(): void {
+		$this->http["ignore_errors"] = true;
+	}
+	
 	/**
 	 * Sets a raw get peace to the url, e.g: https://example.com?test=value&key=test
 	 *
@@ -107,14 +119,33 @@ class HTTPRequest {
 	 *
 	 * @api
 	 *
-	 * @return string|null|bool
+	 * @return array
 	 */
-	public function submit() {
+	public function submit(): array {
 		$array = [
 			"http" => $this->http
 		];
-		if (count(Discord::getInstance()->sslSettings) > 0) $array = array_merge($array, ["ssl" => ArrayUtils::asArray(Discord::getInstance()->sslSettings)]);
+		//if (count(Discord::getInstance()->sslSettings) > 0) $array = array_merge($array, ["ssl" => ArrayUtils::asArray(Discord::getInstance()->sslSettings)]);
 		$context = stream_context_create($array);
-		return @file_get_contents($this->url, false, $context);
+		$res = file_get_contents($this->url, false, $context);
+		return [$res, $http_response_header];
+	}
+	
+	/**
+	 * Returns the response code of the last request done
+	 *
+	 * @api
+	 *
+	 * @param string $firstHeaderLine
+	 *
+	 * @return int|null
+	 */
+	public static function getResponseCode(string $firstHeaderLine): ?int {
+		$ar = array_map(function($k): int {
+			return intval($k);
+		}, array_filter(explode(" ", $firstHeaderLine), function ($k): bool {
+			return is_numeric($k);
+		}));
+		return array_shift($ar);
 	}
 }

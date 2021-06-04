@@ -12,7 +12,7 @@
     "ext-yaml": "*",
     "ext-sockets": "*",
     "ext-pthreads": "*",
-    "php-promise/promise": "*"
+    "himmelkreis4865/promise": "*"
   },
   "autoload": {
     "psr-4": {

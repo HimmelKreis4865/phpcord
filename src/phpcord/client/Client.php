@@ -18,7 +18,7 @@ use function is_array;
 use function is_string;
 use function json_decode;
 
-class Client extends Threaded {
+class Client {
 	/** @var Guild[]|null $guild todo: maybe make this to a SplFixedArray */
 	public $guilds;
 	

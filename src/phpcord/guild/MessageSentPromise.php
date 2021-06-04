@@ -14,8 +14,6 @@ class MessageSentPromise {
 	/** @var null | callable $answerCallable */
 	public $answerCallable = null;
 
-	/** @var bool $failed */
-	public $failed;
 	
 	/** @var GuildMessage|null $message */
 	protected $message;
@@ -23,14 +21,11 @@ class MessageSentPromise {
 	/**
 	 * MessageSentPromise constructor.
 	 *
-	 * @param bool $failed
 	 * @param GuildMessage|null $message
-	 * @param string|null $channelId
 	 */
-	public function __construct(bool $failed, GuildMessage $message = null, string $channelId = null) {
-		$this->channelId = $channelId;
+	public function __construct(GuildMessage $message = null) {
+		$this->channelId = $message->getChannelId();
 		$this->message = $message;
-		$this->failed = $failed;
 	}
 
 	/**
@@ -43,7 +38,6 @@ class MessageSentPromise {
 	 */
 	public function setAnswerHandler($member, callable $answerCallable): void {
 		if ($member instanceof GuildMember) $member = $member->getId();
-		if ($this->isFailed()) return;
 		$this->id = $member;
 		$this->answerCallable = $answerCallable;
 		$this->storePromise();
@@ -54,15 +48,6 @@ class MessageSentPromise {
 	 */
 	protected function storePromise() {
 		Discord::$lastInstance->answerHandlers[$this->channelId . ":" . $this->id] = $this;
-	}
-
-	/**
-	 * Return whether message sending / answering failed
-	 *
-	 * @return bool
-	 */
-	public function isFailed(): bool {
-		return $this->failed;
 	}
 	
 	/**

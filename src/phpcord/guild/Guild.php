@@ -17,6 +17,7 @@ use phpcord\utils\IntUtils;
 use InvalidArgumentException;
 use phpcord\utils\Math;
 use phpcord\utils\Permission;
+use Promise\Promise;
 use function array_filter;
 use function array_map;
 use function is_int;
@@ -391,15 +392,10 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @return AuditLog
+	 * @return Promise
 	 */
-	public function getAuditLog(): AuditLog {
-		$auditlog = $this->auditlog;
-		if (!$auditlog instanceof AuditLog) $auditlog = AuditLogInitializer::create($this->id, json_decode(RestAPIHandler::getInstance()->getAuditLog($this->getId())->getRawData(), true) ?? []);
-		
-		if (CacheLevels::canCache(CacheLevels::TYPE_BAN_LIST)) $this->auditlog = $auditlog;
-		
-		return $auditlog;
+	public function getAuditLog(): Promise {
+		return RestAPIHandler::getInstance()->getAuditLog($this->getId());
 	}
 
 	/**

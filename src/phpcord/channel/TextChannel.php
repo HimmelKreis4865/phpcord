@@ -14,7 +14,9 @@ use phpcord\utils\DateUtils;
 use phpcord\utils\GuildSettingsInitializer;
 use phpcord\utils\IntUtils;
 use phpcord\utils\MessageInitializer;
+use Promise\Promise;
 use function array_filter;
+use function array_keys;
 use function array_map;
 use function array_merge;
 use function is_string;
@@ -51,7 +53,7 @@ class TextChannel extends ExtendedTextChannel {
 	 *
 	 * @param int $messages
 	 */
-	public function bulkDelete(int $messages = 1) {
+	public function bulkDelete(int $messages = 1): void {
 		if ($messages < 1 or $messages > 100) throw new OutOfBoundsException("You can only delete 1-100 messages per call!");
 
 		if ($messages === 1) {
@@ -59,7 +61,10 @@ class TextChannel extends ExtendedTextChannel {
 			return;
 		}
 
-		RestAPIHandler::getInstance()->bulkDelete($this->id, $this->getMessageIds($messages));
+		$this->getMessages($messages)->then(function (array $messages) {
+			$ids = array_keys($messages);
+			RestAPIHandler::getInstance()->bulkDelete($this->id, $ids);
+		});
 	}
 	
 	/**
@@ -68,9 +73,11 @@ class TextChannel extends ExtendedTextChannel {
 	 * @api
 	 *
 	 * @param string $id
+	 *
+	 * @return Promise
 	 */
-	public function deleteMessage(string $id) {
-		RestAPIHandler::getInstance()->deleteMessage($id, $this->getId());
+	public function deleteMessage(string $id): Promise {
+		return RestAPIHandler::getInstance()->deleteMessage($id, $this->getId());
 	}
 	
 	/**

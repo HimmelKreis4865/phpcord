@@ -29,6 +29,7 @@ use ReflectionException;
 use ReflectionMethod;
 use function date;
 use function file_exists;
+use function ini_set;
 use function is_dir;
 use function is_subclass_of;
 use function json_decode;
@@ -301,7 +302,7 @@ final class Discord {
 	 *
 	 * @internal
 	 */
-	protected function registerAutoload() {
+	public static function registerAutoload() {
 		spl_autoload_register(function($class) {
 			$file = __DIR__ . DIRECTORY_SEPARATOR . str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
 			if (!class_exists($class) and file_exists($file)) require_once $file;
