@@ -11,20 +11,16 @@ use phpcord\intents\handlers\MessageHandler;
 use phpcord\intents\handlers\ReactionHandler;
 use phpcord\Discord;
 use Threaded;
+use function get_class;
 use function var_dump;
 
-class IntentReceiveManager extends Threaded {
+class IntentReceiveManager {
 
 	/** @var string[][] $intentHandlers */
 	protected $intentHandlers = [];
 	
-	/** @var string[] */
-	protected $registeredClasses = [];
-	
 	/**
 	 * Registers a new intent handler to the system
-	 *
-	 * @warning Please don't register an anonymous class, it will throw an Exception!
 	 *
 	 * @internal
 	 *
@@ -36,9 +32,7 @@ class IntentReceiveManager extends Threaded {
 		foreach (array_filter($intentHandler->getIntents(), function($key) {
 			return IntentsManager::isValidIntent($key);
 		}) as $intent) {
-			$list = $this->intentHandlers[$intent];
-			$list[] = get_class($intentHandler);
-			$this->intentHandlers[$intent] = $list;
+			$this->intentHandlers[$intent][] = get_class($intentHandler);
 		}
 		return true;
 	}

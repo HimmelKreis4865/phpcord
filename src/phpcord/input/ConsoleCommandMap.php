@@ -4,7 +4,6 @@ namespace phpcord\input;
 
 
 use phpcord\utils\ArrayUtils;
-use Threaded;
 use function array_merge;
 use function array_shift;
 use function explode;
@@ -12,7 +11,7 @@ use function is_string;
 use function strtolower;
 use function var_dump;
 
-final class ConsoleCommandMap extends Threaded {
+final class ConsoleCommandMap {
 	
 	/** @var ConsoleCommand[] $commands */
 	protected $commands = [];

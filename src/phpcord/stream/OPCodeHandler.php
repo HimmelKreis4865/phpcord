@@ -3,45 +3,45 @@
 namespace phpcord\stream;
 
 use phpcord\Discord;
+use phpcord\utils\PacketCreator;
 use function array_shift;
-use function is_numeric;
 use function json_encode;
 use function microtime;
 use function substr;
-use function var_dump;
 
 class OPCodeHandler {
 	
 	public function __call(string $name, array $parameters) {
 		if (substr($name, 0, 2) !== "__") return;
 		$name = substr($name, 2, strlen($name) - 2);
-		/** @var WebSocket $ws */
-		/** @var StreamLoop $loop */
-		if (!is_numeric($name) or count($parameters) < 2 or !(($ws = array_shift($parameters)) instanceof WebSocket) or !(($loop = array_shift($parameters)) instanceof StreamLoop)) return;
 		
+		/** @var Discord $discord */
+		$discord = array_shift($parameters);
+		/** @var array $data $data */
 		$data = array_shift($parameters);
+		
 		if (isset($data["s"])) Discord::getInstance()->lastSequence = $data["s"];
 		
 		switch (intval($name)) {
 			case 0:
-				Discord::getInstance()->getIntentReceiveManager()->executeIntent(Discord::getInstance(), $data["t"], $data["d"]);
+				$discord->getIntentReceiveManager()->executeIntent($discord, $data["t"], $data["d"]);
 				break;
 			case 1:
-				$ws->write(json_encode(["op" => 11]));
+				$discord->pushToSocket(json_encode(["op" => 11]));
 				break;
 				
 			case 7:
 			case 9:
-				$ws->invalidate();
+				$discord->pushToSocket(StreamLoop::PREFIX_INVALIDATE);
 				break;
 			case 10:
-				Discord::getInstance()->heartbeatInterval = $data["d"]["heartbeat_interval"];
-				Discord::getInstance()->runHeartbeats();
-				$loop->identify($ws);
+				$discord->heartbeatInterval = $data["d"]["heartbeat_interval"];
+				$discord->runHeartbeats();
+				$discord->pushToSocket(PacketCreator::buildIdentify($discord->token, $discord->intents));
 				break;
 				
 			case 11:
-				$loop->lastACK = microtime(true);
+				$discord->lastACK = microtime(true);
 				break;
 		}
 	}

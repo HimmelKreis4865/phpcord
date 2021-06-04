@@ -9,17 +9,21 @@ use function fclose;
 use function fread;
 use function fsockopen;
 use function fwrite;
+use function get_resource_id;
+use function get_resource_type;
 use function is_resource;
 use function openssl_random_pseudo_bytes;
 use function socket_get_status;
+use function socket_set_blocking;
+use function socket_set_nonblock;
 use function stream_set_blocking;
+use function stream_set_timeout;
 use function strpos;
 use function substr;
-use function var_dump;
 
 class WebSocket {
 	/** @var resource $stream */
-	protected $stream;
+	public $stream;
 	
 	/**
 	 * WebSocket constructor.
@@ -27,14 +31,23 @@ class WebSocket {
 	 * @param string $address
 	 * @param int $port
 	 * @param bool $nonBlock
+	 * @param bool $set
 	 */
-	public function __construct(string $address, int $port, bool $nonBlock = false) {
+	public function __construct(string $address, int $port, bool $nonBlock = false, bool $set = true) {
+		if (!$set) return;
 		$this->stream = fsockopen($address, $port, $error_code, $error_message);
+		//socket_set_blocking($this->stream, false);
 		if ($error_code !== 0 or !$this->stream)
 			throw new RuntimeException("Failed to connect to websocket [$error_code] $error_message");
 		
 		if ($nonBlock) stream_set_blocking($this->stream, false);
 		$this->sendHeaders();
+	}
+	
+	public static function fromStream($stream): WebSocket {
+		$sock = new WebSocket("-", 1, false, false);
+		$sock->stream = $stream;
+		return $sock;
 	}
 	
 	public function isInvalid(): bool {

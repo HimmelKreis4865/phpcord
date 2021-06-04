@@ -14,23 +14,35 @@ class StreamLoop extends Thread {
 	
 	public const GATEWAY = "ssl://gateway.discord.gg";
 	
+	public const PREFIX_INVALIDATE = "--invalidate";
+	
 	public const MAX_FAILURES = 5;
 	
 	public $lastACK;
 	
 	protected $failureCount = 0;
 
+	protected $converter;
+	
+	public function __construct(ThreadConverter $converter) {
+		$this->converter = $converter;
+	}
+	
 	public function onRun() {
-		$opCodeHandler = new OPCodeHandler();
-		
 		// todo: dynamic autoload for threads
 		$ws = new WebSocket(self::GATEWAY, 443);
-
+		$thread = new SocketWriteThread($this->converter, $ws->stream);
+		$thread->start();
 		while (true) {
 			usleep(1000 * 50);
 			if ($ws->isInvalid()) {
 				$ws->close();
 				$ws = new WebSocket(self::GATEWAY, 443);
+				$this->converter->running = false;
+				usleep(1000 * 50);
+				$this->converter->running = true;
+				$thread2 = new SocketWriteThread($this->converter, $ws->stream);
+				$thread2->start();
 				if (++$this->failureCount > self::MAX_FAILURES)
 					throw new RuntimeException("Failed to reconnect the gateway connection!");
 			}
@@ -41,20 +53,7 @@ class StreamLoop extends Thread {
 			}
 			$this->failureCount = 0;
 			MainLogger::logDebug("Received $message");
-			$data = json_decode($message, true);
-			if (!$data or !isset($data["op"])) return;
-			$opCodeHandler->{"__" . $data["op"]}($ws, $this, $data);
-			
-			if (QueuedSender::getInstance()->has()) {
-				foreach (QueuedSender::getInstance()->getFullQueue() as $buffer) {
-					$ws->write($buffer);
-				}
-			}
+			$this->converter->pushThreadToMain[] = $message;
 		}
-	}
-	
-	public function identify(WebSocket $socket): void {
-		// todo: change this
-		$socket->write(json_encode(["op" => 2, "d" => ["token" => "", "intents" => 513, "properties" => ["\$os" => "linux", "\$browser" => "my_library", "\$device" => "my_library"]]]));
 	}
 }

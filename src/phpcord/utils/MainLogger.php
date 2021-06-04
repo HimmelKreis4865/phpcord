@@ -112,7 +112,8 @@ class MainLogger {
 	 * @param string $debug
 	 */
 	public static function logDebug(string $debug) {
-		if (Discord::$debugMode) self::log("§7[DEBUG]: " . $debug);
+		self::logInfo($debug);
+		//if (Discord::getInstance()->debugMode) self::log("§7[DEBUG]: " . $debug);
 	}
 	
 	/**

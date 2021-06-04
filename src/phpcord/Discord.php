@@ -5,9 +5,7 @@ namespace phpcord;
 use BadMethodCallException;
 use phpcord\command\CommandMap;
 use phpcord\command\SimpleCommandMap;
-use phpcord\connection\ConnectionHandler;
 use phpcord\client\Client;
-use phpcord\connection\ConnectOptions;
 use phpcord\event\Event;
 use phpcord\event\EventListener;
 use phpcord\exception\ClientException;
@@ -17,12 +15,11 @@ use phpcord\http\RestAPIHandler;
 use phpcord\input\ConsoleCommandMap;
 use phpcord\input\InputLoop;
 use phpcord\intents\IntentReceiveManager;
-use phpcord\stream\QueuedSender;
+use phpcord\stream\OPCodeHandler;
 use phpcord\stream\StreamLoop;
-use phpcord\stream\WebSocket;
+use phpcord\stream\ThreadConverter;
 use phpcord\task\defaults\HeartbeatTask;
 use phpcord\task\TaskManager;
-use phpcord\thread\Thread;
 use phpcord\utils\LogStore;
 use phpcord\utils\MainLogger;
 use phpcord\utils\PermissionIds;
@@ -30,23 +27,20 @@ use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use Threaded;
 use function date;
 use function file_exists;
-use function get_class;
-use function getmypid;
-use function intval;
 use function is_dir;
 use function is_subclass_of;
 use function json_decode;
 use function set_time_limit;
 use function str_replace;
 use function strlen;
+use function substr;
 use function usleep;
 use function var_dump;
 use const DIRECTORY_SEPARATOR;
 
-final class Discord extends Threaded {
+final class Discord {
 	/** @var int the version that is used for the gateway and restapi */
 	public const VERSION = 8;
 
@@ -54,24 +48,25 @@ final class Discord extends Threaded {
 	public $client;
 
 	/** @var array $options */
-	public $options;
-
-	/** @var bool $debugMode */
-	public $debugMode;
+	public $options = [];
 
 	/** @var EventListener[][] $listeners */
-	public $listeners;
+	public $listeners = [];
 
 	/** @var int $intents */
-	protected $intents;
+	public $intents = 513;
 
 	/** @var MessageSentPromise[] $answerHandlers */
-	public $answerHandlers;
+	public $answerHandlers = [];
 
 	/** @var self|null $lastInstance */
 	public static $lastInstance;
+	
+	/** @var bool $debugMode */
+	public $debugMode = true;
 
-	private $loggedIn;
+	/** @var bool $loggedIn */
+	private $loggedIn = false;
 	
 	/** @var IntentReceiveManager $intentReceiveManager */
 	public $intentReceiveManager;
@@ -79,7 +74,7 @@ final class Discord extends Threaded {
 	/** @var null|CommandMap $commandMap */
 	private $commandMap;
 	
-	public $sslSettings;
+	public $sslSettings = [];
 	
 	/** @var int|null $lastSequence */
 	public $lastSequence;
@@ -90,12 +85,22 @@ final class Discord extends Threaded {
 	/** @var ConsoleCommandMap $consoleCommandMap */
 	protected $consoleCommandMap;
 	
+	/** @var OPCodeHandler $opCodeHandler */
+	protected $opCodeHandler;
+	
+	/** @var ThreadConverter $converter */
+	protected $converter;
+	
+	/** @var string $token */
+	public $token;
+	
+	/** @var null | int $lastACK */
+	public $lastACK = null;
+	
 	public function __construct(array $options = []) {
 		set_time_limit(0);
 		
 		self::$lastInstance = $this;
-		
-		$this->defineVariables();
 		
 		$this->registerAutoload();
 		$this->registerErrorHandler();
@@ -121,20 +126,14 @@ final class Discord extends Threaded {
 		$this->commandMap = new SimpleCommandMap();
 	    $this->consoleCommandMap = new ConsoleCommandMap();
 	    
+		$this->opCodeHandler = new OPCodeHandler();
+	    
 	    MainLogger::logInfo("Loading extensions...");
 	    ExtensionManager::getInstance()->loadExtensions();
 	    
 		MainLogger::logInfo("§aLoading complete, waiting for a login now...");
 		$this->initSSLSettings();
     }
-	
-    private function defineVariables(): void {
-		$this->debugMode = false;
-		$this->listeners = [];
-		$this->intents = 513;
-		$this->answerHandlers = [];
-		$this->loggedIn = false;
-	}
  
 	/**
 	 * Changes the intents to another number
@@ -192,7 +191,7 @@ final class Discord extends Threaded {
 
 		if (is_null($token) and !isset($this->options["token"])) throw new BadMethodCallException("Couldn't login to Discord since there is no token specified");
 
-		$token = $token ?? $this->options["token"];
+		$this->token = $token = $token ?? $this->options["token"];
 
 		$this->loggedIn = true;
 
@@ -204,12 +203,14 @@ final class Discord extends Threaded {
 		MainLogger::logInfo("Authenticating REST API...");
 		RestAPIHandler::getInstance()->setAuth($token);
 		
-		$thread = new InputLoop($this->getConsoleCommandMap());
+		$this->converter = new ThreadConverter();
+		
+		$thread = new InputLoop($this->converter);
 		$thread->start();
 		
 		MainLogger::logInfo("Starting websocket client...");
 		
-		$thread2 = new StreamLoop();
+		$thread2 = new StreamLoop($this->converter);
 		$thread2->start();
 		$this->loop();
 	}
@@ -223,7 +224,33 @@ final class Discord extends Threaded {
 		while (true) {
 			usleep(50 * 1000);
 			TaskManager::getInstance()->onUpdate();
+			$this->readThreads();
 		}
+	}
+	
+	public function readThreads(): void {
+		//var_dump($this->converter->pushThreadToMain);
+		foreach ($this->converter->pushThreadToMain as $k => $message) {
+			$this->handleMessage($message);
+			unset($this->converter->pushThreadToMain[$k]);
+		}
+	}
+	
+	public function pushToSocket(string $message) {
+		var_dump("pushing $message");
+		$this->converter->pushMainToThread[] = $message;
+	}
+	
+	private function handleMessage(string $message): void {
+		if (strlen($message) > InputLoop::INPUT_PREFIX and substr($message, 0, strlen(InputLoop::INPUT_PREFIX)) === InputLoop::INPUT_PREFIX) {
+			// console command
+			$this->getConsoleCommandMap()->executeCommand(substr($message, strlen(InputLoop::INPUT_PREFIX)));
+			return;
+		}
+		// gateway message
+		$data = json_decode($message, true);
+		if (!$data) return;
+		$this->opCodeHandler->{"__" . $data["op"]}($this, $data);
 	}
 	
 	public function runHeartbeats(): void {
@@ -264,7 +291,7 @@ final class Discord extends Threaded {
 		if (!is_subclass_of($event, Event::class)) return;
 		if (($ref = new ReflectionClass($listener))->isAnonymous())
 			throw new InvalidArgumentException("Failed to register an anonymous EventListener class");
-		$list = $this->listeners[$event];
+		$list = $this->listeners[$event] ?? [];
 		$list[] = [$listener, $method_name];
 		$this->listeners[$event] = $list;
 	}

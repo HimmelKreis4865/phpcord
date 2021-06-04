@@ -3,10 +3,9 @@
 namespace phpcord\task;
 
 use phpcord\utils\InstantiableTrait;
-use Threaded;
 use function var_dump;
 
-final class TaskManager extends Threaded {
+final class TaskManager {
 	use InstantiableTrait;
 	
 	/** @var Task[] $tasks */

@@ -2,6 +2,7 @@
 
 namespace phpcord\input;
 
+use phpcord\stream\ThreadConverter;
 use phpcord\thread\Thread;
 use function fopen;
 use function fread;
@@ -9,10 +10,12 @@ use function var_dump;
 
 class InputLoop extends Thread {
 	
-	protected $map;
+	public const INPUT_PREFIX = "CONSOLE::";
 	
-	public function __construct(ConsoleCommandMap $map) {
-		$this->map = $map;
+	protected $converter;
+	
+	public function __construct(ThreadConverter $converter) {
+		$this->converter = $converter;
 	}
 	
 	public function onRun() {
@@ -20,7 +23,7 @@ class InputLoop extends Thread {
 		while (true) {
 			$in = trim(rtrim(fread($stream, 1024)));
 			if ($in) {
-				$this->map->executeCommand($in);
+				$this->converter->pushThreadToMain[] = self::INPUT_PREFIX . $in;
 			}
 		}
 	}
