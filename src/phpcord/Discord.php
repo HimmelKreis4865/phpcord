@@ -96,6 +96,9 @@ final class Discord {
 	/** @var string $token */
 	public $token;
 	
+	/** @var null|int $heartbeatTask */
+	protected $heartbeatTask;
+	
 	/** @var null | int $lastACK */
 	public $lastACK = null;
 	
@@ -269,7 +272,10 @@ final class Discord {
 	}
 	
 	public function runHeartbeats(): void {
-		TaskManager::getInstance()->submitTask(new HeartbeatTask($this->heartbeatInterval));
+		if ($this->heartbeatTask !== null) TaskManager::getInstance()->getTask($this->heartbeatTask)->cancel();
+		$task = new HeartbeatTask($this->heartbeatInterval);
+		$this->heartbeatTask = $task->id;
+		TaskManager::getInstance()->submitTask($task);
 	}
 	
 	/**

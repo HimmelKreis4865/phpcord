@@ -2,6 +2,7 @@
 
 namespace phpcord\stream;
 
+use phpcord\thread\Thread;
 use phpcord\utils\MainLogger;
 use RuntimeException;
 use function base64_encode;
@@ -167,6 +168,6 @@ class WebSocket {
 		for ($i = 0; $i < strlen($buffer); $i++)
 			$buffer[$i] = chr(ord($buffer[$i]) ^ ord($mask[$i % 4]));
 		
-		return (fwrite($this->stream, $header . $buffer) === strlen($buffer));
+		return (fwrite($this->stream, $header . $buffer) >= strlen($buffer));
 	}
 }

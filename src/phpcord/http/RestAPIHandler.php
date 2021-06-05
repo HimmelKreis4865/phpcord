@@ -86,6 +86,7 @@ final class RestAPIHandler extends Threaded	{
 	}
 
 	public function sendMessage(string $guildId, string $channelId, string $data, string $contentType): Promise {
+		var_dump($data);
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages", HTTPRequest::REQUEST_POST, false);
 		$request->setContentType($contentType);
 		$request->addHTTPData("content", $data);

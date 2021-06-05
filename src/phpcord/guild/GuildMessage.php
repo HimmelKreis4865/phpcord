@@ -8,6 +8,7 @@ use phpcord\channel\NewsChannel;
 use phpcord\channel\Sendable;
 use phpcord\channel\TextMessage;
 use phpcord\Discord;
+use phpcord\guild\component\MessageComponent;
 use phpcord\guild\store\GuildStoredMessage;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
@@ -109,6 +110,7 @@ class GuildMessage {
 	 * @param bool $pinned
 	 * @param GuildStoredMessage|null $referenced_message
 	 * @param array $attachments
+	 * @param MessageComponent[] $components
 	 * @param string|null $edited_timestamp
 	 * @param int $type
 	 * @param int $flags
@@ -117,7 +119,7 @@ class GuildMessage {
 	 * @param array $mention_roles
 	 * @param array $reactions
 	 */
-	public function __construct(string $guildId, string $id, string $channelId, string $content, ?GuildMember $member, ?GuildReceivedEmbed $embed = null, string $timestamp = "", bool $tts = false, bool $pinned = false, ?GuildStoredMessage $referenced_message = null, array $attachments = [], ?string $edited_timestamp = null, int $type = 0, int $flags = 0, bool $mention_everyone = false, array $mentions = [], array $mention_roles = [], array $reactions = []) {
+	public function __construct(string $guildId, string $id, string $channelId, string $content, ?GuildMember $member, ?GuildReceivedEmbed $embed = null, string $timestamp = "", bool $tts = false, bool $pinned = false, ?GuildStoredMessage $referenced_message = null, array $attachments = [], array $components = [], ?string $edited_timestamp = null, int $type = 0, int $flags = 0, bool $mention_everyone = false, array $mentions = [], array $mention_roles = [], array $reactions = []) {
 		$this->guildId = $guildId;
 		$this->id = $id;
 		$this->channelId = $channelId;

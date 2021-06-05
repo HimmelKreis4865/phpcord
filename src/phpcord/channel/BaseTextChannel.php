@@ -3,6 +3,7 @@
 namespace phpcord\channel;
 
 use OutOfBoundsException;
+use phpcord\guild\component\MessageComponent;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\MessageSentPromise;
 use phpcord\guild\store\GuildStoredMessage;
@@ -10,6 +11,7 @@ use phpcord\http\RestAPIHandler;
 use phpcord\utils\MessageInitializer;
 use Promise\Promise;
 use RuntimeException;
+use function array_map;
 use function json_decode;
 
 abstract class BaseTextChannel extends GuildChannel {
@@ -62,14 +64,17 @@ abstract class BaseTextChannel extends GuildChannel {
 	 * @api
 	 *
 	 * @param string|Sendable $message
+	 * @param MessageComponent[] $components
 	 *
 	 * @return Promise
 	 */
-	public function send($message): Promise {
+	public function send($message, array $components = []): Promise {
 		if (is_string($message) or is_numeric($message)) $message = new TextMessage(strval($message));
 		if (!$message instanceof Sendable)
 			throw new RuntimeException("Expected subclass of interface " . Sendable::class);
-		return RestAPIHandler::getInstance()->sendMessage($this->getGuildId(), $this->getId(), $message->getFormattedData(), $message->getContentType());
+		return RestAPIHandler::getInstance()->sendMessage($this->getGuildId(), $this->getId(), json_encode(array_merge(json_decode($message->getFormattedData(), true), ["components" => array_map(function (MessageComponent $component): array {
+			return $component->encode();
+		}, $components)])), $message->getContentType());
 	}
 	
 	/**

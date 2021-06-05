@@ -2,6 +2,7 @@
 
 namespace phpcord\utils;
 
+use phpcord\guild\component\MessageComponent;
 use phpcord\guild\GuildDeletedMessage;
 use phpcord\guild\GuildMessage;
 use phpcord\guild\GuildReceivedEmbed;
@@ -25,7 +26,17 @@ class MessageInitializer {
 		if (!is_null(@$data["referenced_message"])) {
 			$reference = self::fromStore($data["guild_id"] ?? "-", $data["referenced_message"]);
 		}
-		return new GuildMessage($data["guild_id"] ?? "-", $data["id"] ?? "", $data["channel_id"] ?? "", $data["content"] ?? "", MemberInitializer::createMember(array_merge(["user" => $data["author"]], $data["member"] ?? []), $data["guild_id"] ?? "-"), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, $reference, $data["attachments"] ?? [], @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? [], $data["reactions"] ?? []);
+		$components = self::createComponents($data["components"] ?? []);
+		return new GuildMessage($data["guild_id"] ?? "-", $data["id"] ?? "", $data["channel_id"] ?? "", $data["content"] ?? "", MemberInitializer::createMember(array_merge(["user" => $data["author"]], $data["member"] ?? []), $data["guild_id"] ?? "-"), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, $reference, $data["attachments"] ?? [], $components, @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? [], $data["reactions"] ?? []);
+	}
+	
+	protected static function createComponents(array $data): array {
+		$components = [];
+		foreach ($data as $value) {
+			if (isset($value["type"]) or ($class = MessageComponent::getClassById($value["type"])) === null) continue;
+			$components[] = ($class)::fromArray($value);
+		}
+		return $components;
 	}
 	
 	/**
@@ -80,6 +91,7 @@ class MessageInitializer {
 	 * @return GuildStoredMessage
 	 */
 	public static function fromStore(string $guildId, array $data): GuildStoredMessage {
-		return new GuildStoredMessage($guildId, $data["id"], $data["channel_id"], $data["content"], MemberInitializer::createUser($data["author"], $guildId), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, @$data["referenced_message"], $data["attachments"] ?? [], @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? []);
+		$components = self::createComponents($data["components"] ?? []);
+		return new GuildStoredMessage($guildId, $data["id"], $data["channel_id"], $data["content"], MemberInitializer::createUser($data["author"], $guildId), (isset($data["embed"]) ? self::initReceiveEmbed($data["embed"]) : null), $data["timestamp"] ?? null, $data["tts"] ?? false, $data["pinned"] ?? false, @$data["referenced_message"], $data["attachments"] ?? [], $components, @$data["edited_timestamp"], $data["type"] ?? 0, $data["flags"] ?? 0, $data["mention_everyone"] ?? false, $data["mentions"] ?? [], $data["mention_roles"] ?? []);
 	}
 }
