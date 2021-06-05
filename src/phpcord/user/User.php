@@ -6,6 +6,7 @@ use phpcord\Discord;
 use phpcord\exception\GuildException;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\UserUtils;
+use Promise\Promise;
 
 class User {
 	/** @var string $username */
@@ -178,10 +179,10 @@ class User {
 	 * @api
 	 *
 	 * @param string|null $reason
-	 * @return bool
+	 * @return Promise
 	 */
-	public function kick(?string $reason = null): bool {
-		return !RestAPIHandler::getInstance()->removeMember($this->getGuildId(), $this->getId(), $reason)->isFailed();
+	public function kick(?string $reason = null): Promise {
+		return RestAPIHandler::getInstance()->removeMember($this->getGuildId(), $this->getId(), $reason);
 	}
 	
 	/**

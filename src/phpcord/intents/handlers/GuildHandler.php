@@ -62,6 +62,7 @@ class GuildHandler extends BaseIntentHandler {
 				
 			case "READY":
 				Discord::getInstance()->getClient()->user = ClientInitializer::createBotUser($data);
+				Discord::getInstance()->getClient()->sessionId = $data["session_id"];
 				(new ClientReadyEvent(Discord::getInstance()->getClient()))->call();
 				break;
 		}

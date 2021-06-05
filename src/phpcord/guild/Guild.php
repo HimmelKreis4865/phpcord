@@ -2,6 +2,7 @@
 
 namespace phpcord\guild;
 
+use OutOfBoundsException;
 use phpcord\channel\ChannelType;
 use phpcord\channel\embed\ColorUtils;
 use phpcord\channel\TextChannel;
@@ -17,6 +18,8 @@ use phpcord\utils\IntUtils;
 use InvalidArgumentException;
 use phpcord\utils\Math;
 use phpcord\utils\Permission;
+use Promise\Processors\Rejecter;
+use Promise\Processors\Resolver;
 use Promise\Promise;
 use function array_filter;
 use function array_map;
@@ -406,18 +409,19 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @return GuildBanList|null
+	 * @return Promise
 	 */
-	public function getBanList(): ?GuildBanList {
+	public function getBanList(): Promise {
 		$banList = $this->banList;
+		if ($banList instanceof GuildBanList) return new Promise(function (Resolver $resolver, Rejecter $rejecter, GuildBanList $banList) {
+			$resolver($banList);
+		}, $banList);
 		
-		if (($result = RestAPIHandler::getInstance()->getBans($this->getId()))->isFailed()) return null;
+		$result = RestAPIHandler::getInstance()->getBans($this->getId());
 		
-		if (!$banList instanceof GuildBanList) $banList = GuildSettingsInitializer::createBanList($this->id, json_decode($result->getRawData(), true) ?? []);
-		
-		if (CacheLevels::canCache(CacheLevels::TYPE_BAN_LIST)) $this->banList = $banList;
-		
-		return $banList;
+		return $result->then(function (GuildBanList $banList) {
+			$this->banList = $banList;
+		});
 	}
 	
 	/**
@@ -429,14 +433,16 @@ class Guild {
 	 * @param string|null $reason
 	 * @param int|null $messageDeleteDays
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function addBan($user, ?string $reason = null, ?int $messageDeleteDays = null): bool {
-		if ($messageDeleteDays !== null and !IntUtils::isInRange($messageDeleteDays, 0, 7)) return false;
+	public function addBan($user, ?string $reason = null, ?int $messageDeleteDays = null): Promise {
+		if ($messageDeleteDays !== null and !IntUtils::isInRange($messageDeleteDays, 0, 7))
+			throw new OutOfBoundsException("Ban message delete duration cannot be out of the range between 0 - 7");
 		if ($user instanceof User) $user = $user->getId();
 		$result = RestAPIHandler::getInstance()->addBan($this->getId(), $user, $reason, $messageDeleteDays);
-		if (!$result->isFailed()) $this->banList->addBan(new GuildBanEntry($this->getMemberById($user), $reason));
-		return $result->isFailed();
+		return $result->then(function () use ($user, $reason) {
+			$this->banList->addBan(new GuildBanEntry($this->getMemberById($user), $reason));
+		});
 	}
 	
 	/**
@@ -480,12 +486,13 @@ class Guild {
 	 *
 	 * @param string $id
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function removeBan(string $id): bool {
+	public function removeBan(string $id): Promise {
 		$result = RestAPIHandler::getInstance()->removeBan($this->getId(), $id);
-		if (!$result->isFailed()) $this->banList->removeBan($id);
-		return $result->isFailed();
+		return $result->then(function () use ($id) {
+			$this->banList->removeBan($id);
+		});
 	}
 	
 	/**
@@ -495,12 +502,10 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @return Webhook[]
+	 * @return Promise
 	 */
-	public function getWebhooks(): array {
-		return array_map(function($key) {
-			return GuildSettingsInitializer::initWebhook($key);
-		}, json_decode(RestAPIHandler::getInstance()->getWebhooksByGuild($this->getId())->getRawData(), true));
+	public function getWebhooks(): Promise {
+		return RestAPIHandler::getInstance()->getWebhooksByChannel($this->getId());
 	}
 	
 	/**
@@ -571,9 +576,9 @@ class Guild {
 	 * @param int|null $bitrate
 	 * @param bool $nsfw
 	 *
-	 * @return GuildChannel|null
+	 * @return Promise
 	 */
-	public function createChannel(string $name, int $type = 0, ?int $position = null, ?array $permissionOverwrites = null, ?string $parentID = null, ?string $topic = null, ?int $userLimit = null, ?int $rateLimit = null, ?int $bitrate = null, bool $nsfw = false): ?GuildChannel {
+	public function createChannel(string $name, int $type = 0, ?int $position = null, ?array $permissionOverwrites = null, ?string $parentID = null, ?string $topic = null, ?int $userLimit = null, ?int $rateLimit = null, ?int $bitrate = null, bool $nsfw = false): Promise {
 		$query = ["name" => $name, "type" => $type];
 		if (is_int($position)) $query["position"] = $position;
 		if (is_array($position)) $query["position"] = array_map(function ($key) {
@@ -588,9 +593,7 @@ class Guild {
 		if (is_int($bitrate) and ($type === ChannelType::TYPE_VOICE) and ($bitrate >= 8000) and ($bitrate <= 128000)) $query["bitrate"] = $bitrate;
 		if ($nsfw and ($type === ChannelType::TYPE_TEXT)) $query["nsfw"] = $nsfw;
 		
-		$result = RestAPIHandler::getInstance()->createChannel($this->getId(), $query);
-		if ($result->isFailed()) return null;
-		return ChannelInitializer::createChannel(json_decode($result->getRawData(), true), $this->getId());
+		return RestAPIHandler::getInstance()->createChannel($this->getId(), $query);
 	}
 	
 	/**
@@ -631,10 +634,10 @@ class Guild {
 	 *
 	 * @param string $id
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function deleteChannel(string $id): bool {
-		return !RestAPIHandler::getInstance()->deleteChannel($id)->isFailed();
+	public function deleteChannel(string $id): Promise {
+		return RestAPIHandler::getInstance()->deleteChannel($id);
 	}
 	
 	
@@ -724,9 +727,9 @@ class Guild {
 	 * @param bool $hoist
 	 * @param bool $mentionable
 	 *
-	 * @return GuildRole|null
+	 * @return Promise
 	 */
-	public function addRole(string $name = "new role", ?Permission $permission = null, $color = 0x000000, bool $hoist = false, bool $mentionable = false): ?GuildRole {
+	public function addRole(string $name = "new role", ?Permission $permission = null, $color = 0x000000, bool $hoist = false, bool $mentionable = false): Promise {
 		if (is_null($permission)) {
 			$permission = "0";
 		} else {
@@ -735,9 +738,7 @@ class Guild {
 		
 		$color = ColorUtils::createFromCustomData($color)->decimal;
 		
-		$result = RestAPIHandler::getInstance()->createRole($this->getId(), $name, $color, $permission, $hoist, $mentionable);
-		if ($result->isFailed()) return null;
-		return GuildSettingsInitializer::initRole($this->getId(), json_decode($result->getRawData(), true));
+		return RestAPIHandler::getInstance()->createRole($this->getId(), $name, $color, $permission, $hoist, $mentionable);
 	}
 	
 	/**
@@ -787,10 +788,10 @@ class Guild {
 	 *
 	 * @param string|null $nick
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function setBotNick(?string $nick): bool {
-		return !RestAPIHandler::getInstance()->setBotNick(Discord::getInstance()->getClient()->getUser()->getId(), $nick)->isFailed();
+	public function setBotNick(?string $nick): Promise {
+		return !RestAPIHandler::getInstance()->setBotNick(Discord::getInstance()->getClient()->getUser()->getId(), $nick);
 	}
 	
 	/**
@@ -832,10 +833,10 @@ class Guild {
 	 *
 	 * @param string $id
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function deleteRole(string $id): bool {
-		return !RestAPIHandler::getInstance()->deleteRole($this->getId(), $id)->isFailed();
+	public function deleteRole(string $id): Promise {
+		return RestAPIHandler::getInstance()->deleteRole($this->getId(), $id);
 	}
 	
 	/**
@@ -843,16 +844,9 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @return GuildInvite[]
+	 * @return Promise
 	 */
-	public function fetchInvites(): array {
-		$result = RestAPIHandler::getInstance()->getGuildInvites($this->getId());
-		if ($result->isFailed() or strlen($result->getRawData()) === 0) return [];
-		$invites = [];
-		foreach (json_decode($result->getRawData(), true) as $invite) {
-			$invite = GuildSettingsInitializer::createInvitation($invite);
-			$invites[$invite->getCode()] = $invite;
-		}
-		return $invites;
+	public function fetchInvites(): Promise {
+		return RestAPIHandler::getInstance()->getGuildInvites($this->getId());
 	}
 }

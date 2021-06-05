@@ -2,6 +2,7 @@
 
 namespace phpcord\channel;
 
+use InvalidArgumentException;
 use OutOfBoundsException;
 use OutOfRangeException;
 use phpcord\guild\FollowWebhook;
@@ -85,12 +86,10 @@ class TextChannel extends ExtendedTextChannel {
 	 *
 	 * @api
 	 *
-	 * @return Webhook[]
+	 * @return Promise
 	 */
-	public function getWebhooks(): array {
-		return array_map(function($key) {
-			return GuildSettingsInitializer::initWebhook($key);
-		}, json_decode(RestAPIHandler::getInstance()->getWebhooksByChannel($this->getId())->getRawData(), true));
+	public function getWebhooks(): Promise {
+		return RestAPIHandler::getInstance()->getWebhooksByChannel($this->getId());
 	}
 	
 	/**
@@ -101,15 +100,13 @@ class TextChannel extends ExtendedTextChannel {
 	 * @param string $name
 	 * @param string|null $avatar
 	 *
-	 * @return Webhook|null
+	 * @return Promise
 	 */
-	public function createWebhook(string $name, ?string $avatar = null): ?Webhook {
-		if (strlen($name) > 80 or strlen($name) === 0) return null;
+	public function createWebhook(string $name, ?string $avatar = null): Promise {
+		if (strlen($name) > 80 or !strlen($name))
+			throw new InvalidArgumentException("Webhook name $name exceeded the limits!");
 		
-		$data = RestAPIHandler::getInstance()->createWebhook($this->getId(), $name, $avatar);
-		if ($data->isFailed()) return null;
-		if (is_array(($data = json_decode($data->getRawData(), true)))) return GuildSettingsInitializer::initWebhook($data);
-		return null;
+		return RestAPIHandler::getInstance()->createWebhook($this->getId(), $name, $avatar);
 	}
 	
 	/**
@@ -117,10 +114,10 @@ class TextChannel extends ExtendedTextChannel {
 	 *
 	 * @param string $targetId
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function follow(string $targetId): bool {
-		return !RestAPIHandler::getInstance()->followChannel($targetId, $this->getId())->isFailed();
+	public function follow(string $targetId): Promise {
+		return RestAPIHandler::getInstance()->followChannel($targetId, $this->getId());
 	}
 	
 	/**
@@ -162,14 +159,12 @@ class TextChannel extends ExtendedTextChannel {
 	 * @param bool $unique
 	 * @param string|null $target_user the id of the target user
 	 *
-	 * @return GuildInvite|null
+	 * @return Promise
 	 */
-	public function createInvite($duration = 0, int $max_uses = 0, bool $temporary_membership = false, bool $unique = false, ?string $target_user = null): ?GuildInvite {
+	public function createInvite($duration = 0, int $max_uses = 0, bool $temporary_membership = false, bool $unique = false, ?string $target_user = null): Promise {
 		if (is_string($duration)) $duration = DateUtils::convertTimeToSeconds($duration);
 		if (!IntUtils::isInRange($max_uses, 0, 100)) throw new OutOfRangeException("Max uses must be in range between 0 and 100!");
-		$result = RestAPIHandler::getInstance()->createInvite($this->getId(), $duration, $max_uses, $temporary_membership, $unique, $target_user);
-		if ($result->isFailed() or strlen($result->getRawData()) === 0) return null;
-		return GuildSettingsInitializer::createInvitation(json_decode($result->getRawData(), true));
+		return RestAPIHandler::getInstance()->createInvite($this->getId(), $duration, $max_uses, $temporary_membership, $unique, $target_user);
 	}
 	
 	/**
@@ -179,17 +174,10 @@ class TextChannel extends ExtendedTextChannel {
 	 *
 	 * @api
 	 *
-	 * @return array
+	 * @return Promise
 	 */
-	public function getInvites(): array {
-		$result = RestAPIHandler::getInstance()->getInvitesByChannel($this->getId());
-		if ($result->isFailed() or strlen($result->getRawData()) === 0) return [];
-		$invites = [];
-		foreach (json_decode($result->getRawData(), true) as $invite) {
-			$invite = GuildSettingsInitializer::createInvitation($invite);
-			$invites[$invite->getCode()] = $invite;
-		}
-		return $invites;
+	public function getInvites(): Promise {
+		return RestAPIHandler::getInstance()->getInvitesByChannel($this->getId());
 	}
 	
 	/**
@@ -240,16 +228,9 @@ class TextChannel extends ExtendedTextChannel {
 	 *
 	 * @api
 	 *
-	 * @return GuildStoredMessage[]
+	 * @return Promise
 	 */
-	public function getPins(): array {
-		$result = RestAPIHandler::getInstance()->getPins($this->getId());
-		if ($result->isFailed() or strlen($result->getRawData()) === 0) return [];
-		$messages = [];
-		foreach (json_decode($result->getRawData(), true) as $message) {
-			$message = MessageInitializer::fromStore($this->getGuildId(), $message);
-			$messages[$message->getId()] = $message;
-		}
-		return $messages;
+	public function getPins(): Promise {
+		return RestAPIHandler::getInstance()->getPins($this->getGuildId(), $this->getId());
 	}
 }

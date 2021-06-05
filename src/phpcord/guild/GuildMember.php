@@ -9,6 +9,7 @@ use phpcord\user\User;
 use phpcord\utils\ArrayUtils;
 use phpcord\utils\ChannelInitializer;
 use phpcord\utils\Math;
+use Promise\Promise;
 use function array_map;
 use function json_decode;
 
@@ -95,11 +96,11 @@ class GuildMember extends User {
 	 *
 	 * @param string|null $nick
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function setNick(?string $nick): bool {
+	public function setNick(?string $nick): Promise {
 		$this->nick = $nick;
-		return !RestAPIHandler::getInstance()->updateMember($this->getGuildId(), $this->getId(), [ "nick" => $nick ])->isFailed();
+		return RestAPIHandler::getInstance()->updateMember($this->getGuildId(), $this->getId(), [ "nick" => $nick ]);
 	}
 	
 	/**
@@ -110,9 +111,9 @@ class GuildMember extends User {
 	 *
 	 * @param bool $muted
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function setMuted(bool $muted = true): bool {
+	public function setMuted(bool $muted = true): Promise {
 		$this->muted = $muted;
 		return $this->update(null, $muted);
 	}
@@ -143,9 +144,9 @@ class GuildMember extends User {
 	 *
 	 * @param bool $deafened
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function setDeafened(bool $deafened = true): bool {
+	public function setDeafened(bool $deafened = true): Promise {
 		$this->deafened = $deafened;
 		return $this->update($deafened);
 	}
@@ -158,9 +159,9 @@ class GuildMember extends User {
 	 *
 	 * @param string $channelId
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function moveToChannel(string $channelId): bool {
+	public function moveToChannel(string $channelId): Promise {
 		return $this->update(null, null, $channelId);
 	}
 	
@@ -173,15 +174,15 @@ class GuildMember extends User {
 	 * @param bool|null $muted
 	 * @param string|null $channelToMove
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	protected function update(?bool $deafened = null, ?bool $muted = null, ?string $channelToMove = null): bool {
+	protected function update(?bool $deafened = null, ?bool $muted = null, ?string $channelToMove = null): Promise {
 		$array = ArrayUtils::filterNullRecursive([
 			"deaf" => $deafened,
 			"mute" => $muted,
 			"channel_id" => $channelToMove
 		]);
-		return !RestAPIHandler::getInstance()->updateMember($this->getGuildId(), $this->getId(), $array)->isFailed();
+		return RestAPIHandler::getInstance()->updateMember($this->getGuildId(), $this->getId(), $array);
 	}
 	
 
@@ -256,13 +257,13 @@ class GuildMember extends User {
 	 *
 	 * @param GuildRole|string $role
 	 *
-	 * @return bool
+	 * @return Promise|null
 	 */
-	public function addRole($role): bool {
+	public function addRole($role): ?Promise {
 		if ($role instanceof GuildRole) $role = $role->getId();
-		if ($this->hasRole($role)) return false;
+		if ($this->hasRole($role)) return null;
 		$this->roles[] = $role;
-		return !RestAPIHandler::getInstance()->addRoleToUser($this->getGuildId(), $this->getId(), $role)->isFailed();
+		return RestAPIHandler::getInstance()->addRoleToUser($this->getGuildId(), $this->getId(), $role);
 	}
 	
 	/**
@@ -272,15 +273,15 @@ class GuildMember extends User {
 	 *
 	 * @param string|GuildRole $role
 	 *
-	 * @return bool
+	 * @return Promise|null
 	 */
-	public function removeRole($role): bool {
+	public function removeRole($role): ?Promise {
 		if ($role instanceof GuildRole) $role = $role->getId();
-		if (!$this->hasRole($role)) return false;
+		if (!$this->hasRole($role)) return null;
 		foreach ($this->roles as $key => $id) {
 			if ($id === $role) unset($this->roles[$key]);
 		}
-		return !RestAPIHandler::getInstance()->removeRoleFromUser($this->getGuildId(), $this->getId(), $role)->isFailed();
+		return RestAPIHandler::getInstance()->removeRoleFromUser($this->getGuildId(), $this->getId(), $role);
 	}
 	
 	/**
@@ -288,11 +289,9 @@ class GuildMember extends User {
 	 *
 	 * @api
 	 *
-	 * @return DMChannel|null
+	 * @return Promise
 	 */
-	public function createDM(): ?DMChannel {
-		$val = RestAPIHandler::getInstance()->createDM($this->getId());
-		if ($val->isFailed() or !($result = json_decode($val->getRawData(), true))) return null;
-		return ChannelInitializer::createDMChannel($result);
+	public function createDM(): Promise {
+		return RestAPIHandler::getInstance()->createDM($this->getId());
 	}
 }

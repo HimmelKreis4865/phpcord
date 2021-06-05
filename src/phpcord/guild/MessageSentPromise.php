@@ -15,15 +15,15 @@ class MessageSentPromise {
 	public $answerCallable = null;
 
 	
-	/** @var GuildMessage|null $message */
+	/** @var GuildMessage $message */
 	protected $message;
 
 	/**
 	 * MessageSentPromise constructor.
 	 *
-	 * @param GuildMessage|null $message
+	 * @param GuildMessage $message
 	 */
-	public function __construct(GuildMessage $message = null) {
+	public function __construct(GuildMessage $message) {
 		$this->channelId = $message->getChannelId();
 		$this->message = $message;
 	}
@@ -55,10 +55,9 @@ class MessageSentPromise {
 	 *
 	 * @api
 	 *
-	 * @return GuildMessage|null
+	 * @return GuildMessage
 	 */
-	public function getMessage(): ?GuildMessage {
-		if ($this->isFailed()) return null;
+	public function getMessage(): GuildMessage {
 		return $this->message;
 	}
 }

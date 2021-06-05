@@ -41,7 +41,6 @@ class Event {
 	 * @api
 	 */
 	public function call() {
-		var_dump(Discord::getInstance()->listeners[static::class]);
 		if (!isset(Discord::getInstance()->listeners[static::class])) return;
 		foreach (array_filter(ArrayUtils::asArray(Discord::getInstance()->listeners[static::class]), function($key) {
 				return (isset($key[1]) and isset($key[0]) and ($key[0] instanceof EventListener));

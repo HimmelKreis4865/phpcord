@@ -4,6 +4,7 @@ namespace phpcord\guild;
 
 use phpcord\channel\Channel;
 use phpcord\http\RestAPIHandler;
+use Promise\Promise;
 
 abstract class GuildChannel extends Channel {
 	/** @var string $name */
@@ -88,10 +89,10 @@ abstract class GuildChannel extends Channel {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function delete(): bool {
-		return !RestAPIHandler::getInstance()->deleteChannel($this->getId())->isFailed();
+	public function delete(): Promise {
+		return RestAPIHandler::getInstance()->deleteChannel($this->getId());
 	}
 	
 	/**
@@ -116,10 +117,10 @@ abstract class GuildChannel extends Channel {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function update(): bool {
-		return !RestAPIHandler::getInstance()->updateChannel($this->getId(), $this->getModifyData())->isFailed();
+	public function update(): Promise {
+		return RestAPIHandler::getInstance()->updateChannel($this->getGuildId(), $this->getId(), $this->getModifyData());
 	}
 	
 	/**
@@ -178,11 +179,11 @@ abstract class GuildChannel extends Channel {
 	 *
 	 * @param int $position
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function setPosition(int $position): bool {
-		$result = !RestAPIHandler::getInstance()->setChannelPosition($this->getGuildId(), $this->getId(), $position)->isFailed();
-		if ($result) $this->position = $position;
-		return $result;
+	public function setPosition(int $position): Promise {
+		return  RestAPIHandler::getInstance()->setChannelPosition($this->getGuildId(), $this->getId(), $position)->then(function () use ($position) {
+			$this->position = $position;
+		});
 	}
 }

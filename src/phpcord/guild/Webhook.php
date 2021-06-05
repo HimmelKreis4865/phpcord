@@ -5,6 +5,7 @@ namespace phpcord\guild;
 use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
+use Promise\Promise;
 
 class Webhook {
 	
@@ -163,10 +164,10 @@ class Webhook {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function delete(): bool {
-		return !RestAPIHandler::getInstance()->deleteWebhook($this->getId())->isFailed();
+	public function delete(): Promise {
+		return RestAPIHandler::getInstance()->deleteWebhook($this->getId());
 	}
 	
 	/**
@@ -178,10 +179,10 @@ class Webhook {
 	 * @param string|null $channelId
 	 * @param string|null $avatar
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function modify(?string $name, ?string $channelId = null, ?string $avatar = null): bool {
-		return !RestAPIHandler::getInstance()->modifyWebhook($this->getId(), $name, $channelId, $avatar)->isFailed();
+	public function modify(?string $name, ?string $channelId = null, ?string $avatar = null): Promise {
+		return RestAPIHandler::getInstance()->modifyWebhook($this->getId(), $name, $channelId, $avatar);
 	}
 	
 	/**
@@ -191,9 +192,9 @@ class Webhook {
 	 *
 	 * @param string $name
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function setName(string $name): bool {
+	public function setName(string $name): Promise {
 		return $this->modify($name);
 	}
 	
@@ -204,9 +205,9 @@ class Webhook {
 	 *
 	 * @param string $imageData
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function setAvatar(string $imageData): bool {
+	public function setAvatar(string $imageData): Promise {
 		return $this->modify(null, null, $imageData);
 	}
 	
@@ -217,9 +218,9 @@ class Webhook {
 	 *
 	 * @param string $channelId
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function moveToChannel(string $channelId): bool {
+	public function moveToChannel(string $channelId): Promise {
 		return $this->modify(null, $channelId);
 	}
 }

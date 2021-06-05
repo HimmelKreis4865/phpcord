@@ -28,6 +28,9 @@ class Client {
 	/** @var BotUser|null $user */
 	public $user;
 	
+	/** @var null | string $sessionId */
+	public $sessionId = null;
+	
 	/** @var DMChannel[] $dms */
 	public $dms = [];
 

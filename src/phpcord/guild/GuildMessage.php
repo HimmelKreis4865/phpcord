@@ -13,6 +13,7 @@ use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\ArrayUtils;
 use phpcord\utils\MemberInitializer;
+use Promise\Promise;
 use function array_filter;
 use function array_map;
 use function is_null;
@@ -354,14 +355,14 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function crosspost(): bool {
+	public function crosspost(): Promise {
 		$channel = $this->getGuild()->getChannel($this->getChannelId());
 		if ($channel !== null and !($channel instanceof NewsChannel))
 			throw new InvalidArgumentException("Cannot crosspost a message in a channel that is no news channel!");
 		
-		return !(RestAPIHandler::getInstance()->crosspostMessage($this->getChannelId(), $this->getId()))->isFailed();
+		return RestAPIHandler::getInstance()->crosspostMessage($this->getChannelId(), $this->getId());
 	}
 	
 	/**
@@ -369,10 +370,10 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function removeAllReactions(): bool {
-		return !(RestAPIHandler::getInstance()->removeAllReactions($this->getChannelId(), $this->getId())->isFailed());
+	public function removeAllReactions(): Promise {
+		return RestAPIHandler::getInstance()->removeAllReactions($this->getChannelId(), $this->getId());
 	}
 	
 	/**
@@ -382,10 +383,10 @@ class GuildMessage {
 	 *
 	 * @param Emoji $emoji
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function removeMyReaction(Emoji $emoji): bool {
-		return !(RestAPIHandler::getInstance()->removeMyReaction($this->getChannelId(), $this->getId(), $emoji)->isFailed());
+	public function removeMyReaction(Emoji $emoji): Promise {
+		return RestAPIHandler::getInstance()->removeMyReaction($this->getChannelId(), $this->getId(), $emoji);
 	}
 	
 	/**
@@ -395,10 +396,10 @@ class GuildMessage {
 	 *
 	 * @param Emoji $emoji
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function removeReaction(Emoji $emoji): bool {
-		return !(RestAPIHandler::getInstance()->removeReactionId($this->getChannelId(), $this->getId(), $emoji)->isFailed());
+	public function removeReaction(Emoji $emoji): Promise {
+		return RestAPIHandler::getInstance()->removeReactionId($this->getChannelId(), $this->getId(), $emoji);
 	}
 	
 	/**
@@ -409,11 +410,11 @@ class GuildMessage {
 	 * @param User|string $user
 	 * @param Emoji $emoji
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function removeUserReaction($user, Emoji $emoji): bool {
+	public function removeUserReaction($user, Emoji $emoji): Promise {
 		if ($user instanceof User) $user = $user->getId();
-		return !(RestAPIHandler::getInstance()->removeUserReaction($this->getChannelId(), $this->getId(), $user, $emoji))->isFailed();
+		return RestAPIHandler::getInstance()->removeUserReaction($this->getChannelId(), $this->getId(), $user, $emoji);
 	}
 	
 	/**
@@ -423,18 +424,10 @@ class GuildMessage {
 	 *
 	 * @param Emoji $emoji
 	 *
-	 * @return array
+	 * @return Promise
 	 */
-	public function getReactionsByEmoji(Emoji $emoji): array {
-		$result = RestAPIHandler::getInstance()->getReactions($this->getChannelId(), $this->getId(), $emoji);
-		if ($result->isFailed()) return [];
-		$guildId = $this->getGuildId();
-		if (!is_array(($value = @json_decode($result->getRawData(), true)))) return [];
-		return array_map(function($key) use ($guildId) {
-			return MemberInitializer::createUser($key, $guildId);
-		}, array_filter($value, function($key) {
-			return (isset($key["id"]) and isset($key["username"]) and isset($key["avatar"]) and isset($key["discriminator"]));
-		}));
+	public function getReactionsByEmoji(Emoji $emoji): Promise {
+		return RestAPIHandler::getInstance()->getReactions($this->getGuildId(), $this->getChannelId(), $this->getId(), $emoji);
 	}
 	
 	/**
@@ -444,10 +437,10 @@ class GuildMessage {
 	 *
 	 * @param Emoji $emoji
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function react(Emoji $emoji): bool {
-		return !(RestAPIHandler::getInstance()->createReaction($this->getChannelId(), $this->getId(), $emoji)->isFailed());
+	public function react(Emoji $emoji): Promise {
+		return RestAPIHandler::getInstance()->createReaction($this->getChannelId(), $this->getId(), $emoji);
 	}
 	
 	/**
@@ -455,10 +448,10 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function delete(): bool {
-		return !RestAPIHandler::getInstance()->deleteMessage($this->getId(), $this->getChannelId())->isFailed();
+	public function delete(): Promise {
+		return RestAPIHandler::getInstance()->deleteMessage($this->getId(), $this->getChannelId());
 	}
 	
 	/**
@@ -477,12 +470,12 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function pin(): bool {
+	public function pin(): Promise {
 		if (in_array($this->getType(), [self::TYPE_CALL, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION, self::TYPE_GUILD_MEMBER_JOIN, self::TYPE_CHANNEL_PINNED_MESSAGE, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2, self::TYPE_USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3, self::TYPE_CHANNEL_FOLLOW_ADD]))
 			throw new InvalidArgumentException("Could not pin a message of type " . $this->getType());
-		return !RestAPIHandler::getInstance()->pinMessage($this->getChannelId(), $this->getId())->isFailed();
+		return RestAPIHandler::getInstance()->pinMessage($this->getChannelId(), $this->getId());
 	}
 	
 	/**
@@ -490,10 +483,10 @@ class GuildMessage {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function unpin(): bool {
-		return !RestAPIHandler::getInstance()->unpinMessage($this->getChannelId(), $this->getId())->isFailed();
+	public function unpin(): Promise {
+		return RestAPIHandler::getInstance()->unpinMessage($this->getChannelId(), $this->getId());
 	}
 	
 	/**
@@ -504,9 +497,9 @@ class GuildMessage {
 	 * @param string|null $content
 	 * @param MessageEmbed|null $embed
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function edit(?string $content, ?MessageEmbed $embed = null): bool {
+	public function edit(?string $content, ?MessageEmbed $embed = null): Promise {
 		// todo: validate message was sent by the application
 		$data = [];
 		if ($content !== null) {
@@ -517,6 +510,6 @@ class GuildMessage {
 			$data["embed"] = ArrayUtils::filterNullRecursive($embed->data);
 		}
 		
-		return !RestAPIHandler::getInstance()->editMessage($this->getChannelId(), $this->getId(), $data)->isFailed();
+		return RestAPIHandler::getInstance()->editMessage($this->getGuildId(), $this->getChannelId(), $this->getId(), $data);
 	}
 }

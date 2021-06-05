@@ -9,6 +9,7 @@ use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\Permission;
 use phpcord\utils\PermissionIds;
+use Promise\Promise;
 use function array_values;
 use function is_numeric;
 use function is_string;
@@ -254,10 +255,10 @@ class GuildRole {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function update(): bool {
-		return !RestAPIHandler::getInstance()->modifyRole($this->getGuildId(), $this->getId(), $this->getName(), $this->getColor(), $this->getPermissions(), $this->isManaged())->isFailed();
+	public function update(): Promise {
+		return RestAPIHandler::getInstance()->modifyRole($this->getGuildId(), $this->getId(), $this->getName(), $this->getColor(), $this->getPermissions(), $this->isManaged());
 	}
 	
 	/**
@@ -266,9 +267,9 @@ class GuildRole {
 	 *
 	 * @api
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function delete(): bool {
+	public function delete(): Promise {
 		return $this->getGuild()->deleteRole($this->getId());
 	}
 	

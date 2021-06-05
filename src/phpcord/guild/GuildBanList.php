@@ -2,6 +2,8 @@
 
 namespace phpcord\guild;
 
+use function var_dump;
+
 class GuildBanList {
 	/** @var GuildBanEntry[] $bans */
 	protected $bans = [];
@@ -31,6 +33,7 @@ class GuildBanList {
 	 * @param GuildBanEntry $entry
 	 */
 	public function addBan(GuildBanEntry $entry) {
+		var_dump("adding ban to banlist lol");
 		if (isset($this->bans[$entry->getUser()->getId()])) return;
 		$this->bans[$entry->getUser()->getId()] = $entry;
 	}
