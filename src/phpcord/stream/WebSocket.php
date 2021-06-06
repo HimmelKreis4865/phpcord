@@ -10,17 +10,18 @@ use function fclose;
 use function fread;
 use function fsockopen;
 use function fwrite;
-use function get_resource_id;
-use function get_resource_type;
 use function is_resource;
 use function openssl_random_pseudo_bytes;
 use function socket_get_status;
 use function socket_set_blocking;
 use function socket_set_nonblock;
+use function stream_context_create;
 use function stream_set_blocking;
 use function stream_set_timeout;
+use function stream_socket_client;
 use function strpos;
 use function substr;
+use const STREAM_CLIENT_CONNECT;
 
 class WebSocket {
 	/** @var resource $stream */
@@ -33,11 +34,11 @@ class WebSocket {
 	 * @param int $port
 	 * @param bool $nonBlock
 	 * @param bool $set
+	 * @param array $context
 	 */
-	public function __construct(string $address, int $port, bool $nonBlock = false, bool $set = true) {
+	public function __construct(string $address, int $port, bool $nonBlock = false, bool $set = true, array $context = []) {
 		if (!$set) return;
-		$this->stream = fsockopen($address, $port, $error_code, $error_message);
-		//socket_set_blocking($this->stream, false);
+		$this->stream = stream_socket_client($address  . ":"  . $port, $error_code, $error_message, 5, STREAM_CLIENT_CONNECT, stream_context_create($context));
 		if ($error_code !== 0 or !$this->stream)
 			throw new RuntimeException("Failed to connect to websocket [$error_code] $error_message");
 		

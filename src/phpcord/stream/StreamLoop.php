@@ -3,6 +3,7 @@
 namespace phpcord\stream;
 
 use phpcord\thread\Thread;
+use phpcord\utils\ArrayUtils;
 use phpcord\utils\MainLogger;
 use RuntimeException;
 use function json_decode;
@@ -24,20 +25,23 @@ class StreamLoop extends Thread {
 
 	protected $converter;
 	
-	public function __construct(ThreadConverter $converter) {
+	protected $settings;
+	
+	public function __construct(ThreadConverter $converter, array $settings = []) {
 		$this->converter = $converter;
+		$this->settings = $settings;
 	}
 	
 	public function onRun() {
 		// todo: dynamic autoload for threads
-		$ws = new WebSocket(self::GATEWAY, 443);
+		$ws = new WebSocket(self::GATEWAY, 443, false, true, ArrayUtils::asArray($this->settings));
 		$thread = new SocketWriteThread($this->converter, $ws->stream);
 		$thread->start();
 		while (true) {
 			usleep(1000 * 50);
 			if ($ws->isInvalid()) {
 				$ws->close();
-				$ws = new WebSocket(self::GATEWAY, 443);
+				$ws = new WebSocket(self::GATEWAY, 443, false, true, ArrayUtils::asArray($this->settings));
 				$this->converter->running = false;
 				usleep(1000 * 50);
 				$this->converter->running = true;

@@ -226,7 +226,19 @@ final class Discord {
 		
 		MainLogger::logInfo("Starting websocket client...");
 		
-		$thread2 = new StreamLoop($this->converter);
+		$settings = [
+			"ssl" => [
+				"SNI_enabled" => true,
+				"peer_name" => "gateway.discord.gg",
+				"SNI_server_name" => "gateway.discord.gg",
+				"CN_match" => "gateway.discord.gg",
+				"verify_peer" => true,
+				"verify_peer_name" => true,
+				"cafile" => __DIR__ . DIRECTORY_SEPARATOR . "utils" . DIRECTORY_SEPARATOR . "cacert.pem",
+				"ciphers" => "HIGH:TLSv1.2:TLSv1.1:TLSv1.0:!SSLv3:!SSLv2"
+			]
+		];
+		$thread2 = new StreamLoop($this->converter, $settings);
 		$thread2->start();
 		$this->loop();
 	}

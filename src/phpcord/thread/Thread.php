@@ -16,7 +16,7 @@ abstract class Thread extends \Thread {
 	final public function run() {
 		spl_autoload_register(function (string $class): void {
 			if (substr($class, 0, strlen("phpcord\\")) === "phpcord\\") {
-				if (!class_exists($class)) require $this->shiftDirectory(__DIR__) . DIRECTORY_SEPARATOR . substr($class, strlen("phpcord\\"), strlen($class)) . ".php";
+				if (!class_exists($class)) require str_replace("\\", DIRECTORY_SEPARATOR, $this->shiftDirectory(__DIR__) . DIRECTORY_SEPARATOR . substr($class, strlen("phpcord\\"), strlen($class))) . ".php";
 			}
 		});
 		
