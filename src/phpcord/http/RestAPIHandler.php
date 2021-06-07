@@ -6,6 +6,8 @@ use phpcord\channel\Channel;
 use phpcord\channel\DMChannel;
 use phpcord\Discord;
 use phpcord\guild\AuditLog;
+use phpcord\guild\component\ActionRow;
+use phpcord\guild\component\Button;
 use phpcord\guild\GuildBanList;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildInvite;
@@ -438,11 +440,16 @@ final class RestAPIHandler extends Threaded	{
 	}
 	
 	public function editMessage(string $guildId, string $channelId, string $id, array $data): Promise {
-		var_dump("editing");
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages/" . $id, HTTPRequest::REQUEST_PATCH);
 		$request->addHTTPData("content", json_encode($data));
 		return $this->createRestResponse($request, function (string $content) use ($guildId) : GuildStoredMessage {
 			return MessageInitializer::fromStore($guildId, json_decode($content, true) ?? []);
 		});
+	}
+	
+	public function sendInteractionReply(string $token, string $id, int $type, array $data): Promise {
+		$request = $this->getDefaultRequest(self::API . "interactions/" . $id . "/" . $token . "/callback");
+		$request->addHTTPData("content", json_encode(["type" => $type, "data" => $data]));
+		return $this->createRestResponse($request, function (string $content): void { });
 	}
 }

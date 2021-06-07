@@ -21,10 +21,14 @@ use phpcord\stream\ThreadConverter;
 use phpcord\task\AsyncPool;
 use phpcord\task\defaults\HeartbeatTask;
 use phpcord\task\TaskManager;
+use phpcord\utils\ErrorHandler;
 use phpcord\utils\LogStore;
 use phpcord\utils\MainLogger;
 use phpcord\utils\PermissionIds;
 use InvalidArgumentException;
+use phpcord\utils\theme\DefaultTheme;
+use phpcord\utils\theme\Theme;
+use phpcord\utils\theme\ThemeStorage;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -46,6 +50,8 @@ final class Discord {
 	/** @var int the version that is used for the gateway and restapi */
 	public const VERSION = 8;
 
+	public const PATH = __DIR__ . DIRECTORY_SEPARATOR;
+	
 	/** @var null|Client $client */
 	public $client;
 
@@ -105,13 +111,16 @@ final class Discord {
 	/** @var AsyncPool $asyncPool */
 	protected $asyncPool;
 	
+	/** @var Theme $theme */
+	protected $theme;
+	
 	public function __construct(array $options = []) {
 		set_time_limit(0);
 		
 		self::$lastInstance = $this;
 		
 		$this->registerAutoload();
-		$this->registerErrorHandler();
+		ErrorHandler::init();
 		$this->registerShutdownHandler();
 		$this->options = $options;
 		
@@ -119,7 +128,6 @@ final class Discord {
 		LogStore::setLogFile(($dir[(strlen($dir) - 1)] === DIRECTORY_SEPARATOR ? $dir : $dir . DIRECTORY_SEPARATOR) . "save.log");
 		LogStore::addMessage("\n\n" . "[STARTING PHPCORD AT " . date("d.m.Y H:i:s") . "]\n");
 		$this->client = new Client();
-		MainLogger::logInfo("Starting discord application...");
 		PermissionIds::initDefinitions();
 		
 		if (isset($options["debugMode"]) and is_bool($options["debugMode"])) $this->debugMode = $options["debugMode"];
@@ -136,11 +144,6 @@ final class Discord {
 	    
 		$this->opCodeHandler = new OPCodeHandler();
 		$this->asyncPool = new AsyncPool();
-	    
-	    MainLogger::logInfo("Loading extensions...");
-	    ExtensionManager::getInstance()->loadExtensions();
-	    
-		MainLogger::logInfo("§aLoading complete, waiting for a login now...");
 		$this->initSSLSettings();
     }
  
@@ -189,6 +192,17 @@ final class Discord {
 		if ($this->commandMap instanceof CommandMap) return $this->commandMap;
 		throw new InvalidArgumentException("You can't access the commandmap without activating it!");
 	}
+	
+	/**
+	 * @param Theme $theme
+	 */
+	public function setTheme(Theme $theme): void {
+		$this->theme = $theme;
+	}
+	
+	protected function putTheme(): void {
+		ThemeStorage::getInstance()->setTheme($this->theme ?? new DefaultTheme());
+	}
 
     /**
 	 * Tries to login to discord gateway
@@ -202,7 +216,20 @@ final class Discord {
 	 * @throws ClientException
 	 */
 	public function login(string $token = null): void {
+		$this->putTheme();
+		MainLogger::logInfo("Loading extensions...");
+		ExtensionManager::getInstance()->loadExtensions();
+		
+		MainLogger::logInfo("§lLoading complete, waiting for a login now...");
+		
 		MainLogger::logInfo("Logging in...");
+		
+		MainLogger::logInfo("Test info");
+		MainLogger::logNotice("Test notice");
+		MainLogger::logWarning("Test warning");
+		MainLogger::logError("Test error");
+		MainLogger::logEmergency("Test emergency");
+		MainLogger::logDebug("Test debug");
 		if ($this->loggedIn) throw new ClientException("Could not connect to an already connected client!");
 
 		if (is_null($token) and !isset($this->options["token"])) throw new BadMethodCallException("Couldn't login to Discord since there is no token specified");
@@ -359,10 +386,6 @@ final class Discord {
 	 */
 	public function isLoggedIn(): bool {
 		return $this->loggedIn;
-	}
-	
-	protected function registerErrorHandler() {
-		// todo: implement this
 	}
 	
 	protected function registerShutdownHandler() {

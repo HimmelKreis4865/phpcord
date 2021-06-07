@@ -2,6 +2,7 @@
 
 namespace phpcord\thread;
 
+use phpcord\utils\ErrorHandler;
 use function array_pop;
 use function class_exists;
 use function explode;
@@ -19,6 +20,8 @@ abstract class Thread extends \Thread {
 				if (!class_exists($class)) require str_replace("\\", DIRECTORY_SEPARATOR, $this->shiftDirectory(__DIR__) . DIRECTORY_SEPARATOR . substr($class, strlen("phpcord\\"), strlen($class))) . ".php";
 			}
 		});
+		
+		ErrorHandler::init();
 		
 		$this->onRun();
 	}

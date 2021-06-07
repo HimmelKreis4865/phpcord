@@ -2,52 +2,68 @@
 
 namespace phpcord\utils;
 
-use phpcord\Discord;
-use function array_keys;
-use function array_merge;
-use function array_values;
+use phpcord\utils\theme\ThemeStorage;
 use function str_replace;
 use const PHP_EOL;
 
 class MainLogger {
-	/** @var string[] includes all available terminal colors */
-	public const TERMINAL_COLORS = [
-		"PURPUR" => "\033[35m",
-		"DARK_RED" => "\033[31m",
-		"RED" => "\033[91m",
-		"PINK" => "\033[95m",
-		"ORANGE" => "\033[33m",
-		"YELLOW" => "\033[93m",
-		"LIGHT_GREEN" => "\033[92m",
-		"AQUA" => "\033[96m",
-		"TURQUOISE" => "\033[36m",
-		"GREEN" => "\033[32m",
-		"DARK_BLUE" => "\033[34m",
-		"LIGHT_GRAY" => "\033[37m",
-		"DARK_GRAY" => "\033[90m",
-		"LIGHT_BLUE" => "\033[94m",
-		"WHITE" => "\033[30m",
-		"RESET" => "\033[39m",
-	];
-
-	/** @var array includes all color codes under another minecraft's color format */
-	public const COLOR_UNITS = [
-		"§a" => self::TERMINAL_COLORS["LIGHT_GREEN"],
-		"§b" => self::TERMINAL_COLORS["AQUA"],
-		"§c" => self::TERMINAL_COLORS["RED"],
-		"§d" => self::TERMINAL_COLORS["PINK"],
-		"§e" => self::TERMINAL_COLORS["YELLOW"],
-		"§f" => self::TERMINAL_COLORS["WHITE"],
-		"§r" => self::TERMINAL_COLORS["RESET"],
-		"§1" => self::TERMINAL_COLORS["DARK_BLUE"],
-		"§2" => self::TERMINAL_COLORS["GREEN"],
-		"§3" => self::TERMINAL_COLORS["LIGHT_GREEN"],
-		"§4" => self::TERMINAL_COLORS["DARK_RED"],
-		"§5" => self::TERMINAL_COLORS["PURPUR"],
-		"§6" => self::TERMINAL_COLORS["ORANGE"],
-		"§7" => self::TERMINAL_COLORS["LIGHT_GRAY"],
-		"§8" => self::TERMINAL_COLORS["DARK_GRAY"],
-		"§9" => self::TERMINAL_COLORS["LIGHT_BLUE"],
+	
+	/*
+	 * the console can display 512 colors (256 foreground, 256 background)
+	 * we no longer have the minecraft format to support as much colors as possible
+	 * also, this is now case sensitive
+	 *
+	 * see this image for a color code list https://user-images.githubusercontent.com/89590/40762008-687f909a-646c-11e8-88d6-e268a064be4c.png
+	 *
+	 * the colors are having a color scheme, until the next color is called in comment, all colors below are from the same kind
+	 * background colors are equivalent to foreground's
+	 *
+	 * => background colors are disabled yet due to incompatible reset types
+	 */
+	
+	public const COLOR_FORMATS = [
+		"a" => 88,  // red
+		"b" => 124,
+		"c" => 160,
+		"d" => 9,
+		"e" => 196,
+		"f" => 210,
+		"g" => 198,
+		"h" => 205,
+		"i" => 202, // orange
+		"j" => 208,
+		"k" => 166,
+		"l" => 178,
+		"m" => 185, // yellow
+		"n" => 190,
+		"o" => 192,
+		"p" => 214,
+		"q" => 220,
+		"r" => 226,
+		"s" => 154,
+		"t" => 118, // green
+		"u" => 83,
+		"v" => 82,
+		"w" => 40,
+		"x" => 41,
+		"y" => 43,
+		"z" => 31, // turquoise
+		"0" => 67,
+		"1" => 69, // blue
+		"2" => 51,
+		"3" => 57,
+		"4" => 90, // lila
+		"5" => 135,
+		"6" => 129,
+		"7" => 231, // white
+		"8" => 230,
+		"9" => 232, // black
+		"A" => 238, // gray
+		"B" => 241,
+		"C" => 244,
+		"D" => 247,
+		"E" => 252,
+		"F" => 254,
 	];
 	
 	/**
@@ -58,7 +74,7 @@ class MainLogger {
 	 * @param string $info
 	 */
 	public static function logInfo(string $info) {
-		self::log("§r[INFO]: " . $info);
+		self::log(ThemeStorage::getInstance()->getTheme()->getInfoFormat($info));
 	}
 	/**
 	 * Logs an info to the terminal
@@ -68,7 +84,7 @@ class MainLogger {
 	 * @param string $warning
 	 */
 	public static function logWarning(string $warning) {
-		self::log("§e[WARNING]: " . $warning);
+		self::log(ThemeStorage::getInstance()->getTheme()->getWarningFormat($warning));
 	}
 	
 	/**
@@ -79,7 +95,7 @@ class MainLogger {
 	 * @param string $error
 	 */
 	public static function logError(string $error) {
-		self::log("§4[ERROR]: " . $error);
+		self::log(ThemeStorage::getInstance()->getTheme()->getErrorFormat($error));
 	}
 	
 	/**
@@ -90,7 +106,7 @@ class MainLogger {
 	 * @param string $emergency
 	 */
 	public static function logEmergency(string $emergency) {
-		self::log("§5[EMERGENCY]: " . $emergency);
+		self::log(ThemeStorage::getInstance()->getTheme()->getEmergencyFormat($emergency));
 	}
 	
 	/**
@@ -101,7 +117,7 @@ class MainLogger {
 	 * @param string $notice
 	 */
 	public static function logNotice(string $notice) {
-		self::log("§b[NOTICE]: " . $notice);
+		self::log(ThemeStorage::getInstance()->getTheme()->getNoticeFormat($notice));
 	}
 	
 	/**
@@ -112,8 +128,7 @@ class MainLogger {
 	 * @param string $debug
 	 */
 	public static function logDebug(string $debug) {
-		self::logInfo($debug);
-		//if (Discord::getInstance()->debugMode) self::log("§7[DEBUG]: " . $debug);
+		self::log(ThemeStorage::getInstance()->getTheme()->getDebugFormat($debug));
 	}
 	
 	/**
@@ -125,9 +140,8 @@ class MainLogger {
 	 */
 	public static function log(string $message) {
 		$message = self::dateFormat() . " " . $message;
-		LogStore::addMessage(self::removeColors($message));
 		
-		echo self::convertColored($message) . self::TERMINAL_COLORS["RESET"] . PHP_EOL;
+		echo self::convertColored($message . self::resetFormat()) . PHP_EOL;
 	}
 	
 	/**
@@ -138,7 +152,11 @@ class MainLogger {
 	 * @return string
 	 */
 	private static function dateFormat(): string {
-		return "§6[" . date("H:i:s.") . self::getMilliseconds() . "]";
+		return ThemeStorage::getInstance()->getTheme()->getDateFormat(date("H"), date("i"), date("s"), self::getMilliseconds());
+	}
+	
+	protected static function resetFormat(): string {
+		return  ThemeStorage::getInstance()->getTheme()->getResetFormat();
 	}
 	
 	/**
@@ -166,22 +184,10 @@ class MainLogger {
 	 * @return string
 	 */
 	protected static function convertColored(string $message): string {
-		foreach (self::COLOR_UNITS as $key => $color) {
-			$message = str_replace($key, $color, $message);
+		foreach (self::COLOR_FORMATS as $key => $color) {
+			$prefix = "\033[38;5;";
+			$message = str_replace("§" . $key, $prefix . $color . "m", $message);
 		}
 		return $message;
-	}
-	
-	/**
-	 * Removes all colors of a string
-	 *
-	 * @api
-	 *
-	 * @param string $message
-	 *
-	 * @return string
-	 */
-	public static function removeColors(string $message): string {
-		return str_replace(array_merge(array_keys(self::COLOR_UNITS), array_values(self::TERMINAL_COLORS)), "", $message);
 	}
 }
