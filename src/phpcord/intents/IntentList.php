@@ -76,8 +76,11 @@ interface IntentList {
 	 * Guild presence events:.
 	 *
 	 * - PRESENECE_UPDATE
+	 *
+	 * Presences are currently disabled due to an intent spam on larger servers
+	 * Uncomment it if you require it for your bot
 	 */
-	const GUILD_PRESENCES = (1 << 8);
+	//const GUILD_PRESENCES = (1 << 8);
 
 	/**
 	 * Guild message events:.

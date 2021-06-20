@@ -2,12 +2,10 @@
 
 namespace phpcord\http;
 
-use phpcord\channel\Channel;
 use phpcord\channel\DMChannel;
 use phpcord\Discord;
 use phpcord\guild\AuditLog;
-use phpcord\guild\component\ActionRow;
-use phpcord\guild\component\Button;
+use phpcord\guild\Guild;
 use phpcord\guild\GuildBanList;
 use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildInvite;
@@ -19,18 +17,16 @@ use phpcord\guild\Webhook;
 use phpcord\user\User;
 use phpcord\utils\AuditLogInitializer;
 use phpcord\utils\ChannelInitializer;
+use phpcord\utils\ClientInitializer;
 use phpcord\utils\GuildSettingsInitializer;
 use phpcord\utils\InstantiableTrait;
 use phpcord\utils\MainLogger;
 use phpcord\utils\MemberInitializer;
 use phpcord\utils\MessageInitializer;
-use Promise\Processors\Rejecter;
-use Promise\Processors\Resolver;
-use Promise\Promise;
+use phpcord\task\Promise;
 use Threaded;
 use function array_map;
 use function array_merge;
-use function http_response_code;
 use function is_null;
 use function json_decode;
 use function json_encode;
@@ -52,30 +48,22 @@ final class RestAPIHandler extends Threaded	{
 	}
 
 	private function createRestResponse(HTTPRequest $request, callable $parser = null) : Promise {
-		return new Promise(function (Resolver $resolver, Rejecter $rejecter, HTTPRequest $request, callable $parser): void {
+		return Promise::create(function (HTTPRequest $request, callable $parser) {
 			Discord::registerAutoload();
 			$request->ignoreErrors();
 			$result = $request->submit();
-			var_dump($result[0]);
 			if (strval(($code = HTTPRequest::getResponseCode($result[1][0])))[0] != "2") {
 				MainLogger::logWarning("Request failure: {$request->url} answered with error code " . ($code));
-				$rejecter(new RequestFailure($code, $result[0]));
-				return;
+				throw new RequestFailureException($result[0], $code);
 			}
-			var_dump("resolver getting called " . $request->http["method"]);
-			$res = $parser($result[0]);
-			if ($res === null) {
-				$resolver();
-				return;
-			}
-			var_dump("resolver111 getting called");
-			$resolver($res);
+			return $parser($result[0]);
 		}, $request, $parser);
 	}
 
 	public function getDefaultRequest(string $url, string $requestMethod = HTTPRequest::REQUEST_POST, bool $addContentType = true): HTTPRequest {
 		$request = new HTTPRequest($url, $requestMethod);
 		$request->addHeader("Authorization", $this->auth);
+		$request->addSSLOptions();
 		if ($addContentType) $request->setContentType();
 		return $request;
 	}
@@ -88,7 +76,6 @@ final class RestAPIHandler extends Threaded	{
 	}
 
 	public function sendMessage(string $guildId, string $channelId, string $data, string $contentType): Promise {
-		var_dump($data);
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages", HTTPRequest::REQUEST_POST, false);
 		$request->setContentType($contentType);
 		$request->addHTTPData("content", $data);
@@ -108,7 +95,6 @@ final class RestAPIHandler extends Threaded	{
 	}
 
 	public function deleteMessage(string $id, string $channelId): Promise {
-		var_dump("deleting");
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelId . "/messages/" . $id, HTTPRequest::REQUEST_DELETE, false);
 		return $this->createRestResponse($request, function (string $content) : void { });
 	}
@@ -395,7 +381,7 @@ final class RestAPIHandler extends Threaded	{
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channelToFollow . "/followers");
 		$request->addHTTPData("content", json_encode(["webhook_channel_id" => $targetId]));
 		return $this->createRestResponse($request, function (string $content) {
-			var_dump("received $content");
+			// todo: implement result
 		});
 	}
 	
@@ -403,7 +389,7 @@ final class RestAPIHandler extends Threaded	{
 		$request = $this->getDefaultRequest(self::API . "channels/" . $channel . "/messages/" . $message . "/crosspost");
 		$request->addHTTPData("content", json_encode([]));
 		return $this->createRestResponse($request, function (string $content) {
-			var_dump("received $content");
+			// todo: implement result
 		});
 	}
 	
@@ -451,5 +437,27 @@ final class RestAPIHandler extends Threaded	{
 		$request = $this->getDefaultRequest(self::API . "interactions/" . $id . "/" . $token . "/callback");
 		$request->addHTTPData("content", json_encode(["type" => $type, "data" => $data]));
 		return $this->createRestResponse($request, function (string $content): void { });
+	}
+	
+	public function fetchGuild(string $id, bool $withCount = true): Promise {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $id, HTTPRequest::REQUEST_GET);
+		$request->addRawGet("with_count", $withCount);
+		return $this->createRestResponse($request, function (string $content) : Guild {
+			return ClientInitializer::createGuild(json_decode($content, true));
+		});
+	}
+	
+	public function fetchChannel(string $id): Promise {
+		$request = $this->getDefaultRequest(self::API . "channels/" . $id, HTTPRequest::REQUEST_GET);
+		return $this->createRestResponse($request, function (string $content): GuildChannel {
+			return ChannelInitializer::createChannel(($data = json_decode($content, true)), $data["guild_id"] ?? "-");
+		});
+	}
+	
+	public function fetchMember(string $guildId, string $id): Promise {
+		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/members/" . $id, HTTPRequest::REQUEST_GET);
+		return $this->createRestResponse($request, function (string $content): GuildMember {
+			return MemberInitializer::createMember(($data = json_decode($content, true)), $data["guild_id"] ?? "-");
+		});
 	}
 }

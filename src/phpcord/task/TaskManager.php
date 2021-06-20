@@ -3,7 +3,6 @@
 namespace phpcord\task;
 
 use phpcord\utils\InstantiableTrait;
-use function var_dump;
 
 final class TaskManager {
 	use InstantiableTrait;

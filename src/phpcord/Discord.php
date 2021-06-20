@@ -29,12 +29,12 @@ use InvalidArgumentException;
 use phpcord\utils\theme\DefaultTheme;
 use phpcord\utils\theme\Theme;
 use phpcord\utils\theme\ThemeStorage;
+use phpcord\utils\Utils;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use function date;
 use function file_exists;
-use function ini_set;
 use function is_dir;
 use function is_subclass_of;
 use function json_decode;
@@ -43,7 +43,6 @@ use function str_replace;
 use function strlen;
 use function substr;
 use function usleep;
-use function var_dump;
 use const DIRECTORY_SEPARATOR;
 
 final class Discord {
@@ -89,6 +88,9 @@ final class Discord {
 	
 	/** @var int $heartbeatInterval The time we need to send the heartbeat in ms */
 	public $heartbeatInterval;
+	
+	/** @var int $lastHeartbeat */
+	public $lastHeartbeat = 0;
 
 	/** @var ConsoleCommandMap $consoleCommandMap */
 	protected $consoleCommandMap;
@@ -114,13 +116,14 @@ final class Discord {
 	/** @var Theme $theme */
 	protected $theme;
 	
-	public function __construct(array $options = []) {
+	protected static $baseDir;
+	
+	public function __construct(string $baseDir, array $options = []) {
 		set_time_limit(0);
 		
 		self::$lastInstance = $this;
 		
 		$this->registerAutoload();
-		ErrorHandler::init();
 		$this->registerShutdownHandler();
 		$this->options = $options;
 		
@@ -138,6 +141,8 @@ final class Discord {
 	    foreach ($options["extension_paths"] ?? [] as $path) {
 	    	$this->registerExtensionPath($path);
 		}
+	    
+	    self::$baseDir = Utils::addSeparator($baseDir);
 		
 		$this->commandMap = new SimpleCommandMap();
 	    $this->consoleCommandMap = new ConsoleCommandMap();
@@ -217,6 +222,9 @@ final class Discord {
 	 */
 	public function login(string $token = null): void {
 		$this->putTheme();
+		
+		ErrorHandler::init();
+		
 		MainLogger::logInfo("Loading extensions...");
 		ExtensionManager::getInstance()->loadExtensions();
 		
@@ -285,16 +293,13 @@ final class Discord {
 	}
 	
 	public function readThreads(): void {
-		//var_dump($this->converter->pushThreadToMain);
 		foreach ($this->converter->pushThreadToMain as $k => $message) {
-			var_dump("got $message");
 			$this->handleMessage($message);
 			unset($this->converter->pushThreadToMain[$k]);
 		}
 	}
 	
 	public function pushToSocket(string $message) {
-		var_dump("pushing $message");
 		$this->converter->pushMainToThread[] = $message;
 	}
 	
@@ -363,7 +368,11 @@ final class Discord {
 	 */
 	public static function registerAutoload() {
 		spl_autoload_register(function($class) {
-			$file = __DIR__ . DIRECTORY_SEPARATOR . str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
+			if (substr($class, 0, strlen("phpcord\\")) === "phpcord\\") {
+				$file = __DIR__ . DIRECTORY_SEPARATOR . str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, str_replace("phpcord\\", "", $class)) . ".php";
+			} else {
+				$file = Discord::$baseDir . str_replace(["\\", "\\\\", "/", "//"], DIRECTORY_SEPARATOR, $class) . ".php";
+			}
 			if (!class_exists($class) and file_exists($file)) require_once $file;
 		});
 	}

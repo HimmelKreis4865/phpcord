@@ -9,7 +9,7 @@ use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\Permission;
 use phpcord\utils\PermissionIds;
-use Promise\Promise;
+use phpcord\task\Promise;
 use function array_values;
 use function is_numeric;
 use function is_string;

@@ -41,7 +41,7 @@ class OPCodeHandler {
 				break;
 				
 			case 11:
-				$discord->lastACK = microtime(true);
+				Discord::getInstance()->getClient()->ping = floor((microtime(true) - Discord::getInstance()->lastHeartbeat) * 1000);
 				break;
 		}
 	}

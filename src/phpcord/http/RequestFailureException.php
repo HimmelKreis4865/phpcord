@@ -2,7 +2,9 @@
 
 namespace phpcord\http;
 
-class RequestFailure {
+use Exception;
+
+class RequestFailureException extends Exception {
 	
 	/** @var int $response_code */
 	protected $response_code;
@@ -13,12 +15,13 @@ class RequestFailure {
 	/**
 	 * RequestFailure constructor.
 	 *
-	 * @param int $response_code
 	 * @param string $error_string
+	 * @param int $response_code
 	 */
-	public function __construct(int $response_code, string $error_string) {
+	public function __construct(string $error_string, int $response_code = 404) {
 		$this->response_code = $response_code;
 		$this->error_string = $error_string;
+		parent::__construct("Request answered with response code $response_code and error: $error_string");
 	}
 	
 	/**

@@ -6,7 +6,6 @@ use phpcord\stream\ThreadConverter;
 use phpcord\thread\Thread;
 use function fopen;
 use function fread;
-use function var_dump;
 
 class InputLoop extends Thread {
 	

@@ -14,7 +14,6 @@ use phpcord\event\user\UserUnbanEvent;
 use phpcord\guild\GuildBanEntry;
 use phpcord\utils\ClientInitializer;
 use phpcord\utils\MemberInitializer;
-use function var_dump;
 
 class GuildHandler extends BaseIntentHandler {
 
@@ -23,6 +22,7 @@ class GuildHandler extends BaseIntentHandler {
 	}
 
 	public function handle(Discord $discord, string $intent, array $data) {
+		// fixme: Fix this broken peace of shit
 		switch ($intent) {
 			case "GUILD_BAN_ADD":
 				$user = MemberInitializer::createUser($data["user"], $data["guild_id"]);
@@ -53,7 +53,7 @@ class GuildHandler extends BaseIntentHandler {
 				$guildId = ClientInitializer::create(Discord::getInstance()->client, $data);
 				(new GuildCreateEvent(Discord::getInstance()->client->getGuild($guildId)))->call();
 				
-				// WORKAROUND, todo: improve this
+				// fixme: This workaround isn't working anymore
 				// checks whether the guild was created due to join on a new guild / initialisation on startup
 				if (Discord::getInstance()->client->getPing() > -1) {
 					(new GuildEnterEvent(Discord::getInstance()->client->getGuild($guildId)))->call();

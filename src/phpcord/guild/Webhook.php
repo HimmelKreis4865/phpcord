@@ -5,7 +5,7 @@ namespace phpcord\guild;
 use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
-use Promise\Promise;
+use phpcord\task\Promise;
 
 class Webhook {
 	

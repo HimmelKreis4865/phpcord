@@ -3,7 +3,6 @@
 namespace phpcord\intents\handlers;
 
 use phpcord\Discord;
-use phpcord\http\RestAPIHandler;
 use phpcord\utils\Interaction;
 use function var_dump;
 

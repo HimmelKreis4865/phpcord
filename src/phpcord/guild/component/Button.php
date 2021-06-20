@@ -4,7 +4,6 @@ namespace phpcord\guild\component;
 
 use BadMethodCallException;
 use phpcord\guild\Emoji;
-use function var_dump;
 
 class Button extends LabeledMessageComponent {
 	

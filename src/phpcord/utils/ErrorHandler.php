@@ -25,10 +25,12 @@ final class ErrorHandler {
 	
 	public static function error(int $error_level, string $error_message, string $error_file, int $error_line) {
 		if ($error_level > 4) return;
-		MainLogger::logEmergency("Call to " . (strtolower(substr($error_message, 0, 2)) === "a " ? "" : (strtolower(substr($error_message, 0, 2)) === "an " ? "" : (in_array(strtolower($error_message[0]), ["a", "e", "i", "o", "u"]) ? "n " : " "))) . $error_message . " in $error_file:$error_line");
+		MainLogger::logError((strtolower(substr($error_message, 0, 2)) === "a " ? "" : (strtolower(substr($error_message, 0, 2)) === "an " ? "" : (in_array(strtolower($error_message[0]), ["a", "e", "i", "o", "u"]) ? "n " : " "))) . $error_message . " in $error_file:$error_line");
+		exit();
 	}
 	
 	public static function exception(Throwable $throwable) {
 		MainLogger::logEmergency("Uncaught " . (new ReflectionClass($throwable))->getShortName() . ": " . $throwable->getMessage() . " in " . str_replace(Discord::PATH, "", $throwable->getFile()) . ":" . $throwable->getLine());
+		exit();
 	}
 }

@@ -20,7 +20,7 @@ use phpcord\utils\Math;
 use phpcord\utils\Permission;
 use Promise\Processors\Rejecter;
 use Promise\Processors\Resolver;
-use Promise\Promise;
+use phpcord\task\Promise;
 use function array_filter;
 use function array_map;
 use function is_int;
@@ -684,6 +684,7 @@ class Guild {
 	}
 	
 	/**
+	/**
 	 * Returns an array with all channels the guild has in cache
 	 *
 	 * @api
@@ -848,5 +849,27 @@ class Guild {
 	 */
 	public function fetchInvites(): Promise {
 		return RestAPIHandler::getInstance()->getGuildInvites($this->getId());
+	}
+	
+	/**
+	 * Fetches a channel from the guild
+	 *
+	 * @param string $id
+	 *
+	 * @return Promise
+	 */
+	public function fetchChannel(string $id): Promise {
+		return RestAPIHandler::getInstance()->fetchChannel($id);
+	}
+	
+	/**
+	 * Fetches a member from the guild
+	 *
+	 * @param string $id
+	 *
+	 * @return Promise
+	 */
+	public function fetchMember(string $id): Promise {
+		return RestAPIHandler::getInstance()->fetchMember($this->getId(), $id);
 	}
 }

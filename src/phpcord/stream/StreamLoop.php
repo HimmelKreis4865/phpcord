@@ -6,10 +6,7 @@ use phpcord\thread\Thread;
 use phpcord\utils\ArrayUtils;
 use phpcord\utils\MainLogger;
 use RuntimeException;
-use function json_decode;
-use function json_encode;
 use function usleep;
-use function var_dump;
 
 class StreamLoop extends Thread {
 	

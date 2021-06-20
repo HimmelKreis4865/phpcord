@@ -15,7 +15,7 @@ use phpcord\utils\DateUtils;
 use phpcord\utils\GuildSettingsInitializer;
 use phpcord\utils\IntUtils;
 use phpcord\utils\MessageInitializer;
-use Promise\Promise;
+use phpcord\task\Promise;
 use function array_filter;
 use function array_keys;
 use function array_map;

@@ -5,7 +5,6 @@ namespace phpcord\event;
 use phpcord\exception\EventException;
 use phpcord\Discord;
 use phpcord\utils\ArrayUtils;
-use function var_dump;
 
 class Event {
 	/** @var bool $cancelled */

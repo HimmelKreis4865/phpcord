@@ -9,10 +9,11 @@ use phpcord\guild\MessageSentPromise;
 use phpcord\guild\store\GuildStoredMessage;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\MessageInitializer;
-use Promise\Promise;
+use phpcord\task\Promise;
 use RuntimeException;
 use function array_map;
 use function json_decode;
+use function var_dump;
 
 abstract class BaseTextChannel extends GuildChannel {
 	

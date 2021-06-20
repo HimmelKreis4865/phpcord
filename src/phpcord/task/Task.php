@@ -34,7 +34,6 @@ abstract class Task {
 	 * @param int $interval
 	 */
 	public function __construct(int $delay = 0, bool $repeating = false, int $interval = 1) {
-		var_dump("ticks: $delay | $interval");
 		do {
 			$this->id = mt_rand(PHP_INT_MIN, PHP_INT_MAX);
 		} while (TaskManager::getInstance()->getTask($this->id) instanceof Task);
@@ -75,11 +74,12 @@ abstract class Task {
 	 */
 	final public function executeUpdate(int $tick) {
 		if ($this->delay > 0) {
-			$this->delay--;
+			if (--$this->delay === 0) goto RUN;
 			return;
 		}
 		
 		if ($tick >= ($this->lastRun + $this->interval)) {
+			RUN:
 			$this->lastRun = $tick;
 			$this->onRun($tick);
 			if (!$this->repeating) $this->cancel();

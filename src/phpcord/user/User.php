@@ -6,7 +6,7 @@ use phpcord\Discord;
 use phpcord\exception\GuildException;
 use phpcord\http\RestAPIHandler;
 use phpcord\utils\UserUtils;
-use Promise\Promise;
+use phpcord\task\Promise;
 
 class User {
 	/** @var string $username */
@@ -73,13 +73,30 @@ class User {
 	 *
 	 * @param string $extension
 	 * @param int $size
+	 * @param bool $returnDefault
 	 *
 	 * @return string|null
 	 */
-	public function getAvatarURL(string $extension = "png", int $size = 1024): ?string {
-		if ($this->avatar === null) return null;
+	public function getAvatarURL(string $extension = "png", int $size = 1024, bool $returnDefault = true): ?string {
+		if ($this->avatar === null) {
+			if (!$returnDefault) return null;
+			return self::getDefaultAvatar($this->getDiscriminator());
+		}
 		if (!in_array($extension, UserUtils::AVATAR_SUPPORTED_EXTENSIONS)) $extension = "png";
 		return UserUtils::AVATAR_URL_PATH . $this->id . "/" . $this->avatar . "." . $extension . "?size=" . $size;
+	}
+	
+	/**
+	 * Returns the url for the default avatar
+	 *
+	 * @internal
+	 *
+	 * @param int $discriminator
+	 *
+	 * @return string
+	 */
+	public static function getDefaultAvatar(int $discriminator): string {
+		return "https://cdn.discordapp.com/embed/avatars/" . ($discriminator % 5) . ".png";
 	}
 
 	/**

@@ -14,7 +14,7 @@ use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\ArrayUtils;
 use phpcord\utils\MemberInitializer;
-use Promise\Promise;
+use phpcord\task\Promise;
 use function array_filter;
 use function array_map;
 use function is_null;

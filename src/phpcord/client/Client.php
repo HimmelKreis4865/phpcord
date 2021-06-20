@@ -11,6 +11,7 @@ use phpcord\guild\GuildInvite;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
 use phpcord\utils\GuildSettingsInitializer;
+use phpcord\task\Promise;
 use Threaded;
 use function array_rand;
 use function get_class;
@@ -23,7 +24,7 @@ class Client {
 	public $guilds;
 	
 	/** @var int $ping */
-	public $ping = -1;
+	public $ping = 0;
 	
 	/** @var BotUser|null $user */
 	public $user;
@@ -68,7 +69,21 @@ class Client {
 		if (count($this->guilds) === 0) return null;
 		return $this->guilds[array_rand($this->guilds)];
 	}
-
+	
+	/**
+	 * Fetches a guild from discord rest api, does not store it to cache
+	 *
+	 * @api
+	 *
+	 * @param string $id
+	 * @param bool $withCount
+	 *
+	 * @return Promise
+	 */
+	public function fetchGuild(string $id, bool $withCount = true): Promise {
+		return RestAPIHandler::getInstance()->fetchGuild($id, $withCount);
+	}
+	
 	/**
 	 * Returns the last recognized ping (in MS)
 	 * => ping is built by time between heartbeating and heartbeat ack
@@ -99,12 +114,10 @@ class Client {
 	 *
 	 * @param string $code
 	 *
-	 * @return GuildInvite|null
+	 * @return Promise
 	 */
-	public function getInvite(string $code): ?GuildInvite {
-		$data = RestAPIHandler::getInstance()->getInvite($code);
-		if ($data->isFailed() or !is_array(($value = @json_decode($data->getRawData(), true)))) return null;
-		return GuildSettingsInitializer::createInvitation($value);
+	public function getInvite(string $code): Promise {
+		return RestAPIHandler::getInstance()->getInvite($code);
 	}
 	
 	/**
@@ -131,12 +144,10 @@ class Client {
 	 *
 	 * @param string $code
 	 *
-	 * @return bool
+	 * @return Promise
 	 */
-	public function deleteInvite(string $code): bool {
-		$data = RestAPIHandler::getInstance()->deleteInvite($code);
-		if ($data->isFailed() or !is_array(($value = @json_decode($data->getRawData(), true))) or !isset($value["code"]) or ($value["code"] !== $code)) return false;
-		return true;
+	public function deleteInvite(string $code): Promise {
+		return RestAPIHandler::getInstance()->deleteInvite($code);
 	}
 	
 	/**
@@ -150,7 +161,7 @@ class Client {
 	public function setActivity(Activity $activity) {
 		$activity = $activity->encode();
 		
-		Discord::getInstance()->toSend[] = $activity;
+		Discord::getInstance()->pushToSocket($activity);
 	}
 	
 	/**

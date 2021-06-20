@@ -8,7 +8,6 @@ use phpcord\event\member\ReactionRemoveAllEvent;
 use phpcord\guild\Emoji;
 use phpcord\event\member\ReactionRemoveEvent;
 use phpcord\utils\MemberInitializer;
-use function var_dump;
 
 class ReactionHandler extends BaseIntentHandler {
 	public function getIntents(): array {

@@ -9,7 +9,6 @@ use function array_shift;
 use function explode;
 use function is_string;
 use function strtolower;
-use function var_dump;
 
 final class ConsoleCommandMap {
 	

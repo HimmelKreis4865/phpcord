@@ -10,9 +10,7 @@ use phpcord\intents\handlers\MemberHandler;
 use phpcord\intents\handlers\MessageHandler;
 use phpcord\intents\handlers\ReactionHandler;
 use phpcord\Discord;
-use Threaded;
 use function get_class;
-use function var_dump;
 
 class IntentReceiveManager {
 
@@ -47,7 +45,6 @@ class IntentReceiveManager {
 	 * @param array $data
 	 */
 	final public function executeIntent(Discord $discord, string $intent, array $data) {
-		var_dump("executing $intent");
 		if (!isset($this->intentHandlers[$intent])) return;
 		foreach ($this->intentHandlers[$intent] as $class) {
 			/** @var BaseIntentHandler $class */

@@ -9,7 +9,7 @@ use phpcord\user\User;
 use phpcord\utils\ArrayUtils;
 use phpcord\utils\ChannelInitializer;
 use phpcord\utils\Math;
-use Promise\Promise;
+use phpcord\task\Promise;
 use function array_map;
 use function json_decode;
 

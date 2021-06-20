@@ -11,8 +11,7 @@
     "ext-json": "*",
     "ext-yaml": "*",
     "ext-sockets": "*",
-    "ext-pthreads": "*",
-    "himmelkreis4865/promise": "*"
+    "ext-pthreads": "*"
   },
   "autoload": {
     "psr-4": {

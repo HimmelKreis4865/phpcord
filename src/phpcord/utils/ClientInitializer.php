@@ -11,8 +11,9 @@ use phpcord\guild\GuildChannel;
 use phpcord\guild\GuildRole;
 use phpcord\guild\IncompleteGuild;
 use function array_map;
+use function intval;
 use function is_null;
-use function var_dump;
+use function strval;
 
 class ClientInitializer {
 	/**
@@ -28,50 +29,42 @@ class ClientInitializer {
 	 * @return string the guild id
 	 */
 	public static function create(Client &$client, array $data): string {
-		var_dump("were obv creating");
+		$guild = self::createGuild($data);
+		$client->guilds[$guild->getId()] = $guild;
+		return $guild->getId();
+	}
+	
+	public static function createGuild(array $data): Guild {
 		$roles = [];
 		$members = [];
 		$channels = [];
-
+		
 		$guild_id = $data["id"];
 		
-		var_dump(1);
-		if (CacheLevels::canCache(CacheLevels::TYPE_ROLES)) {
-			foreach ($data["roles"] ?? [] as $role) {
-				$roles[strval($role["id"])] = new GuildRole($guild_id, $role["name"], $role["id"], intval($role["position"] ?? 0), $role["permissions"] ?? [], $role["color"] ?? 0, $role["mentionable"] ?? false, $role["managed"] ?? false);
-			}
+		foreach ($data["roles"] ?? [] as $role) {
+			$roles[strval($role["id"])] = new GuildRole($guild_id, $role["name"], $role["id"], intval($role["position"] ?? 0), $role["permissions"] ?? [], $role["color"] ?? 0, $role["mentionable"] ?? false, $role["managed"] ?? false);
 		}
-		var_dump(2);
-		if (CacheLevels::canCache(CacheLevels::TYPE_MEMBERS)) {
-			foreach ($data["members"] ?? [] as $member) {
-				$members[strval($member["user"]["id"])] = MemberInitializer::createMember($member, $guild_id);
-			}
+		foreach ($data["members"] ?? [] as $member) {
+			$members[strval($member["user"]["id"])] = MemberInitializer::createMember($member, $guild_id);
 		}
-		var_dump(3);
-		if (CacheLevels::canCache(CacheLevels::TYPE_CHANNEL)) {
-			foreach ($data["channels"] ?? [] as $channel) {
-				$channel = ChannelInitializer::createChannel($channel, $guild_id);
-				if ($channel instanceof GuildChannel) $channels[$channel->id] = $channel;
-			}
+		foreach ($data["channels"] ?? [] as $channel) {
+			$channel = ChannelInitializer::createChannel($channel, $guild_id);
+			if ($channel instanceof GuildChannel) $channels[$channel->id] = $channel;
 		}
-		var_dump(4);
 		$screen = null;
 		if (isset($data["welcome_screen"]) and !is_null($data["welcome_screen"])) $screen = GuildSettingsInitializer::initWelcomeScreen($data["welcome_screen"]);
 		
-		var_dump(5);
 		$emojis = array_map(function($data) use ($guild_id) {
 			return GuildSettingsInitializer::createGuildEmoji($data, $guild_id);
 		}, $data["emojis"] ?? []);
-		var_dump(6);
-		$client->guilds[$guild_id] = new Guild(
+		
+		return new Guild(
 			$data["name"], $data["id"], $data["owner_id"], $data["icon"], @$data["banner"], @$data["afk_channel_id"],
 			@$data["rules_channel_id"], $channels, $members, $roles, $data["description"] ?? "", intval($data["member_count"] ?? 2),
 			@$data["preferred_locale"], @$data["region"], intval($data["default_message_notifications"]), intval($data["verification_level"]),
 			intval($data["max_members"]), $emojis, @$data["vanity_url_code"], @$data["system_channel_id"],
 			@$data["public_updates_channel_id"], intval($data["premium_subscription_count"] ?? 0), $data["features"] ?? [], $screen, $data["premium_tier"] ?? 0
 		);
-		var_dump(7);
-		return $guild_id;
 	}
 	
 	/**

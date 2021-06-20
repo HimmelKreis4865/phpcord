@@ -5,6 +5,7 @@ namespace phpcord\channel\embed;
 use phpcord\channel\embed\components\RGB;
 use phpcord\channel\Sendable;
 use phpcord\utils\ArrayUtils;
+use function var_dump;
 
 class MessageEmbed implements Sendable {
 	
@@ -137,6 +138,7 @@ class MessageEmbed implements Sendable {
 	 */
 	public function setThumbnail(string $url, ?string $proxy_url = null, int $width = null, int $height = null): self {
 		$this->data["thumbnail"] = ["url" => $url, "proxy_url" => $proxy_url, "width" => $width, "height" => $height];
+		var_dump("thumbnail set");
 		return $this;
 	}
 	

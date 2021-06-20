@@ -2,7 +2,9 @@
 
 namespace phpcord\event\user;
 
+use phpcord\Discord;
 use phpcord\event\Event;
+use phpcord\guild\Guild;
 use phpcord\user\User;
 
 class UserEvent extends Event {
@@ -38,5 +40,16 @@ class UserEvent extends Event {
 	 */
 	public function getGuildId(): string {
 		return $this->getUser()->guild_id;
+	}
+	
+	/**
+	 * Returns the guild the player was removed from
+	 *
+	 * @api
+	 *
+	 * @return Guild|null
+	 */
+	public function getGuild(): ?Guild {
+		return Discord::getInstance()->getClient()->getGuild($this->getGuildId());
 	}
 }

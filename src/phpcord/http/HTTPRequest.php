@@ -9,18 +9,17 @@ use phpcord\utils\ArrayUtils;
 use function array_filter;
 use function array_map;
 use function array_merge;
+use function array_pop;
 use function array_shift;
-use function count;
 use function explode;
 use function file_get_contents;
-use function getallheaders;
-use function headers_list;
+use function implode;
 use function intval;
 use function is_numeric;
 use function strpos;
 use function stream_context_create;
 use function urlencode;
-use function var_dump;
+use const DIRECTORY_SEPARATOR;
 
 class HTTPRequest {
 	
@@ -44,6 +43,9 @@ class HTTPRequest {
 	
 	/** @var string $url */
 	public $url;
+	
+	/** @var array $parameters */
+	public $parameters = [];
 
 	/**
 	 * HTTPRequest constructor.
@@ -122,13 +124,56 @@ class HTTPRequest {
 	 * @return array
 	 */
 	public function submit(): array {
-		$array = [
+		$context = stream_context_create(array_merge([
 			"http" => $this->http
-		];
-		//if (count(Discord::getInstance()->sslSettings) > 0) $array = array_merge($array, ["ssl" => ArrayUtils::asArray(Discord::getInstance()->sslSettings)]);
-		$context = stream_context_create($array);
+		], $this->parameters));
 		$res = file_get_contents($this->url, false, $context);
 		return [$res, $http_response_header];
+	}
+	
+	/**
+	 * Adds ssl options to the header to prevent failures
+	 *
+	 * @internal
+	 */
+	public function addSSLOptions(): void {
+		$this->addParameter("ssl", [
+			"SNI_enabled" => true,
+			"peer_name" => "discord.com",
+			"SNI_server_name" => "discord.com",
+			"CN_match" => "discord.com",
+			"verify_peer" => true,
+			"verify_peer_name" => true,
+			"cafile" => $this->shiftDirectory(__DIR__) . DIRECTORY_SEPARATOR . "utils" . DIRECTORY_SEPARATOR . "cacert.pem"
+		]);
+	}
+	
+	/**
+	 * Adds a custom parameter to the request
+	 *
+	 * @api
+	 *
+	 * @param string $name
+	 * @param string|int|float|array $data
+	 */
+	public function addParameter(string $name, $data) {
+		$this->parameters[$name] = $data;
+	}
+	
+	/**
+	 * Removes the last directory from a path
+	 *
+	 * @internal
+	 *
+	 * @param string $dir
+	 *
+	 * @return string
+	 */
+	private function shiftDirectory(string $dir): string {
+		$folders = explode(DIRECTORY_SEPARATOR, $dir);
+		array_pop($folders);
+		
+		return implode(DIRECTORY_SEPARATOR, $folders);
 	}
 	
 	/**

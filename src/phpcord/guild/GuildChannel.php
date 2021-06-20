@@ -4,7 +4,7 @@ namespace phpcord\guild;
 
 use phpcord\channel\Channel;
 use phpcord\http\RestAPIHandler;
-use Promise\Promise;
+use phpcord\task\Promise;
 
 abstract class GuildChannel extends Channel {
 	/** @var string $name */
