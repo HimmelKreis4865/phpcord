@@ -2,31 +2,29 @@
 
 namespace phpcord\guild;
 
+use Exception;
+use JetBrains\PhpStorm\Pure;
 use OutOfBoundsException;
 use phpcord\channel\ChannelType;
 use phpcord\channel\embed\ColorUtils;
 use phpcord\channel\TextChannel;
 use phpcord\channel\VoiceChannel;
+use phpcord\command\GuildCommandMap;
+use phpcord\command\SlashCommand;
 use phpcord\Discord;
 use phpcord\http\RestAPIHandler;
 use phpcord\user\User;
-use phpcord\utils\AuditLogInitializer;
 use phpcord\utils\CacheLevels;
-use phpcord\utils\ChannelInitializer;
-use phpcord\utils\GuildSettingsInitializer;
 use phpcord\utils\IntUtils;
 use InvalidArgumentException;
 use phpcord\utils\Math;
 use phpcord\utils\Permission;
-use Promise\Processors\Rejecter;
-use Promise\Processors\Resolver;
 use phpcord\task\Promise;
 use function array_filter;
 use function array_map;
 use function is_int;
 use function is_null;
 use function is_string;
-use function json_decode;
 use function str_replace;
 use function strlen;
 use function strval;
@@ -36,86 +34,17 @@ class Guild {
 	
 	protected const BASE_ICON_URL = "https://cdn.discordapp.com/icons/%id%/%icon%.png";
 	
-	/** @var string $name */
-	public $name;
-
-	/** @var string|null $icon */
-	public $icon;
-
-	/** @var string|null $banner */
-	public $banner = null;
-
-	/** @var int $max_members */
-	public $max_members = 100000;
-
-	/** @var string $preferred_locale */
-	public $preferred_locale = "en-US";
-
-	/** @var string $region */
-	public $region = "europe";
-
-	/** @var int $member_count default 2, bot + one member */
-	public $member_count = 2;
-
-	/** @var array|GuildMember[] $members */
-	public $members = [];
-
-	/** @var string|null $afk_channel */
-	public $afk_channel = null;
-
-	/** @var int $verification_level */
-	public $verification_level = 0;
-
-	/** @var array $roles */
-	public $roles = [];
-
-	/** @var int $default_message_notification */
-	public $default_message_notification = 0;
-
-	/** @var string|null $rules_channel_id */
-	public $rules_channel_id = null;
-
-	/** @var array|GuildChannel[] $channels */
-	public $channels = [];
-
-	/** @var string|null $description */
-	public $description = null;
-
-	/** @var string|null $owner_id */
-	public $owner_id;
-
-	/** @var string|null $vanity_url */
-	public $vanity_url = null;
-
-	/** @var string|null $public_updates_channel_id */
-	public $public_updates_channel_id = null;
-
-	/** @var string|null $system_changes_id */
-	public $system_changes_id = null;
-
-	/** @var int|null $premium_subscription_count */
-	public $premium_subscription_count;
-
-	/** @var string $id */
-	public $id;
-	
 	/** @var array|GuildEmoji[] $emojis */
-	public $emojis = [];
+	protected array $emojis = [];
 
 	/** @var AuditLog|null $auditlog */
-	public $auditlog = null;
+	protected ?AuditLog $auditlog = null;
 
 	/** @var GuildBanList|null $banList */
-	public $banList;
+	protected ?GuildBanList $banList = null;
 	
-	/** @var array|null $features */
-	public $features = [];
-	
-	/** @var GuildWelcomeScreen|null $welcomeScreen */
-	public $welcomeScreen = null;
-	
-	/** @var int $premium_tier */
-	public $premium_tier = 0;
+	/** @var GuildCommandMap $commandMap */
+	protected GuildCommandMap $commandMap;
 
 	/**
 	 * Guild constructor.
@@ -135,7 +64,7 @@ class Guild {
 	 * @param int $member_count
 	 * @param string $preferred_locale
 	 * @param string $region
-	 * @param int $default_message_notifications
+	 * @param int $default_message_notification
 	 * @param int $verification_level
 	 * @param int $max_members
 	 * @param GuildEmoji[] $emojis
@@ -147,37 +76,13 @@ class Guild {
 	 * @param GuildWelcomeScreen|null $welcomeScreen
 	 * @param int $premium_tier
 	 */
-	public function __construct(string $name, string $id, ?string $owner_id, ?string $icon = null, ?string $banner = null, ?string $afk_channel = null, ?string $rules_channel_id = null, array $channels = [], array $members = [], array $roles = [], string $description = null, int $member_count = 10000, string $preferred_locale = "en-US", string $region = "europe", int $default_message_notifications = 0, int $verification_level = 0, int $max_members = 10000, array $emojis = [], ?string $vanity_url = null, ?string $system_channel_id = null, ?string $public_updates_channel_id = null, ?int $premium_subscription_count = 0, ?array $features = null, ?GuildWelcomeScreen $welcomeScreen = null, int $premium_tier = 0) {
-		$this->name = $name;
-		$this->id = $id;
-		$this->owner_id = $owner_id;
-		$this->icon = $icon;
-		$this->banner = $banner;
-		$this->afk_channel = $afk_channel;
-		$this->rules_channel_id = $rules_channel_id;
-		$this->channels = $channels;
-		$this->members = $members;
-		$this->roles = $roles;
+	#[Pure] public function __construct(protected string $name, protected string $id, protected ?string $owner_id, protected ?string $icon = null, protected ?string $banner = null, protected ?string $afk_channel = null, protected ?string $rules_channel_id = null, protected array $channels = [], protected array $members = [], protected array $roles = [], protected ?string $description = null, protected int $member_count = 10000, protected string $preferred_locale = "en-US", protected string $region = "europe", protected int $default_message_notification = 0, protected int $verification_level = 0, protected int $max_members = 10000, array $emojis = [], protected ?string $vanity_url = null, protected ?string $system_channel_id = null, protected ?string $public_updates_channel_id = null, protected ?int $premium_subscription_count = 0, protected ?array $features = null, protected ?GuildWelcomeScreen $welcomeScreen = null, protected int $premium_tier = 0) {
 		$_emojis = [];
 		foreach ($emojis as $emoji) {
 			if ($emoji instanceof GuildEmoji) $_emojis[$emoji->getId()] = $emoji;
 		}
 		$this->emojis = $_emojis;
-		$this->description = $description;
-		$this->member_count = $member_count;
-		$this->preferred_locale = $preferred_locale;
-		$this->region = $region;
-		$this->default_message_notification = $default_message_notifications;
-		$this->verification_level = $verification_level;
-		$this->max_members = $max_members;
-		$this->vanity_url = $vanity_url;
-		$this->system_changes_id = $system_channel_id;
-		$this->public_updates_channel_id = $public_updates_channel_id;
-		$this->premium_subscription_count = $premium_subscription_count;
-		$this->features = $features;
-		$this->welcomeScreen = $welcomeScreen;
-		$this->premium_tier = $premium_tier;
-		//$this->getBanList(); // initializing the ban-list   todo: fix this function
+		$this->commandMap = new GuildCommandMap($this->getId());
 	}
 
 	/**
@@ -255,7 +160,7 @@ class Guild {
 	 *
 	 * @param string|GuildChannel $channel
 	 */
-	public function removeChannel($channel) {
+	public function removeChannel(GuildChannel|string $channel) {
 		if ($channel instanceof GuildChannel) $channel = $channel->getId();
 		if (isset($this->channels[$channel])) unset($this->channels[$channel]);
 	}
@@ -269,7 +174,7 @@ class Guild {
 	 *
 	 * @return GuildMember|null
 	 */
-	public function getMemberById($id): ?GuildMember {
+	public function getMemberById(string|int $id): ?GuildMember {
 		if (!is_string($id) and !is_int($id)) throw new InvalidArgumentException("IDs can only be made by string or int");
 		$id = strval($id);
 		return @$this->members[$id];
@@ -382,7 +287,7 @@ class Guild {
 	 *
 	 * @param User|string $member
 	 */
-	public function removeMember($member) {
+	public function removeMember(User|string $member) {
 		if ($member instanceof User) $member = $member->getId();
 		if (isset($this->members[$member])) unset($this->members[$member]);
 	}
@@ -402,6 +307,8 @@ class Guild {
 	}
 
 	/**
+	 * fixme
+	 *
 	 * Returns the banlist of the guild
 	 * Tries to fetch it from cache or get it from RESTAPI
 	 *
@@ -410,7 +317,7 @@ class Guild {
 	 * @api
 	 *
 	 * @return Promise
-	 */
+	 *
 	public function getBanList(): Promise {
 		$banList = $this->banList;
 		if ($banList instanceof GuildBanList) return new Promise(function (Resolver $resolver, Rejecter $rejecter, GuildBanList $banList) {
@@ -423,6 +330,7 @@ class Guild {
 			$this->banList = $banList;
 		});
 	}
+	*/
 	
 	/**
 	 * Bans a user from the guild, internal use only, @see User::ban() for API instructions
@@ -435,7 +343,7 @@ class Guild {
 	 *
 	 * @return Promise
 	 */
-	public function addBan($user, ?string $reason = null, ?int $messageDeleteDays = null): Promise {
+	public function addBan(User|string $user, ?string $reason = null, ?int $messageDeleteDays = null): Promise {
 		if ($messageDeleteDays !== null and !IntUtils::isInRange($messageDeleteDays, 0, 7))
 			throw new OutOfBoundsException("Ban message delete duration cannot be out of the range between 0 - 7");
 		if ($user instanceof User) $user = $user->getId();
@@ -446,7 +354,7 @@ class Guild {
 	}
 	
 	/**
-	 * Returns the membercount of the guild (should be updated on adds / removes)
+	 * Returns the member count of the guild (should be updated on adds / removes)
 	 *
 	 * @api
 	 *
@@ -513,11 +421,11 @@ class Guild {
 	 *
 	 * @api
 	 *
-	 * @param string|int|GuildMember|User $member
+	 * @param string|int|User $member
 	 *
 	 * @return bool
 	 */
-	public function isOwner($member): bool {
+	#[Pure] public function isOwner(string|int|User $member): bool {
 		if ($member instanceof User) {
 			if ($member->getGuildId() !== $this->getId()) return false;
 			$member = $member->getId();
@@ -621,7 +529,7 @@ class Guild {
 	 *
 	 * @return string
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function getCreationDate(string $timezone = "Europe/London", string $format = "H:i:s d.m.Y"): string {
 		return Math::getCreationDate($this->getId(), $timezone, $format);
@@ -676,7 +584,7 @@ class Guild {
 	 *
 	 * @return GuildEmoji|null
 	 */
-	public function getEmojiById(string $id): ?GuildEmoji {
+	#[Pure] public function getEmojiById(string $id): ?GuildEmoji {
 		foreach ($this->getEmojis() as $emoji) {
 			if ($emoji->getId() === $id) return $emoji;
 		}
@@ -792,7 +700,7 @@ class Guild {
 	 * @return Promise
 	 */
 	public function setBotNick(?string $nick): Promise {
-		return !RestAPIHandler::getInstance()->setBotNick(Discord::getInstance()->getClient()->getUser()->getId(), $nick);
+		return RestAPIHandler::getInstance()->setBotNick(Discord::getInstance()->getClient()->getUser()->getId(), $nick);
 	}
 	
 	/**
@@ -871,5 +779,20 @@ class Guild {
 	 */
 	public function fetchMember(string $id): Promise {
 		return RestAPIHandler::getInstance()->fetchMember($this->getId(), $id);
+	}
+	
+	/**
+	 * @return GuildCommandMap
+	 */
+	public function getCommandMap(): GuildCommandMap {
+		return $this->commandMap;
+	}
+	
+	public function registerSlashCommand(SlashCommand $command): Promise {
+		return RestAPIHandler::getInstance()->registerSlashCommand($this->getId(), Discord::getInstance()->getApplicationId(), $command->encode());
+	}
+	
+	public function getSlashCommands(): Promise {
+		return RestAPIHandler::getInstance()->getSlashCommands($this->getId(), Discord::getInstance()->getApplicationId());
 	}
 }

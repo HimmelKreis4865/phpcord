@@ -3,6 +3,7 @@
 namespace phpcord\utils;
 
 use phpcord\utils\theme\ThemeStorage;
+use function array_keys;
 use function str_replace;
 use const PHP_EOL;
 
@@ -22,48 +23,48 @@ class MainLogger {
 	 */
 	
 	public const COLOR_FORMATS = [
-		"a" => 88,  // red
-		"b" => 124,
-		"c" => 160,
-		"d" => 9,
-		"e" => 196,
-		"f" => 210,
-		"g" => 198,
-		"h" => 205,
-		"i" => 202, // orange
-		"j" => 208,
-		"k" => 166,
-		"l" => 178,
-		"m" => 185, // yellow
-		"n" => 190,
-		"o" => 192,
-		"p" => 214,
-		"q" => 220,
-		"r" => 226,
-		"s" => 154,
-		"t" => 118, // green
-		"u" => 83,
-		"v" => 82,
-		"w" => 40,
-		"x" => 41,
-		"y" => 43,
-		"z" => 31, // turquoise
-		"0" => 67,
-		"1" => 69, // blue
-		"2" => 51,
-		"3" => 57,
-		"4" => 90, // lila
-		"5" => 135,
-		"6" => 129,
-		"7" => 231, // white
-		"8" => 230,
-		"9" => 232, // black
-		"A" => 238, // gray
-		"B" => 241,
-		"C" => 244,
-		"D" => 247,
-		"E" => 252,
-		"F" => 254,
+		"§a" => 88,  // red
+		"§b" => 124,
+		"§c" => 160,
+		"§d" => 9,
+		"§e" => 196,
+		"§f" => 210,
+		"§g" => 198,
+		"§h" => 205,
+		"§i" => 202, // orange
+		"§j" => 208,
+		"§k" => 166,
+		"§l" => 178,
+		"§m" => 185, // yellow
+		"§n" => 190,
+		"§o" => 192,
+		"§p" => 214,
+		"§q" => 220,
+		"§r" => 226,
+		"§s" => 154,
+		"§t" => 118, // green
+		"§u" => 83,
+		"§v" => 82,
+		"§w" => 40,
+		"§x" => 41,
+		"§y" => 43,
+		"§z" => 31, // turquoise
+		"§0" => 67,
+		"§1" => 69, // blue
+		"§2" => 51,
+		"§3" => 57,
+		"§4" => 90, // lila
+		"§5" => 135,
+		"§6" => 129,
+		"§7" => 231, // white
+		"§8" => 230,
+		"§9" => 232, // black
+		"§A" => 238, // gray
+		"§B" => 241,
+		"§C" => 244,
+		"§D" => 247,
+		"§E" => 252,
+		"§F" => 254,
 	];
 	
 	/**
@@ -141,7 +142,12 @@ class MainLogger {
 	public static function log(string $message) {
 		$message = self::dateFormat() . " " . $message;
 		
+		LogStore::addMessage(self::unsetColors($message));
 		echo self::convertColored($message . self::resetFormat()) . PHP_EOL;
+	}
+	
+	protected static function unsetColors(string $message): string {
+		return str_replace(array_keys(self::COLOR_FORMATS), "", $message);
 	}
 	
 	/**
@@ -186,7 +192,7 @@ class MainLogger {
 	protected static function convertColored(string $message): string {
 		foreach (self::COLOR_FORMATS as $key => $color) {
 			$prefix = "\033[38;5;";
-			$message = str_replace("§" . $key, $prefix . $color . "m", $message);
+			$message = str_replace($key, $prefix . $color . "m", $message);
 		}
 		return $message;
 	}

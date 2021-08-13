@@ -5,17 +5,6 @@ namespace phpcord\guild;
 use phpcord\channel\ChannelType;
 
 class IncompleteChannel {
-	/** @var string $id */
-	protected $id;
-	
-	/** @var string $name */
-	protected $name;
-	
-	/** @var int $type */
-	protected $type;
-	
-	/** @var string $guildId */
-	protected $guildId;
 	
 	/**
 	 * IncompleteChannel constructor.
@@ -24,14 +13,9 @@ class IncompleteChannel {
 	 * @param string $id
 	 * @param string $name
 	 * @param int $type
+	 * @param string|null $parent
 	 */
-	public function __construct(string $guildId, string $id, string $name, int $type = ChannelType::TYPE_TEXT) {
-		$this->id = $id;
-		$this->guildId = $guildId;
-		$this->name = $name;
-		$this->type = $type;
-		$this->guildId = $guildId;
-	}
+	public function __construct(protected string $guildId, protected string $id, protected string $name, protected int $type = ChannelType::TYPE_TEXT, protected ?string $parent = null) {	}
 	
 	/**
 	 * Returns the name of the channel
@@ -64,5 +48,19 @@ class IncompleteChannel {
 	 */
 	public function getType(): int {
 		return $this->type;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getGuildId(): string {
+		return $this->guildId;
+	}
+	
+	/**
+	 * @return string|null
+	 */
+	public function getParent(): ?string {
+		return $this->parent;
 	}
 }

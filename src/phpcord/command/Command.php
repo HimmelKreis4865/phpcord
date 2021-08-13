@@ -7,51 +7,8 @@ use phpcord\guild\GuildMember;
 use phpcord\guild\GuildMessage;
 
 abstract class Command {
-	/** @var string $name */
-	protected $name;
 
-	/** @var array $aliases */
-	protected $aliases = [];
-
-	/**
-	 * Command constructor.
-	 *
-	 * @param string $name
-	 * @param array $aliases
-	 */
-	public function __construct(string $name, array $aliases = []) {
-		$this->name = $name;
-		$this->aliases = $aliases;
-	}
-
-	/**
-	 * Returns whether a member can use the command or not
-	 *
-	 * For no permission check needed, just don't modify it in your own command
-	 *
-	 * @api
-	 *
-	 * @param GuildMember $member
-	 *
-	 * @return bool
-	 */
-	public function canUse(GuildMember $member): bool {
-		return true;
-	}
-
-	/**
-	 * Body of command execution
-	 *
-	 * @api / @internal  use it as api but don't call it unless you know what you're doing
-	 *
-	 * @param BaseTextChannel $channel
-	 * @param GuildMessage $message
-	 * @param array $args
-	 *
-	 * @return void
-	 */
-	abstract public function execute(BaseTextChannel $channel, GuildMessage $message, array $args): void;
-
+	public function __construct(protected string $name, protected int $type, protected string $description, protected array $subCommands = []) { }
 
 	/**
 	 * Returns the name of the command
@@ -63,15 +20,25 @@ abstract class Command {
 	public function getName(): string {
 		return $this->name;
 	}
-
+	
 	/**
-	 * Returns an array with all aliases of the command
-	 *
-	 * @api
-	 *
+	 * @return int
+	 */
+	public function getType(): int {
+		return $this->type;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getDescription(): string {
+		return $this->description;
+	}
+	
+	/**
 	 * @return array
 	 */
-	public function getAliases(): array {
-		return $this->aliases;
+	public function getOptions(): array {
+		return $this->options;
 	}
 }

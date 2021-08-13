@@ -5,28 +5,25 @@ namespace phpcord\stream;
 use phpcord\thread\Thread;
 use phpcord\utils\MainLogger;
 use RuntimeException;
-use function mt_rand;
 use function usleep;
 
 class SocketWriteThread extends Thread {
 	
-	protected $converter;
+	public $converter;
 	
 	protected $ws;
-	
-	protected $id;
 	
 	public function __construct(ThreadConverter $converter, $ws) {
 		$this->converter = $converter;
 		$this->ws = $ws;
-		$this->id = mt_rand(0, 10000);
 	}
 	
 	public function onRun() {
 		$ws = WebSocket::fromStream($this->ws);
 		$failureCount = 0;
+		
 		while ($this->converter->running) {
-			usleep(1000 * 49);
+			usleep(1000 * 25);
 			foreach ($this->converter->pushMainToThread as $k => $message) {
 				if (!$ws->write($message)) {
 					MainLogger::logWarning("Failed to write to websocket!");

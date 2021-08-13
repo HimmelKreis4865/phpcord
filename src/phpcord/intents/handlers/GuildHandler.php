@@ -14,6 +14,7 @@ use phpcord\event\user\UserUnbanEvent;
 use phpcord\guild\GuildBanEntry;
 use phpcord\utils\ClientInitializer;
 use phpcord\utils\MemberInitializer;
+use function var_dump;
 
 class GuildHandler extends BaseIntentHandler {
 
@@ -22,6 +23,7 @@ class GuildHandler extends BaseIntentHandler {
 	}
 
 	public function handle(Discord $discord, string $intent, array $data) {
+		var_dump("got: " . $intent);
 		// fixme: Fix this broken peace of shit
 		switch ($intent) {
 			case "GUILD_BAN_ADD":

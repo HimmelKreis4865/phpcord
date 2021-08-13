@@ -3,6 +3,7 @@
 namespace phpcord\http;
 
 use phpcord\channel\DMChannel;
+use phpcord\command\SlashCommand;
 use phpcord\Discord;
 use phpcord\guild\AuditLog;
 use phpcord\guild\Guild;
@@ -291,7 +292,7 @@ final class RestAPIHandler extends Threaded	{
 		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/roles");
 		$request->addHTTPData("content", json_encode(["name" => $name, "color" => $color, "permissions" => $permissions, "hoist" => $hoist, "mentionable" => $mentionable]));
 		return $this->createRestResponse($request, function(string $content) use ($guildId) : GuildRole {
-			return GuildSettingsInitializer::initRole($guildId, json_decode($content, true));
+			return GuildSettingsInitializer::createRole($guildId, json_decode($content, true));
 		});
 	}
 	
@@ -299,7 +300,7 @@ final class RestAPIHandler extends Threaded	{
 		$request = $this->getDefaultRequest(self::API . "guilds/" . $guildId . "/roles/" . $id, HTTPRequest::REQUEST_PATCH);
 		$request->addHTTPData("content", json_encode(["name" => $name, "color" => $color, "permissions" => $permissions, "hoist" => $hoist, "mentionable" => $mentionable]));
 		return $this->createRestResponse($request, function(string $content) use ($guildId) : GuildRole {
-			return GuildSettingsInitializer::initRole($guildId, json_decode($content, true));
+			return GuildSettingsInitializer::createRole($guildId, json_decode($content, true));
 		});
 	}
 	
@@ -399,6 +400,29 @@ final class RestAPIHandler extends Threaded	{
 			return GuildSettingsInitializer::createInvitation(json_decode($content, true));
 		});
 	}
+	
+	public function registerSlashCommand(string $guildId, string $applicationId, array $data): Promise {
+		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/guilds/" . $guildId . "/commands");
+		$request->addHTTPData("content", json_encode($data));
+		return $this->createRestResponse($request, function (string $content) {
+			var_dump("content: ", @json_decode($content, true));
+		});
+	}
+	
+	public function getSlashCommands(string $guildId, string $applicationId): Promise {
+		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/guilds/" . $guildId . "/commands", HTTPRequest::REQUEST_GET);
+		return $this->createRestResponse($request, function (string $content) use ($guildId) : array {
+			return array_map(function (array $data) use ($guildId) : SlashCommand {
+				return SlashCommand::fromArray($data, $guildId);
+			}, (@json_decode($content, true) ?? []));
+		});
+	}
+	
+	public function removeSlashCommand(string $id, string $applicationId, string $guildId): Promise {
+		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/guilds/" . $guildId . "/commands/" . $id, HTTPRequest::REQUEST_DELETE, false);
+		return $this->createRestResponse($request, function (string $content): void { });
+	}
+	
 	/*
 	public function registerSlashCommand(string $guildId, string $applicationId, array $data): Promise {
 		$request = $this->getDefaultRequest(self::API . "applications/" . $applicationId . "/guilds/" . $guildId . "/commands");
@@ -433,9 +457,26 @@ final class RestAPIHandler extends Threaded	{
 		});
 	}
 	
-	public function sendInteractionReply(string $token, string $id, int $type, array $data): Promise {
+	public function sendImmediateInteractionReply(string $token, string $id, int $type, array $data): Promise {
 		$request = $this->getDefaultRequest(self::API . "interactions/" . $id . "/" . $token . "/callback");
 		$request->addHTTPData("content", json_encode(["type" => $type, "data" => $data]));
+		return $this->createRestResponse($request, function (string $content): void { });
+	}
+	
+	public function sendInteractionReply(string $token, string $id, int $type, array $data): Promise {
+		$request = $this->getDefaultRequest(self::API . "webhooks/" . $id . "/" . $token);
+		$request->addHTTPData("content", json_encode(["type" => $type, "data" => $data]));
+		return $this->createRestResponse($request, function (string $content): void { });
+	}
+	
+	public function editInteractionReply(string $token, string $id, int $type, array $data): Promise {
+		$request = $this->getDefaultRequest(self::API . "webhooks/" . $id . "/" . $token . "/messages/@original", HTTPRequest::REQUEST_PATCH);
+		$request->addHTTPData("content", json_encode($data));
+		return $this->createRestResponse($request, function (string $content): void { });
+	}
+	
+	public function deleteInteractionReply(string $token, string $id): Promise {
+		$request = $this->getDefaultRequest(self::API . "webhooks/" . $id . "/" . $token . "/messages/@original", HTTPRequest::REQUEST_DELETE, false);
 		return $this->createRestResponse($request, function (string $content): void { });
 	}
 	

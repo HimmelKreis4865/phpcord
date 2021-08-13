@@ -5,6 +5,7 @@ namespace phpcord\client;
 use DateTime;
 use InvalidArgumentException;
 use phpcord\channel\DMChannel;
+use phpcord\command\GlobalCommandMap;
 use phpcord\Discord;
 use phpcord\guild\Guild;
 use phpcord\guild\GuildInvite;
@@ -38,6 +39,8 @@ class Client {
 	/** @var DateTime $startTime the starttime in seconds */
 	protected $startTime;
 	
+	protected GlobalCommandMap $commandMap;
+	
 	/**
 	 * Client constructor.
 	 *
@@ -45,6 +48,7 @@ class Client {
 	 */
 	public function __construct(array $guilds = []) {
 		$this->guilds = $guilds;
+		$this->commandMap = new GlobalCommandMap();
 		$this->startTime = new DateTime("now");
 	}
 
@@ -53,6 +57,13 @@ class Client {
 	 */
 	public function getGuilds(): array {
 		return $this->guilds;
+	}
+	
+	/**
+	 * @return GlobalCommandMap
+	 */
+	public function getCommandMap(): GlobalCommandMap {
+		return $this->commandMap;
 	}
 
 	/**

@@ -59,13 +59,13 @@ class ChannelInitializer {
 	 *
 	 * @internal
 	 *
-	 * @param array $data
 	 * @param string $guildId
+	 * @param array $data
 	 *
 	 * @return IncompleteChannel|null
 	 */
-	public static function createIncomplete(array $data, string $guildId): ?IncompleteChannel {
-		return new IncompleteChannel($guildId, $data["id"], $data["name"], $data["type"] ?? ChannelType::TYPE_TEXT);
+	public static function createIncomplete(string $guildId, array $data): ?IncompleteChannel {
+		return new IncompleteChannel($guildId, $data["id"], $data["name"], $data["type"] ?? ChannelType::TYPE_TEXT, @$data["parent_id"]);
 	}
 	
 	public static function createDMChannel(array $data): DMChannel {

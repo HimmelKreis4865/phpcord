@@ -72,7 +72,7 @@ class GuildSettingsInitializer {
 		if (isset($data["target_user"])) $target = MemberInitializer::createUser($data["target_user"], ($guild === null ? "0" : $guild->getId()));
 		
 		$channel = null;
-		if (isset($data["channel"])) $channel = ChannelInitializer::createIncomplete($data["channel"], ($guild === null ? "0" : $guild->getId()));
+		if (isset($data["channel"])) $channel = ChannelInitializer::createIncomplete(($guild === null ? "0" : $guild->getId()), $data["channel"]);
 		
 		$metadata = [];
 		if (isset($data["uses"]) and isset($data["max_uses"]) and isset($data["temporary"]) and isset($data["created_at"]) and isset($data["max_age"])) {
@@ -98,11 +98,11 @@ class GuildSettingsInitializer {
 	 *
 	 * @return GuildRole
 	 */
-	public static function initRole(string $guildId, array $data): GuildRole {
+	public static function createRole(string $guildId, array $data): GuildRole {
 		return new GuildRole($guildId, $data["name"], $data["id"], intval($data["position"] ?? 0), $data["permissions"] ?? [], $data["color"] ?? 0, $data["mentionable"] ?? false, $data["managed"] ?? false);
 	}
 	
-	public static function initWelcomeScreen(array $data): GuildWelcomeScreen {
+	public static function createWelcomeScreen(array $data): GuildWelcomeScreen {
 		$fields = [];
 		foreach ($data["welcome_channels"] ?? [] as $channel) {
 			$fields[] = new GuildWelcomeScreenField($channel["channel_id"], $channel["description"], (isset($channel["emoji_name"]) ? new Emoji($channel["emoji_name"], @$channel["emoji_id"]) : null));

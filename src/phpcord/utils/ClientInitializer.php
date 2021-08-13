@@ -52,7 +52,7 @@ class ClientInitializer {
 			if ($channel instanceof GuildChannel) $channels[$channel->id] = $channel;
 		}
 		$screen = null;
-		if (isset($data["welcome_screen"]) and !is_null($data["welcome_screen"])) $screen = GuildSettingsInitializer::initWelcomeScreen($data["welcome_screen"]);
+		if (isset($data["welcome_screen"]) and !is_null($data["welcome_screen"])) $screen = GuildSettingsInitializer::createWelcomeScreen($data["welcome_screen"]);
 		
 		$emojis = array_map(function($data) use ($guild_id) {
 			return GuildSettingsInitializer::createGuildEmoji($data, $guild_id);

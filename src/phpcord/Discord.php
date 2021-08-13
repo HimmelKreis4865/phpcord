@@ -3,8 +3,9 @@
 namespace phpcord;
 
 use BadMethodCallException;
+use JetBrains\PhpStorm\Pure;
 use phpcord\command\CommandMap;
-use phpcord\command\SimpleCommandMap;
+use phpcord\command\GlobalCommandMap;
 use phpcord\client\Client;
 use phpcord\event\Event;
 use phpcord\event\EventListener;
@@ -33,6 +34,7 @@ use phpcord\utils\Utils;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use RuntimeException;
 use function date;
 use function file_exists;
 use function is_dir;
@@ -43,6 +45,7 @@ use function str_replace;
 use function strlen;
 use function substr;
 use function usleep;
+use function var_dump;
 use const DIRECTORY_SEPARATOR;
 
 final class Discord {
@@ -77,9 +80,6 @@ final class Discord {
 	
 	/** @var IntentReceiveManager $intentReceiveManager */
 	public $intentReceiveManager;
-	
-	/** @var null|CommandMap $commandMap */
-	private $commandMap;
 	
 	public $sslSettings = [];
 	
@@ -116,6 +116,8 @@ final class Discord {
 	/** @var Theme $theme */
 	protected $theme;
 	
+	protected ?StreamLoop $loop = null;
+	
 	protected static $baseDir;
 	
 	public function __construct(string $baseDir, array $options = []) {
@@ -127,13 +129,14 @@ final class Discord {
 		$this->registerShutdownHandler();
 		$this->options = $options;
 		
-		$dir = __DIR__;
-		LogStore::setLogFile(($dir[(strlen($dir) - 1)] === DIRECTORY_SEPARATOR ? $dir : $dir . DIRECTORY_SEPARATOR) . "save.log");
-		LogStore::addMessage("\n\n" . "[STARTING PHPCORD AT " . date("d.m.Y H:i:s") . "]\n");
+		if (isset($options["file_log"])) {
+			LogStore::setLogFile(($baseDir[(strlen($baseDir) - 1)] === DIRECTORY_SEPARATOR ? $baseDir : $baseDir . DIRECTORY_SEPARATOR) . "bot.log");
+			LogStore::addMessage("\n[STARTING PHPCORD AT " . date("d.m.Y H:i:s") . "]\n");
+		}
 		$this->client = new Client();
 		PermissionIds::initDefinitions();
 		
-		if (isset($options["debugMode"]) and is_bool($options["debugMode"])) $this->debugMode = $options["debugMode"];
+		if (isset($options["debug_mode"]) and is_bool($options["debug_mode"])) $this->debugMode = $options["debug_mode"];
 		
 		if (isset($options["intents"]) and is_int($options["intents"])) $this->setIntents($options["intents"]);
 	    $this->intentReceiveManager = new IntentReceiveManager();
@@ -143,8 +146,7 @@ final class Discord {
 		}
 	    
 	    self::$baseDir = Utils::addSeparator($baseDir);
-		
-		$this->commandMap = new SimpleCommandMap();
+	    
 	    $this->consoleCommandMap = new ConsoleCommandMap();
 	    
 		$this->opCodeHandler = new OPCodeHandler();
@@ -186,16 +188,8 @@ final class Discord {
     	return $this->consoleCommandMap;
 	}
 	
-	/**
-	 * Returns the instance of the commandmap for discord commands
-	 *
-	 * @api
-	 *
-	 * @return CommandMap
-	 */
-	public function getCommandMap(): CommandMap {
-		if ($this->commandMap instanceof CommandMap) return $this->commandMap;
-		throw new InvalidArgumentException("You can't access the commandmap without activating it!");
+	#[Pure] public function getApplicationId(): string {
+		return $this->getClient()->getUser()->getApplication()->getId();
 	}
 	
 	/**
@@ -223,7 +217,7 @@ final class Discord {
 	public function login(string $token = null): void {
 		$this->putTheme();
 		
-		ErrorHandler::init();
+		//ErrorHandler::init();
 		
 		MainLogger::logInfo("Loading extensions...");
 		ExtensionManager::getInstance()->loadExtensions();
@@ -256,8 +250,9 @@ final class Discord {
 		
 		$this->converter = new ThreadConverter();
 		
+		/*
 		$thread = new InputLoop($this->converter);
-		$thread->start();
+		$thread->start();*/
 		
 		MainLogger::logInfo("Starting websocket client...");
 		
@@ -273,8 +268,10 @@ final class Discord {
 				"ciphers" => "HIGH:TLSv1.2:TLSv1.1:TLSv1.0:!SSLv3:!SSLv2"
 			]
 		];
-		$thread2 = new StreamLoop($this->converter, $settings);
-		$thread2->start();
+		
+		$this->loop = new StreamLoop($this->converter, $settings);
+		$this->loop->start();
+		
 		$this->loop();
 	}
 	
@@ -300,6 +297,7 @@ final class Discord {
 	}
 	
 	public function pushToSocket(string $message) {
+		var_dump("pushing $message");
 		$this->converter->pushMainToThread[] = $message;
 	}
 	
@@ -312,7 +310,7 @@ final class Discord {
 		// gateway message
 		$data = json_decode($message, true);
 		if (!$data) return;
-		$this->opCodeHandler->{"__" . $data["op"]}($this, $data);
+		$this->opCodeHandler->{"__" . $data["op"]}($data);
 	}
 	
 	public function runHeartbeats(): void {
@@ -337,9 +335,9 @@ final class Discord {
 		$ref = new ReflectionClass($eventListener);
 		foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
 			if ($method->isStatic() or $method->getNumberOfParameters() !== 1) continue;
-			$event = $method->getParameters()[0]->getClass();
-			if ($event === null or !$event->isSubclassOf(Event::class)) continue;
-			$this->registerEvent($eventListener, $method->getName(), $event->getName());
+			$event = strval($method->getParameters()[0]->getType());
+			if ($event === null or !is_subclass_of($event, Event::class)) continue;
+			$this->registerEvent($eventListener, $method->getName(), $event);
 		}
 	}
 

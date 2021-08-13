@@ -6,7 +6,7 @@
   "license": "GPL-3.0",
   "minimum-stability": "dev",
   "require": {
-    "php": "^7.2",
+    "php": "^8.0",
     "ext-openssl": "*",
     "ext-json": "*",
     "ext-yaml": "*",

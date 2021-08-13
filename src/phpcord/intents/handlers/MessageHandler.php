@@ -37,18 +37,10 @@ class MessageHandler extends BaseIntentHandler {
 					return;
 				}
 				
-				// calling CommandMap to check for a command
-  				try {
-					$commandMap = $discord->getCommandMap();
-					$commandMap->executeCommand($channel, $message);
-				} catch (InvalidArgumentException $exception) {
-				
-				}
-
 				(new MessageSendEvent($message, $channel))->call();
 				break;
 			case "MESSAGE_UPDATE":
-				if ($data["flags"] ?? 0 === 1) {
+				if (($data["flags"] ?? 0) === 1) {
 					(new MessageCrosspostEvent($data["id"], $data["channel_id"], $data["guild_id"]))->call();
 					return;
 				}
@@ -78,9 +70,6 @@ class MessageHandler extends BaseIntentHandler {
 					unset($discord->answerHandlers[$message->channelId . ":" . $id]);
 					return;
 				}
-				
-				// calling CommandMap to check for a command
-				$discord->getCommandMap()->executeCommand($channel, $message);
 				
 				(new MessageSendEvent($message, $channel))->call();
 				break;

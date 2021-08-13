@@ -4,9 +4,17 @@ namespace phpcord\stream;
 
 use phpcord\thread\Thread;
 use phpcord\utils\ArrayUtils;
+use phpcord\utils\LogStore;
 use phpcord\utils\MainLogger;
 use RuntimeException;
+use function array_merge;
+use function json_decode;
+use function json_encode;
+use function microtime;
 use function usleep;
+use function var_dump;
+use const PTHREADS_INHERIT_CLASSES;
+use const PTHREADS_INHERIT_NONE;
 
 class StreamLoop extends Thread {
 	
@@ -30,20 +38,25 @@ class StreamLoop extends Thread {
 	}
 	
 	public function onRun() {
-		// todo: dynamic autoload for threads
 		$ws = new WebSocket(self::GATEWAY, 443, false, true, ArrayUtils::asArray($this->settings));
 		$thread = new SocketWriteThread($this->converter, $ws->stream);
 		$thread->start();
+		
+		var_dump("file:" . LogStore::$logFile);
+		
 		while (true) {
 			usleep(1000 * 50);
 			if ($ws->isInvalid()) {
 				$ws->close();
 				$ws = new WebSocket(self::GATEWAY, 443, false, true, ArrayUtils::asArray($this->settings));
-				$this->converter->running = false;
-				usleep(1000 * 50);
+				$thread->converter->running = false;
+				usleep(60 * 1000);
 				$this->converter->running = true;
-				$thread2 = new SocketWriteThread($this->converter, $ws->stream);
-				$thread2->start();
+				unset($thread);
+				$thread = new SocketWriteThread($this->converter, $ws->stream);
+				$thread->start();
+				// this will be thrown once for example there's a wifi downtime or smh - keeping it away from spamming useless reconnects
+				// won't be thrown if the socket is working and there are messages that can be received
 				if (++$this->failureCount > self::MAX_FAILURES)
 					throw new RuntimeException("Failed to reconnect the gateway connection!");
 			}
@@ -54,6 +67,9 @@ class StreamLoop extends Thread {
 			}
 			$this->failureCount = 0;
 			MainLogger::logDebug("Received $message");
+			if (($data = @json_decode($message, true)) and isset($data["op"]) and $data["op"] === 11) {
+				$message = json_encode(array_merge($data, ["recv_time" => microtime(true)]));
+			}
 			$this->converter->pushThreadToMain[] = $message;
 		}
 	}

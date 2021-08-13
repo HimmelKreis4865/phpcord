@@ -5,6 +5,7 @@ namespace phpcord\event;
 use phpcord\exception\EventException;
 use phpcord\Discord;
 use phpcord\utils\ArrayUtils;
+use function var_dump;
 
 class Event {
 	/** @var bool $cancelled */
@@ -40,6 +41,7 @@ class Event {
 	 * @api
 	 */
 	public function call() {
+		var_dump("calling : " . static::class);
 		if (!isset(Discord::getInstance()->listeners[static::class])) return;
 		foreach (array_filter(ArrayUtils::asArray(Discord::getInstance()->listeners[static::class]), function($key) {
 				return (isset($key[1]) and isset($key[0]) and ($key[0] instanceof EventListener));

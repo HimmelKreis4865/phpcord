@@ -21,7 +21,7 @@ class RequestFailureException extends Exception {
 	public function __construct(string $error_string, int $response_code = 404) {
 		$this->response_code = $response_code;
 		$this->error_string = $error_string;
-		parent::__construct("Request answered with response code $response_code and error: $error_string");
+		parent::__construct("[$response_code] $error_string");
 	}
 	
 	/**

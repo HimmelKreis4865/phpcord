@@ -82,4 +82,11 @@ class BotUser extends User {
 		// can be hardcoded since it has to be a bot
 		$this->bot = true;
 	}
+	
+	/**
+	 * @return Application|null
+	 */
+	public function getApplication(): ?Application {
+		return $this->application;
+	}
 }
