@@ -19,30 +19,9 @@ use phpcord\task\TaskManager;
 
 class EventListener implements \phpcord\event\EventListener {
 	
-	public function onAdd(MemberAddEvent $event) {
-		/** @var BaseTextChannel $channel */
-		if (($channel = $event->getGuild()->getChannel("816776396919013397")) instanceof BaseTextChannel) {
-			var_dump($event->getMember()->getAvatarURL());
-			$channel->send((new MessageEmbed())->setTitle("Welcome")->setDescription("Welcome to this server, " . $event->getMember()->createMention())->setColor("#4dff6a")->setThumbnail($event->getMember()->getAvatarURL()));
-		}
-	}
-	
-	public function onRemove(MemberRemoveEvent $event) {
-		var_dump("member removed");
-		/** @var BaseTextChannel $channel */
-		if (($channel = $event->getGuild()->getChannel("816776396919013397")) instanceof BaseTextChannel) {
-			$channel->send((new MessageEmbed())->setTitle("Goodbye")->setDescription("Hope you had a great time, " . $event->getUser()->getTag())->setColor("#ff504d")->setThumbnail($event->getUser()->getAvatarURL()));
-		}
-	}
-	//
-	public function onInteract(InteractionCreateEvent $event) {
-		//var_dump($event->getInteraction());
-	}
-	
 	public function onReady(ClientReadyEvent $event) {
 		
 		$event->getClient()->getCommandMap()->addHandler("ping", function (Interaction $interaction) {
-			
 			$message = new MessageEmbed();
 			$ping = Discord::getInstance()->getClient()->getPing();
 			$message->setColor(match (true) {
@@ -53,48 +32,10 @@ class EventListener implements \phpcord\event\EventListener {
 			$message->setFooter($interaction->getMember()->getTag(), $interaction->getMember()->getAvatarURL());
 			
 			$interaction->reply($message);
-			
-			/*TaskManager::getInstance()->submitTask(new ClosureTask(function () use ($interaction) {
-				$message = new MessageEmbed();
-				$message->setTitle("Ban success")->setColor(new RGB(0, 255))->setDescription("The ban succeed!");
-				$message->setFooter($interaction->getMember()->getTag(), $interaction->getMember()->getAvatarURL());
-				
-				$interaction->edit($message)->then(function () {
-					var_dump("reply sent");
-				});
-			}, 80));*/
 		});
 	}
 	
 	public function onGuildAdd(GuildCreateEvent $event) {
-		$event->getGuild()->getSlashCommands()->then(function (array $commands) {
-			/** @var SlashCommand[] $commands */
-			foreach ($commands as $command) {
-				var_dump("we have " . $command->getName());
-				$command->delete();
-			}
-		});
-		
-		/*$event->getGuild()->registerSlashCommand(new SlashCommand("ban", SlashCommand::DEFAULT, "Bans players with ease", [
-			new SubCommand("target", SubCommand::USER, "The target player to ban", true, [], []),
-			new SubCommand("reason", SubCommand::INTEGER, "The ban reason ID", true, [
-				"offensive" => 1,
-				"permanent" => 99
-			])
-		]));*/
-		
 		$event->getGuild()->registerSlashCommand(new SlashCommand("ping", SlashCommand::DEFAULT, "Returns my current ping"));
-		
-		$event->getGuild()->registerSlashCommand(new SlashCommand("test", SlashCommand::DEFAULT, "test command", [
-			new SubCommand("channel", SubCommand::CHANNEL, "Shows channel blablabla"),
-			new SubCommand("role", SubCommand::ROLE, "Shows role blablabla"),
-			new SubCommand("mentionable", SubCommand::MENTIONABLE, "Shows mentionables blablabla"),
-		]));
 	}
 }
-/*
- *
- * new SubCommand("reason", SubCommand::INTEGER, "The ban reason ID", true, [
-					"offensive" => 1,
-					"permanent" => 99
-				])*/
