@@ -1,5 +1,7 @@
 # phpcord v3
 
+<a href="https://discord.gg/GCCTxymKct"><img src="https://img.shields.io/discord/808294266886553601?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+
 ## Into
 Phpcord is an unofficial [Discord API](https://discord.com/developers/docs) wrapper that allows you to simply create bots for Discord servers.
 
