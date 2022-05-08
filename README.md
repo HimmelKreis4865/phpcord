@@ -1,17 +1,36 @@
-# <img src="icon.png" width="40" height="40"> phpcord
-<a href="https://discord.gg/GCCTxymKct"><img src="https://img.shields.io/discord/808294266886553601?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+# phpcord v3
 
-A simple PHP Library for interacting with DiscordAPI over a Bot
+## Into
+Phpcord is an unofficial [Discord API](https://discord.com/developers/docs) wrapper that allows you to simply create bots for Discord servers.
 
-Please don't mind me for having only sync tRaSh cOdE (if you find any worse mistakes in code which has nothing to do about multithreading, you're welcome to open an <a href="https://github.com/HimmelKreis4865/phpcord/issues/new">Issue</a> telling me how bad I am, but don't tell me it has to be multithreaded, since this library should stay simple).
+v3 is the successor of v1 (and phpcord v2 which was never finished)
 
-# Documentation
-Check <a href="https://himmelkreis4865.gitbook.io/phpcord/">the official documentation here</a> if you don't understand it / are new to this project.
+The leading difference between those two versions (v1 -> v3) is mainly a better network handling, faster tick and asynchronous webapi - requests.
 
-# Ideas / Feedback / Bugs / Problems? 
-**When it comes to bugs / problems, please visit <a href="https://himmelkreis4865.gitbook.io/phpcord//">the official documentation here</a> before!**
+v3 also supports way more features than the older versions, it supports (except voice) nearly every single feature available in the latest discord version, which makes it a great alternative to other discord libraries.
 
-You're always welcome to open <a href="https://github.com/HimmelKreis4865/phpcord/issues/new">Issue</a>
+##Features
 
-# Credits
-cacert.pem is a copy from <a href="https://curl.se/docs/caextract.html">curl.se</a> - I don't take any responsiblity for it
+✅ Asynchronous
+
+✅ Fast and reliable - Tick speed increased + much more performant with less resources
+
+✅ Slash Command and Message Component support
+
+✅ Discord Threads
+
+✅ Easy and documented API
+
+❌ Voice Support (not yet, this might follow in a future update)
+
+## Installation
+You can simply download this repository from GitHub and drop it into your local folder, it does not require any composer installations but can be installed via composer.
+Edit index.php as a starting point for your projects or create a new file.
+
+## API Documentation
+*Soon.*
+
+## Requirements
+ - PHP Version: >= [8.0](https://www.php.net/downloads)
+ - Required Extensions: [ext-sockets](https://www.php.net/manual/sockets.installation.php), [ext-pthreads](https://pecl.php.net/package/pthreads), [ext-curl](https://www.php.net/manual/curl.installation.php), [ext-openssl](https://www.php.net/manual/openssl.installation.php)
+ - 1GB RAM (real usage depends on bot size)

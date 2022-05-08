@@ -1,20 +1,17 @@
 <?php
 
 use phpcord\Discord;
-use phpcord\event\EventListener;
 use phpcord\event\message\MessageSendEvent;
-use phpcord\intents\IntentsManager;
+use phpcord\message\sendable\MessageBuilder;
 
-require_once __DIR__ . "/src/phpcord/Discord.php";
+require 'phpcord/src/phpcord/Discord.php';
 
-$discord = new Discord([ "debugMode" => true ]);
+$discord = new Discord();
 
-$discord->setIntents(IntentsManager::allIntentsSum());
-
-$discord->registerEvents(new class implements EventListener {
-	public function onSend(MessageSendEvent $event) {
-		if ($event->getMessage()->getMember()->isHuman()) $event->getChannel()->send("This is the default bot message! You should edit the source code.");
+$discord->listen(MessageSendEvent::class, function (MessageSendEvent $event): void {
+	if (!$event->getMessage()->getAuthor()->isBot()) {
+		$event->getMessage()->reply(MessageBuilder::build('This is a dummy message.'));
 	}
 });
 
-$discord->login("your bot token");
+$discord->login('your bot token');
