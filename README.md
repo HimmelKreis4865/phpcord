@@ -1,6 +1,6 @@
 # phpcord v3
 
-<a href="https://discord.gg/GCCTxymKct"><img src="https://img.shields.io/discord/808294266886553601?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+<a href="https://discord.gg/WzRcuK9gBS"><img src="https://img.shields.io/discord/808294266886553601?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
 
 ## Into
 Phpcord is an unofficial [Discord API](https://discord.com/developers/docs) wrapper that allows you to simply create bots for Discord servers.
@@ -11,7 +11,7 @@ The leading difference between those two versions (v1 -> v3) is mainly a better 
 
 v3 also supports way more features than the older versions, it supports (except voice) nearly every single feature available in the latest discord version, which makes it a great alternative to other discord libraries.
 
-## Features
+##Features
 
 ✅ Asynchronous
 

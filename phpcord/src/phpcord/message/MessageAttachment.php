@@ -99,6 +99,6 @@ class MessageAttachment {
 	
 	public static function fromArray(array $array): ?MessageAttachment {
 		if (!Utils::contains($array, 'id', 'filename', 'size', 'url')) return null;
-		return new MessageAttachment($array['id'], $array['filename'], @$array['description'], @$array['content_type'], $array['size'], (@$array['width'] ? new Dimension($array['width'], $array['height']) : null), $array['url'], $array['proxy_url'] ?? $array['url'], $array['ephemeral']);
+		return new MessageAttachment($array['id'], $array['filename'], @$array['description'], @$array['content_type'], $array['size'], (@$array['width'] ? new Dimension($array['width'], $array['height']) : null), $array['url'], $array['proxy_url'] ?? $array['url'], $array['ephemeral'] ?? false);
 	}
 }

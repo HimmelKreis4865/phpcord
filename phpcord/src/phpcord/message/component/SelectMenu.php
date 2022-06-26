@@ -18,6 +18,8 @@ namespace phpcord\message\component;
 
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
+use phpcord\event\interaction\SelectMenuSubmitEvent;
+use phpcord\interaction\Interaction;
 
 class SelectMenu implements IChildComponent {
 	
@@ -52,6 +54,10 @@ class SelectMenu implements IChildComponent {
 	public function disable(): SelectMenu {
 		$this->disabled = true;
 		return $this;
+	}
+	
+	public static function onInteract(Interaction $interaction): void {
+		(new SelectMenuSubmitEvent($interaction, $interaction->getData()->getCustomId(), $interaction->getData()->getValues()))->call();
 	}
 	
 	#[ArrayShape(['type' => "int", 'custom_id' => "string", 'options' => "array", 'placeholder' => "null|string", 'min_values' => "int", 'max_values' => "int", 'disabled' => "bool"])]
