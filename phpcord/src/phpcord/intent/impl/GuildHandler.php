@@ -38,8 +38,8 @@ class GuildHandler implements IntentHandler {
 		switch ($buffer->name()) {
 			case Intents::GUILD_CREATE():
 				$guild = Guild::fromArray($buffer->data());
-				(new GuildCreateEvent($guild))->call();
 				Discord::getInstance()->getClient()->getGuilds()->set($guild->getId(), $guild);
+				(new GuildCreateEvent($guild))->call();
 				break;
 				
 			case Intents::GUILD_DELETE():

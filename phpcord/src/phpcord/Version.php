@@ -26,5 +26,5 @@ interface Version {
 	
 	public const GATEWAY_VERSION = 9;
 	
-	public const VOICE_GATEWAY_VERSION = 3;
+	public const VOICE_GATEWAY_VERSION = 4;
 }
