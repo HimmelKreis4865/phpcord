@@ -42,6 +42,7 @@ use phpcord\image\ImageData;
 use phpcord\interaction\slash\PartialSlashCommand;
 use phpcord\message\Emoji;
 use phpcord\scheduler\Scheduler;
+use phpcord\user\User;
 use phpcord\utils\CDN;
 use phpcord\utils\Collection;
 use phpcord\guild\permissible\Role;
@@ -98,6 +99,7 @@ class Guild extends GuildBase {
 	/**
 	 * @param int $id
 	 * @param string $name
+	 * @param int $ownerId
 	 * @param GuildMember[] $members
 	 * @param GuildChannel[] $channels
 	 * @param Role[] $roles
@@ -126,7 +128,7 @@ class Guild extends GuildBase {
 	 * @param Icon|null $splash
 	 * @param Icon|null $discoverySplash
 	 */
-	private function __construct(int $id, string $name, array $members, array $channels, array $roles, private int $maxMembers, array $emojis, private ?Timestamp $joinedAt, private ?int $afkChannelId, private ?string $preferredLocale, private int $mfaLevel, private ?int $systemChannelId, private int $systemChannelFlags, private ?Icon $icon, private int $nsfwLevel, private int $memberCount, private ?int $applicationId, private ?string $vanityUrl, private ?Icon $banner, private int $premiumTier, private ?int $publicUpdatesChannelId, private ?string $description, private ?int $rulesChannelId, private bool $nsfw, private int $verificationLevel, private int $premiumSubscriptionCount, private array $features, private ?Icon $splash, private ?Icon $discoverySplash) {
+	private function __construct(int $id, string $name, private int $ownerId, array $members, array $channels, array $roles, private int $maxMembers, array $emojis, private ?Timestamp $joinedAt, private ?int $afkChannelId, private ?string $preferredLocale, private int $mfaLevel, private ?int $systemChannelId, private int $systemChannelFlags, private ?Icon $icon, private int $nsfwLevel, private int $memberCount, private ?int $applicationId, private ?string $vanityUrl, private ?Icon $banner, private int $premiumTier, private ?int $publicUpdatesChannelId, private ?string $description, private ?int $rulesChannelId, private bool $nsfw, private int $verificationLevel, private int $premiumSubscriptionCount, private array $features, private ?Icon $splash, private ?Icon $discoverySplash) {
 		$this->members = new Collection($members);
 		$this->channels = new Collection($channels);
 		$this->roles = new Collection($roles);
@@ -220,6 +222,17 @@ class Guild extends GuildBase {
 	 */
 	public function getVerificationLevel(): int {
 		return $this->verificationLevel;
+	}
+	
+	/**
+	 * @return int
+	 */
+	public function getOwnerId(): int {
+		return $this->ownerId;
+	}
+	
+	#[Pure] public function isOwner(User|int $user_or_id): bool {
+		return ($this->getOwnerId() === ($user_or_id instanceof User ? $user_or_id->getId() : $user_or_id));
 	}
 	
 	/**
@@ -586,7 +599,7 @@ class Guild extends GuildBase {
 	}
 	
 	public static function fromArray(array $array): ?static {
-		$guild = new Guild($array['id'], $array['name'], Factory::createMemberArray($array['id'], $array['members']), (Factory::createChannelArray($array['id'], $array['channels']) + Factory::createChannelArray($array['id'], $array['threads'])), Factory::createRoleArray($array['id'], $array['roles']), $array['max_members'] ?? 500000, Factory::createEmojiArray($array['id'], $array['emojis'] ?? []), (@$array['joined_at'] ? Timestamp::fromDate($array['joined_at']) : null), @$array['afk_channel_id'], @$array['preferred_locale'], $array['mfa_level'] ?? MFALevel::NONE(), $array['system_channel_id'], $array['system_channel_flags'], (@$array['icon'] ? new Icon($array['icon'], CDN::GUILD_ICON($array['id'], $array['icon'])) : null), $array['nsfw_level'] ?? NSFWLevel::DEFAULT(), $array['member_count'] ?? -1, @$array['application_id'], @$array['vanity_url'], (@$array['banner'] ? new Icon($array['banner'], CDN::GUILD_BANNER($array['id'], $array['banner'])) : null), $array['premium_tier'] ?? 0, @$array['public_updates_channel_id'], @$array['description'], @$array['rules_channel_id'], $array['nsfw'] ?? false, $array['verification_level'] ?? VerificationLevel::NONE(), $array['premium_subscription_count'] ?? 0, $array['features'] ?? [], (@$array['splash'] ? new Icon($array['splash'], CDN::GUILD_SPLASH($array['id'], $array['splash'])) : null), (@$array['discovery_splash'] ? new Icon($array['discovery_splash'], CDN::GUILD_SPLASH($array['id'], $array['discovery_splash'])) : null));
+		$guild = new Guild($array['id'], $array['name'], $array['owner_id'], Factory::createMemberArray($array['id'], $array['members']), (Factory::createChannelArray($array['id'], $array['channels']) + Factory::createChannelArray($array['id'], $array['threads'])), Factory::createRoleArray($array['id'], $array['roles']), $array['max_members'] ?? 500000, Factory::createEmojiArray($array['id'], $array['emojis'] ?? []), (@$array['joined_at'] ? Timestamp::fromDate($array['joined_at']) : null), @$array['afk_channel_id'], @$array['preferred_locale'], $array['mfa_level'] ?? MFALevel::NONE(), $array['system_channel_id'], $array['system_channel_flags'], (@$array['icon'] ? new Icon($array['icon'], CDN::GUILD_ICON($array['id'], $array['icon'])) : null), $array['nsfw_level'] ?? NSFWLevel::DEFAULT(), $array['member_count'] ?? -1, @$array['application_id'], @$array['vanity_url'], (@$array['banner'] ? new Icon($array['banner'], CDN::GUILD_BANNER($array['id'], $array['banner'])) : null), $array['premium_tier'] ?? 0, @$array['public_updates_channel_id'], @$array['description'], @$array['rules_channel_id'], $array['nsfw'] ?? false, $array['verification_level'] ?? VerificationLevel::NONE(), $array['premium_subscription_count'] ?? 0, $array['features'] ?? [], (@$array['splash'] ? new Icon($array['splash'], CDN::GUILD_SPLASH($array['id'], $array['splash'])) : null), (@$array['discovery_splash'] ? new Icon($array['discovery_splash'], CDN::GUILD_SPLASH($array['id'], $array['discovery_splash'])) : null));
 		if (@$array['voice_states']) $guild->loadVoiceStates(Factory::createVoiceStateArray(array_map(fn(array $ar) => ($ar + ['guild_id' => $guild->getId()]), $array['voice_states'])));
 		return $guild;
 	}

@@ -21,6 +21,7 @@ use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
 use phpcord\async\completable\Completable;
 use phpcord\Discord;
+use phpcord\guild\permissible\PermissionIds;
 use phpcord\guild\permissible\Role;
 use phpcord\http\RestAPI;
 use phpcord\image\Icon;
@@ -229,6 +230,22 @@ class GuildMember extends User implements JsonSerializable {
 	 */
 	public function setChannel(?int $channelId, ?string $reason = null): Completable {
 		return $this->modify(['channel_id' => $channelId], $reason);
+	}
+	
+	/**
+	 * Returns whether the member has a permission or not
+	 * Uses hasPermission of the roles
+	 *
+	 * @param int $permission
+	 * @see PermissionIds
+	 *
+	 * @return bool
+	 */
+	public function hasPermission(int $permission): bool {
+		if ($this->getGuild()->isOwner($this)) return true;
+		foreach ($this->getRoles() as $role)
+			if ($this->getGuild()->getRoles()->get($role)->hasPermission($permission)) return true;
+		return false;
 	}
 	
 	public static function fromArray(array $array): ?GuildMember {

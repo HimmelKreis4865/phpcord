@@ -45,7 +45,7 @@ final class EventRegistry {
 	public function registerListener(string $eventClass, Closure $closure): void {
 		if (!is_subclass_of($eventClass, Event::class))
 			throw new EventException('Class ' . $eventClass . ' is no valid subclass of ' . Event::class);
-		if (!class_exists((string) ($class = ($c = new MClosure($closure))->reflect()->getParameters()[0]?->getType())) or ((string) $class !== $eventClass))
+		if (!class_exists((string) ($class = @(($c = new MClosure($closure))->reflect()->getParameters()[0])?->getType())) or ((string) $class !== $eventClass))
 			throw new EventException('Parameter #0 of ' . $c . ' must be of type ' . $eventClass . ', ' . $class . ' given');
 		$this->eventListeners[$eventClass][] = $closure;
 	}

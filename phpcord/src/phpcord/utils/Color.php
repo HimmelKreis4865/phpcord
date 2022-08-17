@@ -68,7 +68,7 @@ final class Color {
 	 */
 	public static function fromHex(string $hex): Color {
 		$hex = trim($hex, '#');
-		if (!Regex::match($hex, '/[a-f0-9]{1,6}/')) throw new InvalidArgumentException('Hex code ' . $hex . ' is invalid!');
+		if (!Regex::match($hex, '/[a-fA-F0-9]{1,6}/')) throw new InvalidArgumentException('Hex code ' . $hex . ' is invalid!');
 		return Color::fromInt(hexdec($hex));
 	}
 	
