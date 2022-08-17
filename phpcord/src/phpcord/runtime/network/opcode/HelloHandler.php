@@ -45,6 +45,6 @@ class HelloHandler extends OpCodeHandler {
 			$sender->sendPacket(new ResumePacket(Discord::getInstance()->getToken(), Network::getInstance()->getGateway()->getSessionDetails()->sessionId, Network::getInstance()->getGateway()->getLastSequence()));
 			return;
 		}
-		$sender->sendPacket(new IdentifyPacket(Discord::getInstance()->getToken(), Intents::all()));
+		$sender->sendPacket(new IdentifyPacket(Discord::getInstance()->getToken(), Discord::getInstance()->getIntents()));
 	}
 }

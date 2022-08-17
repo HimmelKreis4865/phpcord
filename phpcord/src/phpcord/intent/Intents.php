@@ -109,6 +109,11 @@ final class Intents {
 	public const SUM_GUILD_SCHEDULED_EVENTS =  (1 << 16);
 	
 	
+	/**
+	 * This does not include guild presences, as there's only a few applications for them, and it could spam packets on bigger servers
+	 *
+	 * @return int
+	 */
 	public static function recommendedIntents(): int {
 		return self::SUM_GUILDS | self::SUM_GUILD_MEMBERS | self::SUM_GUILD_BANS | self::SUM_GUILD_EMOJIS_AND_STICKERS |
 			   self::SUM_GUILD_INTEGRATIONS | self::SUM_GUILD_WEBHOOKS | self::SUM_GUILD_INVITES | self::SUM_GUILD_VOICE_STATES |
