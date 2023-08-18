@@ -16,24 +16,42 @@
 
 namespace phpcord\message\sendable;
 
+use GdImage;
 use JetBrains\PhpStorm\ArrayShape;
-use phpcord\image\ImageData;
+use phpcord\exception\FileNotFoundException;
+use function basename;
+use function file_exists;
+use function file_get_contents;
+use function imagepng;
+use function mime_content_type;
+use function ob_end_flush;
+use function ob_get_contents;
+use function ob_start;
 
 final class Attachment {
-	
+
 	/**
-	 * @param ImageData $imageData
+	 * @param string $content
+	 * @param string $mimeType
 	 * @param string $filename
 	 * @param string|null $description
 	 */
-	public function __construct(private ImageData $imageData, private string $filename, private ?string $description = null) { }
-	
+	public function __construct(private string $content, private string $mimeType, private string $filename, private ?string $description = null) { }
+
 	/**
-	 * @return ImageData
+	 * @return string
 	 */
-	public function getImageData(): ImageData {
-		return $this->imageData;
+	public function getContent(): string {
+		return $this->content;
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getMimeType(): string {
+		return $this->mimeType;
+	}
+
 	
 	/**
 	 * @return string
@@ -47,6 +65,20 @@ final class Attachment {
 	 */
 	public function getDescription(): ?string {
 		return $this->description;
+	}
+
+	public static function fromImage(GdImage $image, string $fileName, string $description = null): Attachment {
+		ob_start();
+		imagepng($image);
+		$content = ob_get_contents();
+		ob_end_flush();
+		return new Attachment($content, "image/png", $fileName, $description);
+	}
+
+	public static function fromFile(string $path, string $description = null, string $customFileName = null): Attachment {
+		if (!file_exists($path))
+			throw new FileNotFoundException("Path " . $path . " for attachment does not exist!");
+		return new Attachment(file_get_contents($path), mime_content_type($path), $customFileName ?? basename($path), $description);
 	}
 	
 	#[ArrayShape(['id' => "int", 'description' => "null|string", 'filename' => "string"])]

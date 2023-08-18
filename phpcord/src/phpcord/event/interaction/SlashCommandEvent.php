@@ -50,7 +50,7 @@ class SlashCommandEvent extends InteractionEvent {
 	}
 	
 	/**
-	 * @return Collection<User|float|Channel|Role|int|string|GuildMember>
+	 * @return Collection<mixed>
 	 */
 	public function getArgs(): Collection {
 		return $this->args;

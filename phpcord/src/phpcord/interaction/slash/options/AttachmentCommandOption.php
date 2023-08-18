@@ -14,17 +14,11 @@
  * https://github.com/HimmelKreis4865/phpcord
  */
 
-namespace phpcord;
+namespace phpcord\interaction\slash\options;
 
-interface Version {
-	
-	public const NAME = 'phpcord';
-	
-	public const FULL_NAME = 'phpcord v' . self::VERSION;
-	
-	public const VERSION = '3.0.0-ALPHA';
-	
-	public const GATEWAY_VERSION = 10;
-	
-	public const VOICE_GATEWAY_VERSION = 3;
+class AttachmentCommandOption extends SlashCommandOption {
+
+	public function getType(): int {
+		return SlashCommandOptionTypes::ATTACHMENT();
+	}
 }

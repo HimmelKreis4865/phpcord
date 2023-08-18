@@ -25,8 +25,6 @@ use phpcord\message\component\ComponentMap;
 use phpcord\message\component\ComponentTypes;
 use phpcord\message\component\IChildComponent;
 use phpcord\message\component\SelectMenu;
-use function is_subclass_of;
-use function var_dump;
 
 class MessageComponentInteractionData extends InteractionData {
 	

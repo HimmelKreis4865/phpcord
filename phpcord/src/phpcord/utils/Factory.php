@@ -34,6 +34,7 @@ use phpcord\message\Emoji;
 use phpcord\message\MessageAttachment;
 use phpcord\message\Message;
 use phpcord\message\Reaction;
+use phpcord\message\sendable\Embed;
 use phpcord\user\User;
 use phpcord\voice\VoiceState;
 use function array_flip;
@@ -41,7 +42,6 @@ use function array_map;
 use function array_values;
 use function array_walk;
 use function json_encode;
-use function var_dump;
 
 final class Factory {
 	
@@ -198,6 +198,14 @@ final class Factory {
 		$emojis = [];
 		foreach ($emojiData as $emoji) {
 			if ($e = Emoji::fromArray(($emoji + ['guild_id' => $guildId]))) $emojis[$e->getId()] = $e;
+		}
+		return $emojis;
+	}
+	
+	public static function createEmbedArray(array $embedData): array {
+		$emojis = [];
+		foreach ($embedData as $emoji) {
+			if ($e = Embed::fromArray(($emoji))) $emojis[] = $e;
 		}
 		return $emojis;
 	}

@@ -21,6 +21,7 @@ use JsonSerializable;
 use phpcord\async\completable\Completable;
 use phpcord\Discord;
 use phpcord\guild\Guild;
+use phpcord\guild\permissible\Permission;
 use phpcord\http\RestAPI;
 use phpcord\utils\Collection;
 use function json_encode;
@@ -37,7 +38,7 @@ class SlashCommand implements JsonSerializable {
 	
 	private Collection $options;
 	
-	public function __construct(private string $name, private string $description, array $options, int $type = null) {
+	public function __construct(private string $name, private string $description, array $options, private ?Permission $permission = null, int $type = null) {
 		$this->options = new Collection($options);
 		$this->type = $type ?? SlashCommandTypes::CHAT_INPUT();
 	}
@@ -62,11 +63,12 @@ class SlashCommand implements JsonSerializable {
 		return RestAPI::getInstance()->{($this->guildId ? 'registerGuildSlashCommand' : 'registerGlobalSlashCommand')}(Discord::getInstance()->getClient()->getApplication()->getId(), json_encode($this), $this->guildId);
 	}
 	
-	#[ArrayShape(['type' => "int", 'name' => "string", 'description' => "string", 'options' => "array"])] public function jsonSerialize(): array {
+	#[ArrayShape(['type' => "int", 'name' => "string", 'description' => "string", 'default_member_permissions' => "int|null", 'options' => "array"])] public function jsonSerialize(): array {
 		return [
 			'type' => $this->type,
 			'name' => $this->name,
 			'description' => $this->description,
+			'default_member_permissions' => $this->permission?->getPermissionBit(),
 			'options' => $this->options->asArray()
 		];
 	}

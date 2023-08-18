@@ -31,7 +31,6 @@ use Throwable;
 use function array_map;
 use function set_error_handler;
 use function set_exception_handler;
-use function var_dump;
 
 final class ErrorHook {
 	use SingletonTrait;

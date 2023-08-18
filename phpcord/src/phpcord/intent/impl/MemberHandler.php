@@ -23,7 +23,6 @@ use phpcord\guild\GuildMember;
 use phpcord\intent\IntentHandler;
 use phpcord\intent\Intents;
 use phpcord\runtime\network\packet\IntentMessageBuffer;
-use function var_dump;
 
 class MemberHandler implements IntentHandler {
 	

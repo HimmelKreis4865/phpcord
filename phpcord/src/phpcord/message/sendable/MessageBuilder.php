@@ -16,6 +16,7 @@
 
 namespace phpcord\message\sendable;
 
+use Closure;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
@@ -27,7 +28,6 @@ use function array_map;
 use function implode;
 use function json_encode;
 use function substr;
-use function var_dump;
 
 class MessageBuilder implements Sendable, JsonSerializable {
 	
@@ -44,6 +44,9 @@ class MessageBuilder implements Sendable, JsonSerializable {
 	
 	/** @var Attachment[] $attachments */
 	private array $attachments = [];
+
+	/** @var  */
+	private array $files = [];
 	
 	/** @var int $flags */
 	private int $flags = 0;
@@ -107,7 +110,7 @@ class MessageBuilder implements Sendable, JsonSerializable {
 	 *
 	 * @return MessageBuilder
 	 */
-	public function  addComponent(IComponent $component): MessageBuilder {
+	public function addComponent(IComponent $component): MessageBuilder {
 		$this->components[] = $component;
 		return $this;
 	}
@@ -115,22 +118,28 @@ class MessageBuilder implements Sendable, JsonSerializable {
 	public function getContentType(): string {
 		return (count($this->attachments) ? 'multipart/form-data; boundary=' . substr(self::BOUNDARY, 2) : 'application/json');
 	}
-	
-	public function getBody(): string {
+
+	/**
+	 * @param Closure(MessageBuilder): string|null $bodyMapping
+	 * @return string
+	 */
+	public function getBody(?Closure $bodyMapping = null): string {
 		if (!count($this->attachments)) return json_encode($this);
+		$usedBody = json_encode($this);
+		if ($bodyMapping) $usedBody = $bodyMapping($this);
 		$parts = [
 			['fields' => ['name' => 'payload_json'],
 			'content-type' => 'application/json',
-			'value' => json_encode($this)]
+			'value' => $usedBody]
 		];
 		foreach ($this->attachments as $k => $attachment)
-			$parts[] = ['content-type' => $attachment->getImageData()->getMime(), 'value' => $attachment->getImageData()->getBytes(), 'fields' => ['name' => 'files[' . $k . ']', 'filename' => $attachment->getFilename()]];
-		
+			$parts[] = ['content-type' => $attachment->getMimeType(), 'value' => $attachment->getContent(), 'fields' => ['name' => 'files[' . $k . ']', 'filename' => $attachment->getFilename()]];
+
 		$body = self::BOUNDARY . "\n";
 		$body .= implode("\n" . self::BOUNDARY . "\n", array_map(function(array $part): string {
 			return 'Content-Disposition: form-data; ' . $this->stringifyFields($part['fields'] ?? []) . "\nContent-Type: " . $part['content-type'] . "\n\n" . $part['value'];
 		}, $parts));
-		
+
 		$body .= "\n" . self::BOUNDARY . '--';
 		return $body;
 	}

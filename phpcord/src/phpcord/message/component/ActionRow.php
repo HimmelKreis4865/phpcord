@@ -38,11 +38,12 @@ class ActionRow implements IComponent {
 	/**
 	 * @param IChildComponent $component
 	 *
-	 * @return void
+	 * @return ActionRow
 	 */
-	public function add(IChildComponent $component): void {
+	public function add(IChildComponent $component): ActionRow {
 		$this->components->add($component);
 		$this->validate();
+		return $this;
 	}
 	
 	public static function new(IChildComponent ...$components): ActionRow {

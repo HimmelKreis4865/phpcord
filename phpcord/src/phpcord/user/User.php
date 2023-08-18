@@ -22,7 +22,6 @@ use JsonSerializable;
 use phpcord\image\Icon;
 use phpcord\utils\CDN;
 use phpcord\utils\Utils;
-use function var_dump;
 
 class User implements JsonSerializable {
 	
@@ -60,7 +59,7 @@ class User implements JsonSerializable {
 	}
 	
 	public function getTag(): string {
-		return $this->username . '#' . $this->discriminator;
+		return $this->username . ($this->discriminator === '0' ? '' :  '#' . $this->discriminator);
 	}
 	
 	/**

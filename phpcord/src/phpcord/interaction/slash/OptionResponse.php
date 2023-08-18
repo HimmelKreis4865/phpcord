@@ -19,8 +19,8 @@ namespace phpcord\interaction\slash;
 use phpcord\channel\Channel;
 use phpcord\guild\GuildMember;
 use phpcord\guild\permissible\Role;
-use phpcord\interaction\slash\options\SlashCommandInteractionData;
 use phpcord\interaction\slash\options\SlashCommandOptionTypes;
+use phpcord\message\MessageAttachment;
 use phpcord\user\User;
 use phpcord\utils\Utils;
 
@@ -29,9 +29,9 @@ class OptionResponse {
 	/**
 	 * @param string $name
 	 * @param int $type
-	 * @param int|float|string|User|Role|Channel|GuildMember $value
+	 * @param int|float|string|User|Role|Channel|GuildMember|MessageAttachment $value
 	 */
-	public function __construct(private string $name, private int $type, private int|float|string|User|Role|Channel|GuildMember $value) { }
+	public function __construct(private string $name, private int $type, private int|float|string|User|Role|Channel|GuildMember|MessageAttachment $value) { }
 	
 	/**
 	 * @return string
@@ -48,9 +48,9 @@ class OptionResponse {
 	}
 	
 	/**
-	 * @return float|int|Channel|GuildMember|Role|User|string
+	 * @return int|float|string|User|Role|Channel|GuildMember|MessageAttachment
 	 */
-	public function getValue(): User|float|Channel|Role|int|string|GuildMember {
+	public function getValue(): int|float|string|User|Role|Channel|GuildMember|MessageAttachment {
 		return $this->value;
 	}
 	
@@ -69,6 +69,7 @@ class OptionResponse {
 			SlashCommandOptionTypes::ROLE() => $data->getRoles()->get((int) $value),
 			SlashCommandOptionTypes::CHANNEL() => $data->getChannels()->get((int) $value),
 			SlashCommandOptionTypes::USER() => $data->getMembers()->get((int) $value) ?? $data->getUsers()->get((int) $value),
+			SlashCommandOptionTypes::ATTACHMENT() => $data->getAttachments()->get((int) $value),
 			default => $value
 		};
 		return new OptionResponse($array['name'], $array['type'], $value);

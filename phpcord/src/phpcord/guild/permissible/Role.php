@@ -29,7 +29,6 @@ use phpcord\image\Icon;
 use phpcord\utils\CDN;
 use phpcord\utils\Color;
 use phpcord\utils\Utils;
-use function var_dump;
 
 class Role implements JsonSerializable {
 	use PermissionUpdateTrait;

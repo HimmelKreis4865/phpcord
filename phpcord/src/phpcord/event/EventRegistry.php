@@ -23,9 +23,7 @@ use phpcord\utils\SingletonTrait;
 use ReflectionClass;
 use ReflectionMethod;
 use function class_exists;
-use function is_a;
 use function is_subclass_of;
-use function var_dump;
 
 final class EventRegistry {
 	use SingletonTrait;

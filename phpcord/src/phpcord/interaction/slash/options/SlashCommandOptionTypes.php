@@ -29,6 +29,7 @@ use phpcord\utils\enum\EnumTrait;
  * @method static int ROLE()
  * @method static int MENTIONABLE()
  * @method static int NUMBER()
+ * @method static int ATTACHMENT()
  */
 final class SlashCommandOptionTypes {
 	use EnumTrait;
@@ -44,5 +45,6 @@ final class SlashCommandOptionTypes {
 		self::register('ROLE', 8);
 		self::register('MENTIONABLE',	9);
 		self::register('NUMBER', 10);
+		self::register('ATTACHMENT', 11);
 	}
 }

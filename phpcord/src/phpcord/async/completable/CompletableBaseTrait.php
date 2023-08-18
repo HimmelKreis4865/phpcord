@@ -50,7 +50,7 @@ trait CompletableBaseTrait {
 	 */
 	public function then(Closure $closure): self {
 		if ($this->preCompleteSet) {
-			$closure($this->preCompleted);
+			$closure(igbinary_unserialize($this->preCompleted));
 			return $this;
 		}
 		CompletableMap::getInstance()->putResolve($this, $closure);
@@ -66,7 +66,7 @@ trait CompletableBaseTrait {
 	 */
 	public function catch(Closure $closure): self {
 		if ($this->preFailure) {
-			$closure($this->preFailure);
+			$closure(igbinary_unserialize($this->preFailure));
 			return $this;
 		}
 		CompletableMap::getInstance()->putReject($this, $closure);
@@ -103,7 +103,7 @@ trait CompletableBaseTrait {
 	 * @return void
 	 */
 	public function __preFail(Exception $exception): void {
-		$this->preFailure = $exception;
+		$this->preFailure = igbinary_serialize($exception);
 	}
 	
 	/**
@@ -116,7 +116,7 @@ trait CompletableBaseTrait {
 	 * @return void
 	 */
 	public function __preCompleted(mixed $result): void {
-		$this->preCompleted = $result;
+		$this->preCompleted = igbinary_serialize($result);
 		$this->preCompleteSet = true;
 	}
 }

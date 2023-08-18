@@ -16,9 +16,9 @@
 
 namespace phpcord\message\component;
 
+use phpcord\interaction\component\TextInput;
 use phpcord\utils\Collection;
 use phpcord\utils\SingletonTrait;
-use TextInput;
 
 final class ComponentMap {
     use SingletonTrait;

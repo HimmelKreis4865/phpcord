@@ -23,7 +23,6 @@ use phpcord\guild\Guild;
 use phpcord\guild\GuildMember;
 use phpcord\utils\Timestamp;
 use phpcord\utils\Utils;
-use function var_dump;
 
 class VoiceState {
 	

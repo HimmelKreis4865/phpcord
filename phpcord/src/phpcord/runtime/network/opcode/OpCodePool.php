@@ -21,7 +21,6 @@ use phpcord\runtime\network\Network;
 use phpcord\runtime\network\packet\MessageBuffer;
 use phpcord\utils\Collection;
 use phpcord\utils\SingletonTrait;
-use function var_dump;
 
 final class OpCodePool {
 	use SingletonTrait;

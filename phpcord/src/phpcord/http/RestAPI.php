@@ -23,7 +23,7 @@ use phpcord\async\net\Response;
 use phpcord\channel\ChannelTypes;
 use phpcord\Discord;
 use phpcord\guild\auditlog\AuditLog;
-use phpcord\guild\Ban;
+use phpcord\guild\components\Ban;
 use phpcord\guild\components\Invite;
 use phpcord\guild\components\Webhook;
 use phpcord\guild\GuildMember;
@@ -38,7 +38,6 @@ use phpcord\utils\SingletonTrait;
 use phpcord\Version;
 use function count;
 use function http_build_query;
-use function var_dump;
 
 final class RestAPI {
 	use SingletonTrait;

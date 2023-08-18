@@ -37,15 +37,11 @@ use function implode;
 use function ord;
 use function pack;
 use function rand;
-use function socket_get_status;
 use function str_contains;
 use function stream_context_create;
-use function stream_get_meta_data;
 use function stream_set_blocking;
 use function stream_set_timeout;
-use function stream_socket_client;
 use function strlen;
-use function var_dump;
 use const STREAM_CLIENT_CONNECT;
 
 final class WebSocket {

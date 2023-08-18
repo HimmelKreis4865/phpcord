@@ -22,7 +22,6 @@ use phpcord\utils\Collection;
 use phpcord\utils\helper\SPL;
 use function microtime;
 use function usleep;
-use function var_dump;
 
 final class Ticker {
 	use SingletonTrait;
@@ -77,7 +76,7 @@ final class Ticker {
 	}
 	
 	public function start(): void {
-		$this->startTimeMS = microtime(true) * 1000;
+		$this->startTimeMS = (int) microtime(true) * 1000;
 		$this->running = true;
 		while ($this->running) {
 			$currentTick = $this->currentTick++;

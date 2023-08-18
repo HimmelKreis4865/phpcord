@@ -31,7 +31,6 @@ use RuntimeException;
 use function floor;
 use function json_decode;
 use function microtime;
-use function var_dump;
 
 final class Gateway implements MessageSender {
 	

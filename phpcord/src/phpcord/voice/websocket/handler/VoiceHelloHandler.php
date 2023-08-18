@@ -21,7 +21,6 @@ use phpcord\Version;
 use phpcord\voice\VoiceConnection;
 use phpcord\voice\websocket\packet\VoiceIdentifyPacket;
 use RuntimeException;
-use function var_dump;
 
 class VoiceHelloHandler extends VoiceOpCodeHandler {
 	

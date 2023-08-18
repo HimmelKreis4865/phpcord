@@ -194,6 +194,90 @@ class Embed implements JsonSerializable {
 		return $this;
 	}
 	
+	/**
+	 * @return string|null
+	 */
+	public function getTitle(): ?string {
+		return $this->title;
+	}
+	
+	/**
+	 * @return string|null
+	 */
+	public function getDescription(): ?string {
+		return $this->description;
+	}
+	
+	/**
+	 * @return string|null
+	 */
+	public function getUrl(): ?string {
+		return $this->url;
+	}
+	
+	/**
+	 * @return Timestamp|null
+	 */
+	public function getTimestamp(): ?Timestamp {
+		return $this->timestamp;
+	}
+	
+	/**
+	 * @return Color|null
+	 */
+	public function getColor(): ?Color {
+		return $this->color;
+	}
+	
+	/**
+	 * @return EmbedFooter|null
+	 */
+	public function getFooter(): ?EmbedFooter {
+		return $this->footer;
+	}
+	
+	/**
+	 * @return EmbedMedia|null
+	 */
+	public function getImage(): ?EmbedMedia {
+		return $this->image;
+	}
+	
+	/**
+	 * @return EmbedMedia|null
+	 */
+	public function getThumbnail(): ?EmbedMedia {
+		return $this->thumbnail;
+	}
+	
+	/**
+	 * @return EmbedMedia|null
+	 */
+	public function getVideo(): ?EmbedMedia {
+		return $this->video;
+	}
+	
+	/**
+	 * @return EmbedProvider|null
+	 */
+	public function getProvider(): ?EmbedProvider {
+		return $this->provider;
+	}
+	
+	/**
+	 * @return EmbedAuthor|null
+	 */
+	public function getAuthor(): ?EmbedAuthor {
+		return $this->author;
+	}
+	
+	/**
+	 * @return Collection<EmbedField>
+	 */
+	public function getFields(): Collection {
+		return $this->fields;
+	}
+	
 	#[Pure] public function jsonSerialize(): array {
 		return [
 			'title' => $this->title,
@@ -209,5 +293,12 @@ class Embed implements JsonSerializable {
 			'author' => $this->author,
 			'fields' => array_values($this->fields->asArray())
 		];
+	}
+	
+	public static function fromArray(array $data): Embed {
+		return Embed::new()
+			->setTitle($data['title'] ?? '')
+			->setColor(Color::fromInt($data['color'] ?? 0x000000));
+			// todo: complete
 	}
 }

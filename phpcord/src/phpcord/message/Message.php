@@ -25,13 +25,13 @@ use phpcord\exception\IndexNotFoundException;
 use phpcord\guild\Guild;
 use phpcord\guild\GuildMember;
 use phpcord\http\RestAPI;
+use phpcord\message\sendable\Embed;
 use phpcord\user\User;
 use phpcord\utils\Collection;
 use phpcord\utils\Factory;
 use phpcord\utils\Timestamp;
 use phpcord\utils\Utils;
 use function method_exists;
-use function var_dump;
 
 class Message {
 	
@@ -40,6 +40,12 @@ class Message {
 	 * @phpstan-var Collection<MessageAttachment>
 	 */
 	private Collection $attachments;
+	
+	/**
+	 * @var Collection $embeds
+	 * @phpstan-var Collection<Embed>
+	 */
+	private Collection $embeds;
 	
 	/**
 	 * @param int $id
@@ -52,11 +58,13 @@ class Message {
 	 * @param Timestamp $createTimestamp
 	 * @param Timestamp|null $editTimestamp
 	 * @param Reaction[] $reactions
+	 * @param Embed[] $embeds
 	 * @param MessageAttachment[] $attachments
 	 * @param int $flags
 	 */
-	public function __construct(private int $id, private int $channelId, private User $author, private string $content, private ?int $guildId, private ?GuildMember $member, private bool $tts, private Timestamp $createTimestamp, private ?Timestamp $editTimestamp, private array $reactions, array $attachments = [], private int $flags = 0) {
+	public function __construct(private int $id, private int $channelId, private User $author, private string $content, private ?int $guildId, private ?GuildMember $member, private bool $tts, private Timestamp $createTimestamp, private ?Timestamp $editTimestamp, private array $reactions, array $attachments = [], array $embeds = [], private int $flags = 0) {
 		$this->attachments = new Collection($attachments);
+		$this->embeds = new Collection($embeds);
 	}
 	
 	/**
@@ -181,6 +189,13 @@ class Message {
 	}
 	
 	/**
+	 * @return Collection<Embed>
+	 */
+	public function getEmbeds(): Collection {
+		return $this->embeds;
+	}
+	
+	/**
 	 * @param PartialEmoji $emoji
 	 *
 	 * @return Completable
@@ -236,6 +251,6 @@ class Message {
 	
 	public static function fromArray(array $array): ?Message {
 		if (!Utils::contains($array, 'id', 'author', 'timestamp', 'channel_id', 'content')) return null;
-		return new Message($array['id'], $array['channel_id'], User::fromArray($array['author']), $array['content'], @$array['guild_id'], (@$array['member'] ? GuildMember::fromArray(($array['member'] + ['guild_id' => @$array['guild_id'], 'user' => $array['author']])) : null), $array['tts'] ?? false, Timestamp::fromDate($array['timestamp']), (@$array['edited_timestamp'] ? Timestamp::fromDate($array['edited_timestamp']) : null), Factory::createReactionArray($array['reactions'] ?? []), Factory::createMessageAttachments($array['attachments'] ?? []));
+		return new Message($array['id'], $array['channel_id'], User::fromArray($array['author']), $array['content'], @$array['guild_id'], (@$array['member'] ? GuildMember::fromArray(($array['member'] + ['guild_id' => @$array['guild_id'], 'user' => $array['author']])) : null), $array['tts'] ?? false, Timestamp::fromDate($array['timestamp']), (@$array['edited_timestamp'] ? Timestamp::fromDate($array['edited_timestamp']) : null), Factory::createReactionArray($array['reactions'] ?? []), Factory::createMessageAttachments($array['attachments'] ?? []), Factory::createEmbedArray($array['embeds'] ?? []));
 	}
 }

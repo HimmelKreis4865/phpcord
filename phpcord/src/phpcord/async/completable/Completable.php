@@ -20,7 +20,7 @@ use Exception;
 use phpcord\async\AsyncPool;
 use phpcord\async\Thread;
 use phpcord\utils\Utils;
-use Volatile;
+use pmmp\thread\ThreadSafeArray;
 use function is_callable;
 use function is_string;
 
@@ -30,8 +30,8 @@ final class Completable extends Thread implements ICompletable {
 	/** @var callable $workload */
 	private $workload;
 	
-	/** @var Volatile|array $parameters */
-	private Volatile|array $parameters;
+	/** @var ThreadSafeArray<mixed> $parameters */
+	private ThreadSafeArray $parameters;
 	
 	/**
 	 * @param callable|null $workload if specified, the completable will be async
@@ -40,7 +40,7 @@ final class Completable extends Thread implements ICompletable {
 	private function __construct(?callable $workload = null, mixed ...$parameters) {
 		if (is_callable($workload)) {
 			$this->workload = $workload;
-			$this->parameters = $parameters[0];
+			$this->parameters = ThreadSafeArray::fromArray($parameters[0]);
 			AsyncPool::getInstance()->submitThread($this);
 		}
 	}
@@ -90,7 +90,7 @@ final class Completable extends Thread implements ICompletable {
 	
 	protected function onRun(): void {
 		try {
-			$this->setResult(($this->workload)(...Utils::iterator2array($this->parameters)));
+			$this->setResult(($this->workload)(...Utils::iterator2array($this->parameters->getIterator())));
 		} catch (Exception $exception) {
 			$this->setResult(Utils::exception2string($exception));
 		}

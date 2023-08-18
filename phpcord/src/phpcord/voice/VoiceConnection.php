@@ -28,8 +28,6 @@ use phpcord\runtime\tick\Tickable;
 use phpcord\utils\InternetAddress;
 use phpcord\voice\websocket\VoiceOpCodeHandlerMap;
 use function json_decode;
-use function stream_get_meta_data;
-use function var_dump;
 
 class VoiceConnection implements Tickable {
 	
@@ -58,7 +56,6 @@ class VoiceConnection implements Tickable {
 	public function __construct(private string $endpointUrl, private string $token, private string $sessionId, private int $guildId, private int $userId) {
 		throw new NotImplementedException();
 		$this->logger = new Logger('Voice(WS)');
-		//var_dump('ENDPOINT: ' . $this->endpointUrl, 'TOKEN: ' . $this->token, 'SESSION_ID: ' . $this->sessionId, 'SERVER_ID: ' . $this->guildId, 'USER_ID: ' . $this->userId);
 		$this->webSocket = new WebSocket(InternetAddress::fromString($this->endpointUrl), '/?v=' . Version::VOICE_GATEWAY_VERSION);
 	}
 	

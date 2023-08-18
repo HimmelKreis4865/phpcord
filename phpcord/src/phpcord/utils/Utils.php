@@ -18,13 +18,10 @@ namespace phpcord\utils;
 
 use Exception;
 use InvalidArgumentException;
-use Iterator;
 use phpcord\utils\helper\Reflector;
 use Traversable;
 use function get_resource_type;
-use function implode;
 use function is_array;
-use function is_iterable;
 use function is_object;
 use function is_resource;
 use function iterator_to_array;

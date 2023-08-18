@@ -25,7 +25,6 @@ use phpcord\intent\IntentHandler;
 use phpcord\intent\Intents;
 use phpcord\runtime\network\packet\IntentMessageBuffer;
 use phpcord\utils\Utils;
-use function var_dump;
 
 class RoleHandler implements IntentHandler {
 	

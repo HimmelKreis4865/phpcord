@@ -19,6 +19,7 @@ namespace phpcord\interaction\slash;
 use phpcord\channel\Channel;
 use phpcord\guild\GuildMember;
 use phpcord\guild\permissible\Role;
+use phpcord\message\MessageAttachment;
 use phpcord\user\User;
 use phpcord\utils\Collection;
 
@@ -47,18 +48,26 @@ class InteractionDataResolver {
 	 * @phpstan-var Collection<GuildMember>
 	 */
 	private Collection $members;
+
+	/**
+	 * @var Collection $attachments
+	 * @phpstan-var Collection<MessageAttachment>
+	 */
+	private Collection $attachments;
 	
 	/**
 	 * @param User[] $users
 	 * @param Channel[] $channels
 	 * @param Role[] $roles
 	 * @param GuildMember[] $members
+	 * @param MessageAttachment[] $attachments
 	 */
-	public function __construct(array $users, array $channels, array $roles, array $members) {
+	public function __construct(array $users, array $channels, array $roles, array $members, array $attachments) {
 		$this->users = new Collection($users);
 		$this->channels = new Collection($channels);
 		$this->roles = new Collection($roles);
 		$this->members = new Collection($members);
+		$this->attachments = new Collection($attachments);
 	}
 	
 	/**
@@ -88,9 +97,16 @@ class InteractionDataResolver {
 	public function getMembers(): Collection {
 		return $this->members;
 	}
+
+	/**
+	 * @return Collection<MessageAttachment>
+	 */
+	public function getAttachments(): Collection {
+		return $this->attachments;
+	}
 	
 	public static function fromArray(array $array): InteractionDataResolver {
-		[$users, $channels, $roles, $members] = [[], [], [], []];
+		[$users, $channels, $roles, $members, $attachments] = [[], [], [], [], []];
 		
 		foreach ($array['users'] ?? [] as $user) {
 			$user = User::fromArray($user);
@@ -101,6 +117,11 @@ class InteractionDataResolver {
 			$member = GuildMember::fromArray(($member + ['user' => $users[$id]->jsonSerialize(), 'guild_id' => @$array['guild_id']]));
 			if ($member) $members[$member->getId()] = $member;
 		}
-		return new InteractionDataResolver($users, $channels, $roles, $members);
+		foreach ($array["attachments"] ?? [] as $id => $attachment) {
+			$attachment = MessageAttachment::fromArray($attachment);
+			if ($attachment) $attachments[$attachment->getId()] = $attachment;
+		}
+
+		return new InteractionDataResolver($users, $channels, $roles, $members, $attachments);
 	}
 }

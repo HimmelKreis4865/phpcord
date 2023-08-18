@@ -21,8 +21,6 @@ use phpcord\interaction\Interaction;
 use phpcord\interaction\InteractionData;
 use phpcord\utils\Collection;
 use phpcord\utils\Utils;
-use function array_map;
-use function var_dump;
 
 class SlashCommandInteractionData extends InteractionData {
 	

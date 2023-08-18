@@ -22,7 +22,6 @@ use phpcord\autoload\DynamicAutoloader;
 use phpcord\cache\DefaultMappingsCache;
 use phpcord\event\EventRegistry;
 use phpcord\exception\EventException;
-use phpcord\intent\Intents;
 use phpcord\logger\Logger;
 use phpcord\runtime\network\Network;
 use phpcord\runtime\tick\Ticker;
@@ -55,14 +54,14 @@ final class Discord {
 	/** @var string $token */
 	private string $token;
 	
-	/** @var int $intents */
-	private int $intents;
-	
 	/**
 	 * The client will be initialized once ready intent was received
 	 * @var Client|null $client
 	 */
 	private ?Client $client = null;
+	
+	/** @var bool $debugMode Responsible for logging i/o data */
+	private bool $debugMode = false;
 	
 	public function __construct() {
 		define('SRC_PATH', __DIR__ . DIRECTORY_SEPARATOR);
@@ -104,6 +103,7 @@ final class Discord {
 	}
 	
 	public function setDebugging(bool $enabled): void {
+		$this->debugMode = $enabled;
 		$this->logger->setDebugging($enabled);
 	}
 	
@@ -126,21 +126,10 @@ final class Discord {
 	}
 	
 	/**
-	 * May not be called before @see Discord::login()
-	 *
 	 * @return string
 	 */
 	public function getToken(): string {
 		return $this->token;
-	}
-	
-	/**
-	 * May not be called before @see Discord::login()
-	 *
-	 * @return int
-	 */
-	public function getIntents(): int {
-		return $this->intents;
 	}
 	
 	public function listen(string|object $event_class_or_listener_object, Closure $closure = null): void {
@@ -152,16 +141,8 @@ final class Discord {
 		EventRegistry::getInstance()->registerListener($event_class_or_listener_object, $closure);
 	}
 	
-	/**
-	 * @param string $token
-	 * @param int|null $customIntents
-	 * @see Intents
-	 *
-	 * @return void
-	 */
-	public function login(string $token, int $customIntents = null): void {
+	public function login(string $token): void {
 		$this->token = $token;
-		$this->intents = $customIntents ?? Intents::recommendedIntents();
 		Network::getInstance()->init();
 		$this->getLogger()->info('Startup succeed.');
 		Ticker::getInstance()->start();

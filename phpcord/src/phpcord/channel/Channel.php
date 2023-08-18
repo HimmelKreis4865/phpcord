@@ -20,7 +20,6 @@ use BadMethodCallException;
 use Closure;
 use phpcord\async\completable\Completable;
 use phpcord\utils\Collection;
-use function var_dump;
 
 abstract class Channel {
 	

@@ -23,7 +23,6 @@ use phpcord\runtime\network\Network;
 use phpcord\runtime\network\packet\MessageBuffer;
 use phpcord\runtime\network\packet\ResumePacket;
 use phpcord\runtime\network\packet\IdentifyPacket;
-use function var_dump;
 
 class HelloHandler extends OpCodeHandler {
 	
@@ -45,6 +44,6 @@ class HelloHandler extends OpCodeHandler {
 			$sender->sendPacket(new ResumePacket(Discord::getInstance()->getToken(), Network::getInstance()->getGateway()->getSessionDetails()->sessionId, Network::getInstance()->getGateway()->getLastSequence()));
 			return;
 		}
-		$sender->sendPacket(new IdentifyPacket(Discord::getInstance()->getToken(), Discord::getInstance()->getIntents()));
+		$sender->sendPacket(new IdentifyPacket(Discord::getInstance()->getToken(), Intents::all()));
 	}
 }

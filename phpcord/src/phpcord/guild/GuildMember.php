@@ -31,9 +31,6 @@ use phpcord\utils\Timestamp;
 use phpcord\user\User;
 use phpcord\utils\Collection;
 use phpcord\utils\Utils;
-use function array_map;
-use function intval;
-use function var_dump;
 
 class GuildMember extends User implements JsonSerializable {
 	

@@ -20,7 +20,6 @@ use phpcord\runtime\tick\Tickable;
 use phpcord\utils\Collection;
 use phpcord\utils\helper\SPL;
 use phpcord\utils\SingletonTrait;
-use function var_dump;
 
 final class VoiceConnectionPool implements Tickable {
 	use SingletonTrait;

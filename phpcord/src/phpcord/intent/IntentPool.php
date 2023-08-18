@@ -27,7 +27,6 @@ use phpcord\intent\impl\VoiceHandler;
 use phpcord\runtime\network\packet\MessageBuffer;
 use phpcord\utils\Collection;
 use phpcord\utils\SingletonTrait;
-use function var_dump;
 
 final class IntentPool {
 	use SingletonTrait;

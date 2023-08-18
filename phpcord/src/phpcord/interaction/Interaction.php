@@ -26,8 +26,10 @@ use phpcord\interaction\component\Modal;
 use phpcord\message\Message;
 use phpcord\message\MessageFlags;
 use phpcord\message\Sendable;
+use phpcord\message\sendable\MessageBuilder;
 use phpcord\user\User;
 use phpcord\utils\Utils;
+use RuntimeException;
 use function json_encode;
 
 class Interaction {
@@ -154,7 +156,7 @@ class Interaction {
 	 * @return Completable
 	 */
 	public function editOrigin(Sendable $sendable): Completable {
-		return $this->respond(InteractionResponseTypes::UPDATE_MESSAGE(), $sendable->getBody(), $sendable->getContentType());
+		return $this->respond($type = InteractionResponseTypes::UPDATE_MESSAGE(), $this->stringifySendable($sendable, $type), $sendable->getContentType());
 	}
 	
 	/**
@@ -163,7 +165,7 @@ class Interaction {
 	 * @return Completable
 	 */
 	public function reply(Sendable $sendable): Completable {
-		return $this->respond(InteractionResponseTypes::CHANNEL_MESSAGE_WITH_SOURCE(), $sendable->getBody(), $sendable->getContentType());
+		return $this->respond($type = InteractionResponseTypes::CHANNEL_MESSAGE_WITH_SOURCE(), $this->stringifySendable($sendable, $type), $sendable->getContentType());
 	}
 	
 	/**
@@ -195,8 +197,11 @@ class Interaction {
 	 * @return Completable
 	 */
 	private function respond(int $type, ?string $data, string $contentType = 'application/json'): Completable {
+		if ($this->responded)
+			throw new RuntimeException("Interaction of type " . $this->data::class . " got already responded.");
 		$this->responded = true;
-		return RestAPI::getInstance()->sendInteractionResponse($this->id, $this->token, '{"type": ' . $type . ',"data":' . $data . '}', $contentType);
+		$requiresWrapping = ($contentType === 'application/json');
+		return RestAPI::getInstance()->sendInteractionResponse($this->id, $this->token, ($requiresWrapping ? '{"type": ' . $type . ',"data":' . $data . '}' : $data), $contentType);
 	}
 	
 	/**
@@ -213,6 +218,19 @@ class Interaction {
 	 */
 	public function deleteResponse(): Completable {
 		return RestAPI::getInstance()->deleteInteractionResponse($this->applicationId, $this->token);
+	}
+
+	private function stringifySendable(Sendable $sendable, int $type): string {
+		if ($sendable instanceof MessageBuilder and $sendable->getContentType() !== "application/json") {
+			// contains files
+			return $sendable->getBody(function (MessageBuilder $builder) use ($type): string {
+				return json_encode([
+					"type" => $type,
+					"data" => $builder->jsonSerialize()
+				]);
+			});
+		}
+		return $sendable->getBody();
 	}
 	
 	public static function fromArray(array $array): ?Interaction {

@@ -27,10 +27,6 @@ use phpcord\channel\types\guild\thread\NewsThread;
 use phpcord\channel\types\guild\thread\PrivateThread;
 use phpcord\channel\types\guild\thread\PublicThread;
 use phpcord\utils\enum\EnumToolsTrait;
-use function json_decode;
-use function json_encode;
-use function var_dump;
-use const JSON_PRETTY_PRINT;
 
 /**
  * @method static int GUILD_TEXT()

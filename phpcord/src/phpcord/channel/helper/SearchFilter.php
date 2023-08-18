@@ -47,7 +47,7 @@ final class SearchFilter {
 		return $this->options;
 	}
 	
-	public static function new(): SearchFilter {
+	public static function build(): SearchFilter {
 		return new SearchFilter();
 	}
 }

@@ -23,7 +23,7 @@ use function is_scalar;
 use function serialize;
 use function unserialize;
 
-abstract class Thread extends \Thread {
+abstract class Thread extends \pmmp\thread\Thread {
 	use GarbageTrait;
 	
 	/**
@@ -43,10 +43,10 @@ abstract class Thread extends \Thread {
 	/** @var bool $resultSerialized */
 	private bool $resultSerialized = false;
 	
-	final public function start(int $options = PTHREADS_INHERIT_ALL) {
+	final public function start(int $options = self::INHERIT_ALL): bool {
 		$this->classLoaderSerialized = DefaultMappingsCache::getInstance()->classloader();
 		$this->debugEnabled = Logger::isDebugging();
-		parent::start($options);
+		return parent::start($options);
 	}
 	
 	final public function run(): void {

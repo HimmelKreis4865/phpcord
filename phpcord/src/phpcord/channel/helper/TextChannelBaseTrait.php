@@ -48,7 +48,7 @@ trait TextChannelBaseTrait {
 	 * @return Completable<array<Message>>
 	 */
 	public function fetchMessages(SearchFilter $filter = null): Completable {
-		return RestAPI::getInstance()->getMessages($this->getId(), $filter->asArray());
+		return RestAPI::getInstance()->getMessages($this->getId(), $filter?->asArray() ?? []);
 	}
 	
 	/**
